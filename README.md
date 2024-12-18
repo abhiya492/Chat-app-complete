@@ -6,13 +6,13 @@ Welcome to the Real-time Chat App project! This repository contains a complete g
 ⭐️ Stars appreciated!   
 
 ## Tech Stack  
-- **MongoDB  
-- **Express.js  
-- **React.js  
-- **Node.js  
-- **Socket.io** for real-time communication  
-- **TailwindCSS** for styling  
-- **Daisy UI** for UI components  
+- MongoDB  
+- Express.js  
+- React.js  
+- Node.js  
+- Socket.io for real-time communication  
+- TailwindCSS for styling  
+- Daisy UI for UI components  
 
 ## Features  
 - 🎃 Authentication & Authorization with JWT  
