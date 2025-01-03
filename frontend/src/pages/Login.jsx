@@ -3,12 +3,6 @@ import { useAuthStore } from "../store/useAuthStore";
 import AuthImagePattern from "../components/AuthImagePattern";
 import { Link } from "react-router-dom";
 import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare } from "lucide-react";
-import { z } from "zod";
-
-const loginSchema = z.object({
-  email: z.string().email("Invalid email format"),
-  password: z.string().min(1, "Password is required"),
-});
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -20,14 +14,7 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      loginSchema.parse(formData);
-      login(formData);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        console.error("Validation error:", error.errors);
-      }
-    }
+    login(formData);
   };
 
   return (
