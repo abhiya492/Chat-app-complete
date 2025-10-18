@@ -102,4 +102,26 @@ export const useAuthStore = create((set, get) => ({
   disconnectSocket: () => {
     if (get().socket?.connected) get().socket.disconnect();
   },
+
+  forgotPassword: async (email) => {
+    try {
+      await axiosInstance.post("/auth/forgot-password", { email });
+      toast.success("OTP sent to your email");
+      return true;
+    } catch (error) {
+      toast.error(error.response.data.message);
+      return false;
+    }
+  },
+
+  resetPassword: async (email, otp, newPassword) => {
+    try {
+      await axiosInstance.post("/auth/reset-password", { email, otp, newPassword });
+      toast.success("Password reset successfully");
+      return true;
+    } catch (error) {
+      toast.error(error.response.data.message);
+      return false;
+    }
+  },
 }));
