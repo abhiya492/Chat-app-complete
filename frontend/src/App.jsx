@@ -6,6 +6,7 @@ import Login from './pages/Login'
 import Settings from './pages/Setting'
 import Profile from './pages/Profile'
 import SignUp from './pages/SignUp'
+import ForgotPassword from './pages/ForgotPassword'
 import { useAuthStore } from './store/useAuthStore'
 import { useThemeStore } from './store/useThemeStore'
 import { useEffect } from 'react'
@@ -38,6 +39,7 @@ const App = () => {
         <Route path="/" element={authUser ? <Home /> : <Navigate to="/login" />} />
         <Route path="/signup" element={!authUser ? <SignUp /> : <Navigate to="/" />} />
         <Route path="/login" element={!authUser ? <Login /> : <Navigate to="/" />} />
+        <Route path="/forgot-password" element={!authUser ? <ForgotPassword /> : <Navigate to="/" />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/profile" element={authUser ? <Profile /> : <Navigate to="/login" />} />
       </Routes> 
