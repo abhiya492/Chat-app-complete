@@ -16,9 +16,15 @@ const userSchema = new mongoose.Schema(
         required: true,
         minlength: 6,
     },
-    ProfilePicture: { 
+    profilePic: { 
         type: String,
         default: "",
+    },
+    resetPasswordOTP: {
+        type: String,
+    },
+    resetPasswordExpires: {
+        type: Date,
     },
 },
     { timestamps: true }
