@@ -30,47 +30,47 @@ const SignUp = () => {
     const success = validateForm();  
 
     if (success === true) {  
-      try {  
-        // Wait for signup to finish  
-        await signup(formData);   
-        toast.success("Signup successful!"); // Notify user of success  
-      } catch (error) {  
-        console.error("Signup error:", error); // Log error for debugging  
-      }  
+      await signup(formData);  
     }  
   };  
 
   return (  
-    <div className="min-h-screen grid lg:grid-cols-2">  
+    <div className="min-h-screen grid lg:grid-cols-2 bg-gradient-to-br from-secondary/5 via-base-100 to-primary/5">  
       {/* left side */}  
-      <div className="flex flex-col justify-center items-center p-6 sm:p-12">  
-        <div className="w-full max-w-md space-y-8">  
+      <div className="flex flex-col justify-center items-center p-6 sm:p-12 relative">  
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 right-10 w-72 h-72 bg-secondary/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-20 left-10 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse delay-700"></div>
+        </div>
+        
+        <div className="w-full max-w-md space-y-8 relative z-10">  
           {/* LOGO */}  
           <div className="text-center mb-8">  
             <div className="flex flex-col items-center gap-2 group">  
               <div  
-                className="size-12 rounded-xl bg-primary/10 flex items-center justify-center   
-              group-hover:bg-primary/20 transition-colors"  
+                className="w-16 h-16 rounded-2xl bg-gradient-to-br from-secondary to-secondary/70 flex items-center justify-center group-hover:scale-110 group-hover:rotate-3   
+              transition-all duration-300 shadow-lg shadow-secondary/20"  
               >  
-                <MessageSquare className="size-6 text-primary" />  
+                <MessageSquare className="w-8 h-8 text-secondary-content" />  
               </div>  
-              <h1 className="text-2xl font-bold mt-2">Create Account</h1>  
-              <p className="text-base-content/60">Get started with your free account</p>  
+              <h1 className="text-3xl font-bold mt-4 bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent">Create Account</h1>  
+              <p className="text-base-content/60 text-sm">Get started with your free account</p>  
             </div>  
           </div>  
 
-          <form onSubmit={handleSubmit} className="space-y-6">  
+          <form onSubmit={handleSubmit} className="space-y-5 backdrop-blur-sm bg-base-100/50 p-8 rounded-2xl shadow-xl border border-base-300/50">  
             <div className="form-control">  
               <label className="label">  
-                <span className="label-text font-medium">Full Name</span>  
+                <span className="label-text font-semibold text-sm">Full Name</span>  
               </label>  
-              <div className="relative">  
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">  
-                  <User className="size-5 text-base-content/40" />  
+              <div className="relative group">  
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">  
+                  <User className="size-5 text-base-content/40 group-focus-within:text-primary" />  
                 </div>  
                 <input  
                   type="text"  
-                  className={`input input-bordered w-full pl-10`}  
+                  className="input input-bordered w-full pl-12 h-12 focus:ring-2 focus:ring-primary/20 transition-all"  
                   placeholder="John Doe"  
                   value={formData.fullName}  
                   onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}  
@@ -80,15 +80,15 @@ const SignUp = () => {
 
             <div className="form-control">  
               <label className="label">  
-                <span className="label-text font-medium">Email</span>  
+                <span className="label-text font-semibold text-sm">Email Address</span>  
               </label>  
-              <div className="relative">  
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">  
-                  <Mail className="size-5 text-base-content/40" />  
+              <div className="relative group">  
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">  
+                  <Mail className="size-5 text-base-content/40 group-focus-within:text-primary" />  
                 </div>  
                 <input  
                   type="email"  
-                  className={`input input-bordered w-full pl-10`}  
+                  className="input input-bordered w-full pl-12 h-12 focus:ring-2 focus:ring-primary/20 transition-all"  
                   placeholder="you@example.com"  
                   value={formData.email}  
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}  
@@ -100,38 +100,38 @@ const SignUp = () => {
 
             <div className="form-control">  
               <label className="label">  
-                <span className="label-text font-medium">Password</span>  
+                <span className="label-text font-semibold text-sm">Password</span>  
               </label>  
-              <div className="relative">  
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">  
-                  <Lock className="size-5 text-base-content/40" />  
+              <div className="relative group">  
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">  
+                  <Lock className="size-5 text-base-content/40 group-focus-within:text-primary" />  
                 </div>  
                 <input  
                   type={showPassword ? "text" : "password"}  
-                  className={`input input-bordered w-full pl-10`}  
+                  className="input input-bordered w-full pl-12 pr-12 h-12 focus:ring-2 focus:ring-primary/20 transition-all"  
                   placeholder="••••••••"  
                   value={formData.password}  
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}  
                 />  
                 <button  
                   type="button"  
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"  
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center hover:scale-110 transition-transform"  
                   onClick={() => setShowPassword(!showPassword)}  
                 >  
                   {showPassword ? (  
-                    <EyeOff className="size-5 text-base-content/40" />  
+                    <EyeOff className="size-5 text-base-content/40 hover:text-primary" />  
                   ) : (  
-                    <Eye className="size-5 text-base-content/40" />  
+                    <Eye className="size-5 text-base-content/40 hover:text-primary" />  
                   )}  
                 </button>  
               </div>  
             </div>  
 
-            <button type="submit" className="btn btn-primary w-full" disabled={isSigningUp}>  
+            <button type="submit" className="btn btn-primary w-full h-12 text-base font-semibold shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 hover:scale-[1.02] transition-all" disabled={isSigningUp}>  
               {isSigningUp ? (  
                 <>  
                   <Loader2 className="size-5 animate-spin" />  
-                  Loading...  
+                  Creating account...  
                 </>  
               ) : (  
                 "Create Account"  
@@ -140,9 +140,9 @@ const SignUp = () => {
           </form>  
 
           <div className="text-center">  
-            <p className="text-base-content/60">  
+            <p className="text-base-content/70 text-sm">  
               Already have an account?{" "}  
-              <Link to="/login" className="link link-primary">  
+              <Link to="/login" className="link link-primary font-semibold hover:text-primary/80 transition-colors">  
                 Sign in  
               </Link>  
             </p>  
