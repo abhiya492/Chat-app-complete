@@ -30,13 +30,7 @@ const SignUp = () => {
     const success = validateForm();  
 
     if (success === true) {  
-      try {  
-        // Wait for signup to finish  
-        await signup(formData);   
-        toast.success("Signup successful!"); // Notify user of success  
-      } catch (error) {  
-        console.error("Signup error:", error); // Log error for debugging  
-      }  
+      await signup(formData);  
     }  
   };  
 
