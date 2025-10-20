@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import { LogOut, MessageSquare, Settings, User } from "lucide-react";
+import ThemeToggle from "./ThemeToggle";
 
 const Navbar = () => {
   const { logout, authUser } = useAuthStore();
@@ -22,6 +23,8 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            <ThemeToggle />
+            
             <Link
               to={"/settings"}
               className="btn btn-sm gap-2 btn-ghost hover:bg-primary/10 hover:text-primary transition-all hover:scale-105"

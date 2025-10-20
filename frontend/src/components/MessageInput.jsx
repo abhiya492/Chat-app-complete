@@ -1,11 +1,14 @@
 import { useRef, useState } from "react";
 import { useChatStore } from "../store/useChatStore";
-import { Image, Send, X } from "lucide-react";
+import { Image, Send, X, Smile } from "lucide-react";
 import toast from "react-hot-toast";
+
+const EMOJIS = ["😊", "😂", "❤️", "👍", "🎉", "🔥", "😍", "🤔", "👏", "🙌"];
 
 const MessageInput = () => {
   const [text, setText] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
+  const [showEmoji, setShowEmoji] = useState(false);
   const fileInputRef = useRef(null);
   const { sendMessage } = useChatStore();
 
@@ -70,7 +73,7 @@ const MessageInput = () => {
       )}
 
       <form onSubmit={handleSendMessage} className="flex items-center gap-3">
-        <div className="flex-1 flex gap-2">
+        <div className="flex-1 flex gap-2 relative">
           <input
             type="text"
             className="w-full input input-bordered rounded-xl h-12 focus:ring-2 focus:ring-primary/20 transition-all bg-base-200/50"
@@ -85,6 +88,32 @@ const MessageInput = () => {
             ref={fileInputRef}
             onChange={handleImageChange}
           />
+
+          <button
+            type="button"
+            className="hidden sm:flex btn btn-circle h-12 w-12 transition-all hover:scale-110 btn-ghost hover:bg-primary/10 hover:text-primary"
+            onClick={() => setShowEmoji(!showEmoji)}
+          >
+            <Smile size={22} />
+          </button>
+          
+          {showEmoji && (
+            <div className="absolute bottom-full mb-2 right-0 bg-base-200 rounded-xl shadow-xl border border-base-300 p-3 grid grid-cols-5 gap-2 z-50">
+              {EMOJIS.map((emoji) => (
+                <button
+                  key={emoji}
+                  type="button"
+                  onClick={() => {
+                    setText(text + emoji);
+                    setShowEmoji(false);
+                  }}
+                  className="text-2xl hover:scale-125 transition-transform"
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          )}
 
           <button
             type="button"

@@ -1,6 +1,7 @@
 import { X } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
+import { getLastSeen } from "../lib/timeUtils";
 
 const ChatHeader = () => {
   const { selectedUser, setSelectedUser } = useChatStore();
@@ -26,7 +27,7 @@ const ChatHeader = () => {
             <p className="text-sm flex items-center gap-1.5">
               <span className={`size-2 rounded-full ${onlineUsers.includes(selectedUser._id) ? "bg-green-500" : "bg-gray-400"}`}></span>
               <span className={onlineUsers.includes(selectedUser._id) ? "text-green-600 font-medium" : "text-base-content/60"}>
-                {onlineUsers.includes(selectedUser._id) ? "Online" : "Offline"}
+                {onlineUsers.includes(selectedUser._id) ? "Online" : `Last seen ${getLastSeen(selectedUser.updatedAt)}`}
               </span>
             </p>
           </div>
