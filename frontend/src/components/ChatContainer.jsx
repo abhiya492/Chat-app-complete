@@ -6,6 +6,7 @@ import MessageInput from "./MessageInput";
 import MessageSkeleton from "./skeletons/MessageSkeleton";
 import { useAuthStore } from "../store/useAuthStore";
 import { formatMessageTime } from "../lib/utils";
+import MessageActions from "./MessageActions";
 
 const ChatContainer = () => {
   const {
@@ -15,6 +16,7 @@ const ChatContainer = () => {
     selectedUser,
     subscribeToMessages,
     unsubscribeFromMessages,
+    deleteMessage,
   } = useChatStore();
   const { authUser } = useAuthStore();
   const messageEndRef = useRef(null);
@@ -44,18 +46,18 @@ const ChatContainer = () => {
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-auto">
+    <div className="flex-1 flex flex-col overflow-auto bg-gradient-to-br from-base-100 to-base-200/30">
       <ChatHeader />
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.map((message) => (
           <div
             key={message._id}
-            className={`chat ${message.senderId === authUser._id ? "chat-end" : "chat-start"}`}
+            className={`chat ${message.senderId === authUser._id ? "chat-end" : "chat-start"} group`}
             ref={messageEndRef}
           >
-            <div className=" chat-image avatar">
-              <div className="size-10 rounded-full border">
+            <div className="chat-image avatar">
+              <div className="size-10 rounded-full border-2 border-base-300 shadow-md">
                 <img
                   src={
                     message.senderId === authUser._id
@@ -67,19 +69,31 @@ const ChatContainer = () => {
               </div>
             </div>
             <div className="chat-header mb-1">
-              <time className="text-xs opacity-50 ml-1">
+              <time className="text-xs opacity-60 ml-1 font-medium">
                 {formatMessageTime(message.createdAt)}
               </time>
             </div>
-            <div className="chat-bubble flex flex-col">
+            <div className={`chat-bubble flex flex-col shadow-md relative ${
+              message.senderId === authUser._id 
+                ? "bg-gradient-to-br from-primary to-primary/90 text-primary-content" 
+                : "bg-base-200 text-base-content"
+            }`}>
+              {message.text && (
+                <MessageActions 
+                  message={message} 
+                  isOwnMessage={message.senderId === authUser._id}
+                  onDelete={deleteMessage}
+                />
+              )}
               {message.image && (
                 <img
                   src={message.image}
                   alt="Attachment"
-                  className="sm:max-w-[200px] rounded-md mb-2"
+                  className="sm:max-w-[200px] rounded-lg mb-2 shadow-sm cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={() => window.open(message.image, '_blank')}
                 />
               )}
-              {message.text && <p>{message.text}</p>}
+              {message.text && <p className="break-words whitespace-pre-wrap">{message.text}</p>}
             </div>
           </div>
         ))}
