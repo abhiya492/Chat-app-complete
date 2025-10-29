@@ -10,6 +10,10 @@
   html {
     @apply scroll-smooth;
   }
+  
+  body {
+    @apply antialiased;
+  }
 }
 
 @layer utilities {
@@ -27,6 +31,25 @@
   
   .animate-scale-in {
     animation: scaleIn 0.3s ease-out;
+  }
+  
+  .animate-slide-in-right {
+    animation: slideInRight 0.4s ease-out;
+  }
+  
+  .animate-bounce-subtle {
+    animation: bounceSubtle 2s ease-in-out infinite;
+  }
+  
+  .glass-effect {
+    @apply bg-base-100/60 backdrop-blur-xl border border-base-300/50 shadow-xl;
+  }
+  
+  .gradient-border {
+    position: relative;
+    background: linear-gradient(var(--fallback-b1, oklch(var(--b1))), var(--fallback-b1, oklch(var(--b1)))) padding-box,
+                linear-gradient(135deg, oklch(var(--p)), oklch(var(--s))) border-box;
+    border: 2px solid transparent;
   }
 }
 
@@ -61,23 +84,56 @@
   }
 }
 
+@keyframes slideInRight {
+  from {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes bounceSubtle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-base-200/50;
-  border-radius: 10px;
+  @apply bg-transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-primary/30;
+  @apply bg-primary/20;
   border-radius: 10px;
-  transition: background 0.3s;
+  transition: all 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-primary/50;
+  @apply bg-primary/40;
+}
+
+/* Message bubble animations */
+.chat {
+  animation: slideInRight 0.3s ease-out;
+}
+
+/* Hover glow effect */
+.glow-on-hover {
+  transition: all 0.3s ease;
+}
+
+.glow-on-hover:hover {
+  filter: drop-shadow(0 0 8px oklch(var(--p) / 0.3));
 }

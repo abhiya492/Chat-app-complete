@@ -49,31 +49,33 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen pt-20 bg-gradient-to-br from-base-200 via-base-100 to-base-200">
-      <div className="max-w-2xl mx-auto p-4 py-8">
-        <div className="bg-base-100/80 backdrop-blur-xl rounded-2xl p-8 space-y-8 shadow-2xl border border-base-300/50">
+    <div className="min-h-screen pt-20 bg-gradient-to-br from-base-200 via-base-100 to-base-200 relative overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-20 left-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/5 rounded-full blur-3xl animate-pulse delay-700"></div>
+      </div>
+      <div className="max-w-2xl mx-auto p-4 py-8 relative z-10">
+        <div className="glass-effect rounded-3xl p-8 space-y-8 shadow-2xl animate-fade-in">
           <div className="text-center">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Profile</h1>
-            <p className="mt-2 text-base-content/70">Your profile information</p>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-primary to-secondary bg-clip-text text-transparent">Profile</h1>
+            <p className="mt-2 text-base-content/60 text-lg">Your profile information</p>
           </div>
-
-          {/* avatar upload section */}
 
           <div className="flex flex-col items-center gap-4">
             <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary rounded-full blur-xl opacity-30 group-hover:opacity-50 transition-opacity pointer-events-none"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary rounded-full blur-2xl opacity-40 group-hover:opacity-60 transition-all duration-300 pointer-events-none animate-pulse"></div>
               <img
                 src={selectedImg || authUser.profilePic || "/avatar.png"}
                 alt="Profile"
-                className="size-36 rounded-full object-cover border-4 border-base-100 shadow-xl relative ring-4 ring-primary/20"
+                className="size-40 rounded-full object-cover border-4 border-base-100 shadow-2xl relative ring-4 ring-primary/30 group-hover:ring-primary/50 group-hover:scale-105 transition-all duration-300"
               />
               <label
                 htmlFor="avatar-upload"
                 className={`
                   absolute bottom-2 right-2
-                  bg-gradient-to-br from-primary to-primary/80 hover:scale-110
+                  bg-gradient-to-br from-primary via-primary to-secondary hover:scale-125 hover:rotate-12
                   p-3 rounded-full cursor-pointer 
-                  transition-all duration-200 shadow-lg
+                  transition-all duration-300 shadow-xl shadow-primary/40
                   ${isUpdatingProfile ? "animate-pulse pointer-events-none" : ""}
                 `}
               >
@@ -88,15 +90,20 @@ const Profile = () => {
                 disabled={isUpdatingProfile}
               />
             </div>
-            <p className="text-sm text-base-content/60 font-medium">
-              {isUpdatingProfile ? "Uploading..." : "Click the camera icon to update your photo"}
+            <p className="text-sm text-base-content/60 font-medium animate-fade-in">
+              {isUpdatingProfile ? (
+                <span className="flex items-center gap-2">
+                  <span className="size-2 bg-primary rounded-full animate-pulse"></span>
+                  Uploading...
+                </span>
+              ) : "Click the camera icon to update your photo"}
             </p>
           </div>
 
           <div className="space-y-4">
-            <div className="space-y-2 bg-base-200/50 p-4 rounded-xl border border-base-300/50">
+            <div className="space-y-2 bg-base-200/50 p-4 rounded-xl border border-base-300/50 hover:border-primary/30 hover:shadow-lg transition-all duration-300">
               <div className="text-sm text-base-content/60 flex items-center gap-2 font-semibold">
-                <div className="p-1.5 rounded-lg bg-primary/10">
+                <div className="p-1.5 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10">
                   <User className="w-4 h-4 text-primary" />
                 </div>
                 Full Name
@@ -104,9 +111,9 @@ const Profile = () => {
               <p className="px-4 py-3 bg-base-100 rounded-lg border border-base-300/50 font-medium text-lg">{authUser?.fullName}</p>
             </div>
 
-            <div className="space-y-2 bg-base-200/50 p-4 rounded-xl border border-base-300/50">
+            <div className="space-y-2 bg-base-200/50 p-4 rounded-xl border border-base-300/50 hover:border-primary/30 hover:shadow-lg transition-all duration-300">
               <div className="text-sm text-base-content/60 flex items-center gap-2 font-semibold">
-                <div className="p-1.5 rounded-lg bg-primary/10">
+                <div className="p-1.5 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10">
                   <Mail className="w-4 h-4 text-primary" />
                 </div>
                 Email Address
@@ -115,20 +122,20 @@ const Profile = () => {
             </div>
           </div>
 
-          <div className="mt-6 bg-gradient-to-br from-base-200/50 to-base-300/30 rounded-xl p-6 border border-base-300/50">
+          <div className="mt-6 bg-gradient-to-br from-base-200/50 to-base-300/30 rounded-xl p-6 border border-base-300/50 hover:shadow-xl transition-all duration-300">
             <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
               <div className="w-1 h-6 bg-gradient-to-b from-primary to-secondary rounded-full"></div>
               Account Information
             </h2>
             <div className="space-y-3 text-sm">
-              <div className="flex items-center justify-between py-3 px-4 bg-base-100/50 rounded-lg">
+              <div className="flex items-center justify-between py-3 px-4 bg-base-100/50 rounded-lg hover:bg-base-100/70 transition-all">
                 <span className="font-medium text-base-content/70">Member Since</span>
                 <span className="font-semibold">{authUser.createdAt?.split("T")[0]}</span>
               </div>
-              <div className="flex items-center justify-between py-3 px-4 bg-base-100/50 rounded-lg">
+              <div className="flex items-center justify-between py-3 px-4 bg-base-100/50 rounded-lg hover:bg-base-100/70 transition-all">
                 <span className="font-medium text-base-content/70">Account Status</span>
                 <span className="flex items-center gap-2">
-                  <span className="size-2 bg-green-500 rounded-full animate-pulse"></span>
+                  <span className="size-2 bg-gradient-to-r from-green-400 to-green-500 rounded-full animate-pulse shadow-sm shadow-green-500/50"></span>
                   <span className="text-green-500 font-semibold">Active</span>
                 </span>
               </div>
