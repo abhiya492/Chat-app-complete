@@ -104,12 +104,31 @@ const ChatContainer = () => {
                 />
               )}
               {message.image && (
-                <img
-                  src={message.image}
-                  alt="Attachment"
-                  className="sm:max-w-[200px] rounded-xl mb-2 shadow-md cursor-pointer hover:scale-105 hover:shadow-xl transition-all duration-300 border border-base-300/30"
-                  onClick={() => window.open(message.image, '_blank')}
-                />
+                message.image.includes('image') || message.image.includes('.jpg') || message.image.includes('.png') || message.image.includes('.webp') ? (
+                  <img
+                    src={message.image}
+                    alt="Attachment"
+                    className="sm:max-w-[200px] rounded-xl mb-2 shadow-md cursor-pointer hover:scale-105 hover:shadow-xl transition-all duration-300 border border-base-300/30"
+                    onClick={() => window.open(message.image, '_blank')}
+                  />
+                ) : (
+                  <a 
+                    href={message.image}
+                    download
+                    target="_blank"
+                    className="bg-gradient-to-r from-primary/10 to-secondary/10 p-3 rounded-xl mb-2 shadow-md cursor-pointer hover:from-primary/20 hover:to-secondary/20 transition-all flex items-center gap-3 max-w-[250px] border border-primary/20"
+                  >
+                    <div className="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center">
+                      <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-primary truncate">File Attachment</p>
+                      <p className="text-xs text-base-content/60">Click to download</p>
+                    </div>
+                  </a>
+                )
               )}
               {message.text && <p className="break-words whitespace-pre-wrap leading-relaxed">{message.text}</p>}
               
