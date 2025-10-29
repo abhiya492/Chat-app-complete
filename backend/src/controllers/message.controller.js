@@ -41,14 +41,24 @@ export const sendMessage = async (req, res) => {
     const { id: receiverId } = req.params;
     const senderId = req.user._id;
 
+    console.log("Received message request - text:", !!text, "image:", !!image);
+
     let imageUrl;
     if (image) {
-      // Upload base64 image to cloudinary
-      const uploadResponse = await cloudinary.uploader.upload(image, {
-        resource_type: 'auto',
-        chunk_size: 6000000
-      });
-      imageUrl = uploadResponse.secure_url;
+      try {
+        console.log("Uploading image to Cloudinary, size:", (image.length / 1024).toFixed(2), "KB");
+        const uploadResponse = await cloudinary.uploader.upload(image, {
+          resource_type: 'auto',
+          folder: 'chat-files',
+          timeout: 120000
+        });
+        imageUrl = uploadResponse.secure_url;
+        console.log("Image uploaded successfully:", imageUrl);
+      } catch (uploadError) {
+        console.error("Cloudinary upload error:", uploadError.message);
+        console.error("Error details:", uploadError);
+        return res.status(400).json({ error: "Failed to upload image: " + uploadError.message });
+      }
     }
 
     const newMessage = new Message({
