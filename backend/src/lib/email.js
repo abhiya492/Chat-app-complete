@@ -12,13 +12,16 @@ const transporter = nodemailer.createTransport({
   debug: true
 });
 
-transporter.verify(function (error, success) {
-  if (error) {
-    console.error('Email transporter verification failed:', error);
-  } else {
-    console.log('Email server is ready to send messages');
-  }
-});
+// Skip email verification in production to avoid timeout errors
+if (process.env.NODE_ENV !== 'production') {
+  transporter.verify(function (error, success) {
+    if (error) {
+      console.error('Email transporter verification failed:', error);
+    } else {
+      console.log('Email server is ready to send messages');
+    }
+  });
+}
 
 export async function sendOTPEmail(email, otp) {
   try {
