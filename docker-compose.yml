@@ -45,16 +45,12 @@ services:
       dockerfile: Dockerfile
     container_name: chat-backend
     restart: unless-stopped
+    env_file:
+      - ./backend/.env
     environment:
       - NODE_ENV=production
       - PORT=5001
       - MONGODB_URI=mongodb://admin:password123@mongodb:27017/chat_db?authSource=admin
-      - JWT_SECRET=${JWT_SECRET:-fallback-secret-key}
-      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
-      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
-      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
-      - EMAIL_USER=${EMAIL_USER}
-      - EMAIL_PASS=${EMAIL_PASS}
     ports:
       - "5001:5001"
     depends_on:
