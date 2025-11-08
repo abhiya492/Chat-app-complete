@@ -25,6 +25,11 @@ app.use(cors({
     credentials:true
 }));
 
+// Health check endpoint for Kubernetes
+app.get("/health", (req, res) => {
+    res.status(200).json({ status: "ok" });
+});
+
 app.use("/api/auth",authRoutes);
 app.use("/api/messages",messageRoutes);
 app.use("/api/invitations",invitationRoutes);
