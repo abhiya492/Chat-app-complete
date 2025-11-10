@@ -1,0 +1,26 @@
+apiVersion: v2
+name: chat-app
+description: A Helm chart for Real-Time Chat Application
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - chat
+  - realtime
+  - websocket
+  - mern
+home: https://github.com/abhiya492/Chat-app-complete
+sources:
+  - https://github.com/abhiya492/Chat-app-complete
+maintainers:
+  - name: Chat App Team
+    email: team@chatapp.com
+dependencies:
+  - name: mongodb
+    version: "13.x.x"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: mongodb.enabled
+  - name: redis
+    version: "17.x.x"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: redis.enabled
