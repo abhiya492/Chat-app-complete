@@ -1,4 +1,4 @@
-# 🌟 Real-Time Chat App with MERN Stack 🌟  
+# 🌟 Real-Time Chat App 🌟  
 ![Welcome Banner](https://readme-typing-svg.herokuapp.com?font=Fira+Code&size=24&duration=4000&pause=500&color=F75C7E&width=435&lines=Welcome+to+the+Real-Time+Chat+App!;Powered+by+the+MERN+Stack!;Enjoy+Seamless+Real-Time+Messaging!+🚀)
 
 Welcome to the Real-Time Chat App project! This repository contains a complete guide to building a chat application using the MERN stack, designed to be beginner-friendly and easy to follow.  
