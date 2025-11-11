@@ -25,6 +25,14 @@ Welcome to the Real-Time Chat App project! This repository contains a complete g
 👌 **Global state management with Zustand**  
 🐞 **Comprehensive error handling on both server and client**  
 ⭐ **Deployment guidance to host your app for free**  
+
+### 💬 Advanced Messaging Features (NEW!)  
+😊 **Message reactions** - React with emojis  
+💬 **Reply to messages** - Quote and reply to specific messages  
+✏️ **Edit messages** - Modify your sent messages  
+🗑️ **Delete messages** - Remove messages you sent  
+📎 **File sharing** - Share images and documents (up to 10MB)  
+⌨️ **Typing indicators** - See when someone is typing  
 ⏳ **And much more!**  
 
 ---
@@ -36,7 +44,21 @@ Welcome to the Real-Time Chat App project! This repository contains a complete g
    git clone https://github.com/abhiya492/Chat-app-complete
    cd Chat-app-complete
    ```
-2.Install dependencies:
+2. Install dependencies:
   ```bash
-    npm install
+  npm install
   ```
+
+3. Run backend:
+  ```bash
+  cd backend
+  npm run dev
+  ```
+
+4. Run frontend (in new terminal):
+  ```bash
+  cd frontend
+  npm run dev
+  ```
+
+📖 **See [MESSAGING_FEATURES.md](./MESSAGING_FEATURES.md) for detailed feature documentation**

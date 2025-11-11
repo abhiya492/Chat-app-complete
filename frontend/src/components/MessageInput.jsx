@@ -1,27 +1,34 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useChatStore } from "../store/useChatStore";
-import { Paperclip, Send, X, Smile } from "lucide-react";
+import { Image, Send, X, Paperclip, Mic, Video } from "lucide-react";
 import toast from "react-hot-toast";
-
-const EMOJIS = ["😊", "😂", "❤️", "👍", "🎉", "🔥", "😍", "🤔", "👏", "🙌"];
+import VoiceRecorder from "./VoiceRecorder";
 
 const MessageInput = () => {
   const [text, setText] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
-  const [showEmoji, setShowEmoji] = useState(false);
-  const [isSending, setIsSending] = useState(false);
+  const [videoPreview, setVideoPreview] = useState(null);
+  const [filePreview, setFilePreview] = useState(null);
+  const [voiceData, setVoiceData] = useState(null);
+  const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
-  const { sendMessage } = useChatStore();
+  const videoInputRef = useRef(null);
+  const docInputRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
+  const { sendMessage, replyingTo, setReplyingTo, editingMessage, setEditingMessage, emitTyping, emitStopTyping } = useChatStore();
+
+  useEffect(() => {
+    if (editingMessage) {
+      setText(editingMessage.text || "");
+    }
+  }, [editingMessage]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    
-    const isImage = file.type.startsWith("image/");
-    const maxSize = isImage ? 10 * 1024 * 1024 : 25 * 1024 * 1024;
-    
-    if (file.size > maxSize) {
-      toast.error(`File too large. Max ${isImage ? '10MB' : '25MB'} allowed`);
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
       return;
     }
 
@@ -32,126 +39,331 @@ const MessageInput = () => {
     reader.readAsDataURL(file);
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("File size must be less than 10MB");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFilePreview({
+        data: reader.result,
+        name: file.name,
+        size: file.size,
+        type: file.type,
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleVideoChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error("Video size must be less than 50MB");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setVideoPreview({
+        data: reader.result,
+        name: file.name,
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+
+    if (file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onloadend = () => setImagePreview(reader.result);
+      reader.readAsDataURL(file);
+    } else if (file.type.startsWith("video/")) {
+      if (file.size > 50 * 1024 * 1024) {
+        toast.error("Video size must be less than 50MB");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => setVideoPreview({ data: reader.result, name: file.name });
+      reader.readAsDataURL(file);
+    } else {
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error("File size must be less than 10MB");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFilePreview({
+          data: reader.result,
+          name: file.name,
+          size: file.size,
+          type: file.type,
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const removeImage = () => {
     setImagePreview(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  const removeFile = () => {
+    setFilePreview(null);
+    if (docInputRef.current) docInputRef.current.value = "";
+  };
+
+  const removeVideo = () => {
+    setVideoPreview(null);
+    if (videoInputRef.current) videoInputRef.current.value = "";
+  };
+
+  const handleTextChange = (e) => {
+    setText(e.target.value);
+    
+    emitTyping();
+    
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    
+    typingTimeoutRef.current = setTimeout(() => {
+      emitStopTyping();
+    }, 1000);
+  };
+
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!text.trim() && !imagePreview) return;
-    if (isSending) return;
+    if (!text.trim() && !imagePreview && !filePreview && !videoPreview && !voiceData) return;
 
-    setIsSending(true);
     try {
-      await sendMessage({
-        text: text.trim(),
-        image: imagePreview,
-      });
+      if (editingMessage) {
+        await useChatStore.getState().editMessage(editingMessage._id, text.trim());
+      } else {
+        await sendMessage({
+          text: text.trim(),
+          image: imagePreview,
+          file: filePreview,
+          video: videoPreview,
+          voice: voiceData,
+        });
+      }
 
+      emitStopTyping();
       setText("");
       setImagePreview(null);
+      setVideoPreview(null);
+      setFilePreview(null);
+      setVoiceData(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
+      if (videoInputRef.current) videoInputRef.current.value = "";
+      if (docInputRef.current) docInputRef.current.value = "";
     } catch (error) {
       console.error("Failed to send message:", error);
-      toast.error("Failed to send message");
-    } finally {
-      setIsSending(false);
     }
   };
 
   return (
-    <div className="p-4 w-full border-t border-base-300/50 glass-effect relative">
-      <div className="absolute inset-0 bg-gradient-to-t from-primary/5 to-transparent pointer-events-none"></div>
+    <div 
+      className="p-4 w-full relative"
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {isDragging && (
+        <div className="absolute inset-0 bg-primary/10 border-2 border-dashed border-primary rounded-lg flex items-center justify-center z-10">
+          <p className="text-lg font-semibold">Drop file here</p>
+        </div>
+      )}
+      {replyingTo && (
+        <div className="mb-2 p-3 bg-base-200 rounded-lg flex items-center justify-between border-l-4 border-primary animate-in slide-in-from-bottom-2 duration-200">
+          <div className="text-sm flex-1">
+            <span className="font-semibold text-primary">Replying to</span>
+            <p className="text-base-content/70 mt-1 truncate">{replyingTo.text?.substring(0, 50)}{replyingTo.text?.length > 50 ? '...' : ''}</p>
+          </div>
+          <button onClick={() => setReplyingTo(null)} className="btn btn-ghost btn-sm btn-circle">
+            <X className="size-4" />
+          </button>
+        </div>
+      )}
+      
+      {editingMessage && (
+        <div className="mb-2 p-3 bg-warning/10 rounded-lg flex items-center justify-between border-l-4 border-warning animate-in slide-in-from-bottom-2 duration-200">
+          <div className="flex items-center gap-2">
+            <Edit2 className="size-4 text-warning" />
+            <span className="text-sm font-semibold">Editing message</span>
+          </div>
+          <button onClick={() => { setEditingMessage(null); setText(""); }} className="btn btn-ghost btn-sm btn-circle">
+            <X className="size-4" />
+          </button>
+        </div>
+      )}
+
       {imagePreview && (
-        <div className="mb-3 flex items-center gap-2 relative z-10 animate-scale-in">
-          <div className="relative group">
-            {imagePreview.startsWith('data:image/') ? (
-              <img
-                src={imagePreview}
-                alt="Preview"
-                className="w-24 h-24 object-cover rounded-xl border-2 border-primary/40 shadow-xl ring-2 ring-primary/20 group-hover:scale-105 transition-transform"
-              />
-            ) : (
-              <div className="w-24 h-24 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-xl border-2 border-primary/40 shadow-xl ring-2 ring-primary/20 flex flex-col items-center justify-center">
-                <Paperclip className="w-8 h-8 text-primary mb-1" />
-                <span className="text-xs text-center font-medium text-primary">File</span>
-              </div>
-            )}
+        <div className="mb-3 animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <div className="relative inline-block">
+            <img
+              src={imagePreview}
+              alt="Preview"
+              className="w-20 h-20 object-cover rounded-lg border-2 border-base-300 shadow-md"
+            />
             <button
               onClick={removeImage}
-              className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-gradient-to-br from-error to-error/80 text-error-content
-              flex items-center justify-center shadow-lg hover:scale-125 hover:rotate-90 transition-all duration-300"
+              className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-error text-error-content hover:scale-110 transition-transform flex items-center justify-center shadow-lg"
               type="button"
             >
-              <X className="size-4" />
+              <X className="size-3" />
             </button>
           </div>
         </div>
       )}
 
-      <form onSubmit={handleSendMessage} className="flex items-center gap-2 md:gap-3 relative z-10">
-        <div className="flex-1 flex gap-1 md:gap-2 relative">
+      {videoPreview && (
+        <div className="mb-3 p-3 bg-base-200 rounded-lg flex items-center justify-between border border-base-300 animate-in slide-in-from-bottom-2 duration-200">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <Video className="size-4 flex-shrink-0" />
+            <span className="text-sm truncate">{videoPreview.name}</span>
+          </div>
+          <button onClick={removeVideo} className="btn btn-ghost btn-sm btn-circle flex-shrink-0">
+            <X className="size-4" />
+          </button>
+        </div>
+      )}
+
+      {filePreview && (
+        <div className="mb-3 p-3 bg-base-200 rounded-lg flex items-center justify-between border border-base-300 animate-in slide-in-from-bottom-2 duration-200">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <Paperclip className="size-4 flex-shrink-0" />
+            <span className="text-sm truncate">{filePreview.name}</span>
+          </div>
+          <button onClick={removeFile} className="btn btn-ghost btn-sm btn-circle flex-shrink-0">
+            <X className="size-4" />
+          </button>
+        </div>
+      )}
+
+      {voiceData && (
+        <div className="mb-3 p-3 bg-base-200 rounded-lg flex items-center justify-between border border-base-300 animate-in slide-in-from-bottom-2 duration-200">
+          <div className="flex items-center gap-2">
+            <Mic className="size-4" />
+            <span className="text-sm">Voice message ({voiceData.duration}s)</span>
+          </div>
+          <button onClick={() => setVoiceData(null)} className="btn btn-ghost btn-sm btn-circle">
+            <X className="size-4" />
+          </button>
+        </div>
+      )}
+
+      {showVoiceRecorder && (
+        <VoiceRecorder
+          onRecordingComplete={(data) => {
+            setVoiceData(data);
+            setShowVoiceRecorder(false);
+          }}
+          onCancel={() => setShowVoiceRecorder(false)}
+        />
+      )}
+
+      <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+        <div className="flex-1 flex gap-2">
           <input
             type="text"
-            className="w-full input input-bordered rounded-2xl h-11 md:h-12 text-sm md:text-base focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all bg-base-200/70 backdrop-blur-sm shadow-inner hover:bg-base-200/90 placeholder:text-base-content/40"
+            className="w-full input input-bordered rounded-lg input-sm sm:input-md focus:outline-none focus:ring-2 focus:ring-primary transition-all"
             placeholder="Type a message..."
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={handleTextChange}
           />
           <input
             type="file"
-            accept="*/*"
+            accept="image/*"
             className="hidden"
             ref={fileInputRef}
             onChange={handleImageChange}
           />
+          <input
+            type="file"
+            accept="video/*"
+            className="hidden"
+            ref={videoInputRef}
+            onChange={handleVideoChange}
+          />
+          <input
+            type="file"
+            className="hidden"
+            ref={docInputRef}
+            onChange={handleFileChange}
+          />
 
           <button
             type="button"
-            className="btn btn-circle h-11 w-11 md:h-12 md:w-12 transition-all hover:scale-110 hover:rotate-12 btn-ghost hover:bg-primary/10 hover:text-primary shadow-md hover:shadow-lg"
-            onClick={() => setShowEmoji(!showEmoji)}
-          >
-            <Smile size={20} className="md:w-[22px] md:h-[22px]" />
-          </button>
-          
-          {showEmoji && (
-            <div className="absolute bottom-full mb-2 right-0 glass-effect rounded-2xl shadow-2xl p-3 grid grid-cols-5 gap-2 z-50 animate-scale-in">
-              {EMOJIS.map((emoji) => (
-                <button
-                  key={emoji}
-                  type="button"
-                  onClick={() => {
-                    setText(text + emoji);
-                    setShowEmoji(false);
-                  }}
-                  className="text-2xl hover:scale-150 hover:rotate-12 transition-all duration-200 cursor-pointer"
-                >
-                  {emoji}
-                </button>
-              ))}
-            </div>
-          )}
-
-          <button
-            type="button"
-            className={`btn btn-circle h-11 w-11 md:h-12 md:w-12 transition-all hover:scale-110 hover:rotate-12 shadow-md hover:shadow-lg
-                     ${imagePreview ? "btn-success text-success-content shadow-success/30" : "btn-ghost hover:bg-primary/10 hover:text-primary"}`}
+            className={`hidden sm:flex btn btn-circle transition-all duration-200 ${
+              imagePreview ? "btn-success" : "btn-ghost"
+            }`}
             onClick={() => fileInputRef.current?.click()}
+            title="Attach image"
           >
-            <Paperclip size={20} className="md:w-[22px] md:h-[22px]" />
+            <Image size={20} />
+          </button>
+          <button
+            type="button"
+            className={`hidden sm:flex btn btn-circle transition-all duration-200 ${
+              videoPreview ? "btn-success" : "btn-ghost"
+            }`}
+            onClick={() => videoInputRef.current?.click()}
+            title="Attach video"
+          >
+            <Video size={20} />
+          </button>
+          <button
+            type="button"
+            className={`hidden sm:flex btn btn-circle transition-all duration-200 ${
+              filePreview ? "btn-success" : "btn-ghost"
+            }`}
+            onClick={() => docInputRef.current?.click()}
+            title="Attach file"
+          >
+            <Paperclip size={20} />
+          </button>
+          <button
+            type="button"
+            className={`hidden sm:flex btn btn-circle transition-all duration-200 ${
+              voiceData ? "btn-success" : "btn-ghost"
+            }`}
+            onClick={() => setShowVoiceRecorder(!showVoiceRecorder)}
+            title="Voice message"
+          >
+            <Mic size={20} />
           </button>
         </div>
         <button
           type="submit"
-          className="btn btn-primary btn-circle h-11 w-11 md:h-12 md:w-12 shadow-lg shadow-primary/40 hover:shadow-2xl hover:shadow-primary/60 hover:scale-110 hover:rotate-12 transition-all disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-br from-primary to-primary/80"
-          disabled={(!text.trim() && !imagePreview) || isSending}
+          className="btn btn-sm btn-circle btn-primary transition-all duration-200 hover:scale-110"
+          disabled={!text.trim() && !imagePreview && !filePreview && !videoPreview && !voiceData}
         >
-          {isSending ? (
-            <div className="loading loading-spinner loading-sm"></div>
-          ) : (
-            <Send size={18} className="md:w-5 md:h-5" />
-          )}
+          <Send size={22} />
         </button>
       </form>
     </div>
