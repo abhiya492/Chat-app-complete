@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
 import SidebarSkeleton from "./skeletons/SidebarSkeleton";
-import { Users, UserPlus } from "lucide-react";
+import { Users, UserPlus, Phone } from "lucide-react";
 import InviteModal from "./InviteModal";
 import SearchBar from "./SearchBar";
+import CallHistory from "./CallHistory";
 
 const Sidebar = () => {
   const { getUsers, users, selectedUser, setSelectedUser, isUsersLoading } = useChatStore();
@@ -13,6 +14,7 @@ const Sidebar = () => {
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("chats");
 
   useEffect(() => {
     getUsers();
@@ -35,9 +37,9 @@ const Sidebar = () => {
         <div className="flex flex-col items-center gap-2 lg:flex-row lg:justify-between lg:gap-3">
           <div className="flex items-center gap-2 lg:gap-3 justify-center lg:justify-start">
             <div className="p-1.5 md:p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 shadow-md hover:shadow-lg hover:scale-105 transition-all">
-              <Users className="size-4 md:size-5 text-primary" />
+              {activeTab === "chats" ? <Users className="size-4 md:size-5 text-primary" /> : <Phone className="size-4 md:size-5 text-primary" />}
             </div>
-            <span className="font-bold text-base lg:text-lg hidden lg:block bg-gradient-to-r from-base-content to-base-content/70 bg-clip-text text-transparent">Contacts</span>
+            <span className="font-bold text-base lg:text-lg hidden lg:block bg-gradient-to-r from-base-content to-base-content/70 bg-clip-text text-transparent">{activeTab === "chats" ? "Contacts" : "Calls"}</span>
           </div>
           <button
             onClick={() => setShowInviteModal(true)}
@@ -47,7 +49,24 @@ const Sidebar = () => {
             <UserPlus className="size-3 md:size-4" />
           </button>
         </div>
-        <div className="mt-3 lg:mt-4 hidden lg:flex items-center justify-between gap-2 glass-effect p-3 rounded-xl hover:border-primary/30 transition-all">
+        <div className="mt-3 flex gap-2 justify-center lg:justify-start">
+          <button
+            onClick={() => setActiveTab("chats")}
+            className={`btn btn-xs lg:btn-sm ${activeTab === "chats" ? "btn-primary" : "btn-ghost"}`}
+          >
+            <Users className="size-3 lg:size-4" />
+            <span className="hidden lg:inline">Chats</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("calls")}
+            className={`btn btn-xs lg:btn-sm ${activeTab === "calls" ? "btn-primary" : "btn-ghost"}`}
+          >
+            <Phone className="size-3 lg:size-4" />
+            <span className="hidden lg:inline">Calls</span>
+          </button>
+        </div>
+        {activeTab === "chats" && (
+          <div className="mt-3 lg:mt-4 hidden lg:flex items-center justify-between gap-2 glass-effect p-3 rounded-xl hover:border-primary/30 transition-all">
           <label className="cursor-pointer flex items-center gap-2 flex-1">
             <input
               type="checkbox"
@@ -58,13 +77,20 @@ const Sidebar = () => {
             <span className="text-sm font-medium">Online only</span>
           </label>
           <span className="text-xs font-bold text-primary-content bg-gradient-to-r from-primary to-primary/80 px-2.5 py-1 rounded-full shadow-md animate-pulse">{onlineUsers.length - 1}</span>
-        </div>
+          </div>
+        )}
       </div>
 
-      <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+      {activeTab === "chats" && <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />}
 
       <div className="overflow-y-auto w-full py-1 md:py-2 flex-1">
-        {filteredUsers.map((user) => (
+        {activeTab === "calls" ? (
+          <div className="hidden lg:block">
+            <CallHistory />
+          </div>
+        ) : (
+          <>
+          {filteredUsers.map((user) => (
           <button
             key={user._id}
             onClick={() => setSelectedUser(user)}
@@ -111,16 +137,18 @@ const Sidebar = () => {
               <div className="badge badge-primary badge-sm lg:badge-md font-bold shadow-md shadow-primary/30 animate-bounce-subtle">3</div>
             )}
           </button>
-        ))}
+          ))}
 
-        {filteredUsers.length === 0 && (
-          <div className="text-center text-base-content/60 py-12 px-2 md:px-4 animate-fade-in">
-            <div className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center animate-bounce-subtle">
-              <Users className="size-8 md:size-10 text-primary/50" />
+          {filteredUsers.length === 0 && (
+            <div className="text-center text-base-content/60 py-12 px-2 md:px-4 animate-fade-in">
+              <div className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center animate-bounce-subtle">
+                <Users className="size-8 md:size-10 text-primary/50" />
+              </div>
+              <p className="font-semibold text-sm md:text-base lg:text-lg mb-2">No contacts found</p>
+              <p className="text-xs md:text-sm text-base-content/40 hidden lg:block">Try adjusting your search</p>
             </div>
-            <p className="font-semibold text-sm md:text-base lg:text-lg mb-2">No contacts found</p>
-            <p className="text-xs md:text-sm text-base-content/40 hidden lg:block">Try adjusting your search</p>
-          </div>
+          )}
+          </>
         )}
       </div>
 

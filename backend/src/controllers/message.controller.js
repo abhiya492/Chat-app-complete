@@ -66,15 +66,28 @@ export const sendMessage = async (req, res) => {
     let imageUrl;
     if (image) {
       try {
+        // Check base64 size (rough estimate: 1.37x actual file size)
+        const sizeInBytes = (image.length * 3) / 4;
+        const sizeInMB = sizeInBytes / (1024 * 1024);
+        
+        if (sizeInMB > 10) {
+          return res.status(400).json({ error: "Image too large. Maximum size is 10MB" });
+        }
+
         const uploadResponse = await cloudinary.uploader.upload(image, {
           resource_type: 'auto',
           folder: 'chat-files',
-          timeout: 120000
+          timeout: 60000,
+          max_file_size: 10485760 // 10MB
         });
         imageUrl = uploadResponse.secure_url;
       } catch (uploadError) {
         console.error("Cloudinary upload error:", uploadError.message);
-        return res.status(400).json({ error: "Failed to upload image: " + uploadError.message });
+        return res.status(400).json({ 
+          error: uploadError.message.includes('File size too large') 
+            ? "Image too large. Please use a smaller image (max 10MB)" 
+            : "Failed to upload image. Please try again."
+        });
       }
     }
 

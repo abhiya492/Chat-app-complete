@@ -2,6 +2,7 @@ import { create } from "zustand";
 import toast from "react-hot-toast";
 import { axiosInstance } from "../lib/axios";
 import { useAuthStore } from "./useAuthStore";
+import { showNotification } from "../lib/notifications";
 
 export const useChatStore = create((set,get) => ({
   messages: [],
@@ -9,6 +10,8 @@ export const useChatStore = create((set,get) => ({
   selectedUser: null,
   isUsersLoading: false,
   isMessagesLoading: false,
+  hasMoreMessages: true,
+  currentPage: 1,
   replyingTo: null,
   editingMessage: null,
   typingUsers: new Set(),
@@ -30,16 +33,33 @@ export const useChatStore = create((set,get) => ({
     }
   },
 
-  getMessages: async (userId) => {
+  getMessages: async (userId, page = 1) => {
     set({ isMessagesLoading: true });
     try {
-      const res = await axiosInstance.get(`/messages/${userId}`);
-      set({ messages: res.data });
+      const res = await axiosInstance.get(`/messages/${userId}?page=${page}&limit=50`);
+      const { messages: newMessages, hasMore } = res.data;
+      
+      if (page === 1) {
+        set({ messages: newMessages, hasMoreMessages: hasMore, currentPage: 1 });
+      } else {
+        set({ 
+          messages: [...newMessages, ...get().messages],
+          hasMoreMessages: hasMore,
+          currentPage: page
+        });
+      }
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || "Failed to load messages");
     } finally {
       set({ isMessagesLoading: false });
     }
+  },
+
+  loadMoreMessages: async () => {
+    const { selectedUser, currentPage, hasMoreMessages, isMessagesLoading } = get();
+    if (!hasMoreMessages || isMessagesLoading || !selectedUser) return;
+    
+    await get().getMessages(selectedUser._id, currentPage + 1);
   },
   sendMessage: async (messageData) => {
     const { selectedUser, messages, replyingTo } = get();
@@ -49,6 +69,15 @@ export const useChatStore = create((set,get) => ({
       
       const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, payload);
       set({ messages: [...messages, res.data], replyingTo: null });
+      
+      // Track message sent
+      if (window.analytics) {
+        window.analytics.track('message_sent', { 
+          hasImage: !!messageData.image,
+          hasFile: !!messageData.file,
+          isReply: !!replyingTo
+        });
+      }
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to send message");
     }
@@ -186,7 +215,16 @@ export const useChatStore = create((set,get) => ({
     socket.on("newMessage", (newMessage) => {
       const isMessageSentFromSelectedUser = newMessage.senderId === selectedUser._id;
       if (!isMessageSentFromSelectedUser) return;
+      
       set({ messages: [...get().messages, newMessage] });
+      
+      if (document.hidden) {
+        const sender = selectedUser;
+        showNotification(`New message from ${sender.fullName}`, {
+          body: newMessage.text || 'Sent an attachment',
+          tag: 'new-message'
+        });
+      }
     });
 
     socket.on("messageReaction", (updatedMessage) => {
@@ -248,5 +286,5 @@ export const useChatStore = create((set,get) => ({
     socket.off("messagePinned");
   },
 
-  setSelectedUser: (selectedUser) => set({ selectedUser }),
+  setSelectedUser: (selectedUser) => set({ selectedUser, messages: [], currentPage: 1, hasMoreMessages: true }),
 }));

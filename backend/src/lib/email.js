@@ -1,15 +1,14 @@
 import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
-  auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-  connectionTimeout: 20000,
-  greetingTimeout: 20000,
-  socketTimeout: 20000,
-  logger: true,
-  debug: true
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  },
+  tls: {
+    rejectUnauthorized: false
+  }
 });
 
 // Skip email verification in production to avoid timeout errors
@@ -25,18 +24,31 @@ if (process.env.NODE_ENV !== 'production') {
 
 export async function sendOTPEmail(email, otp) {
   try {
+    console.log('Attempting to send OTP email to:', email);
     const mailOptions = {
-      from: process.env.EMAIL_USER,
+      from: `"Chat App" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: 'Password Reset OTP - Chat App',
-      html: `<div>Your OTP is: <b>${otp}</b></div>`
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #667eea;">🔐 Password Reset Request</h2>
+          <p>You requested to reset your password. Use the OTP below:</p>
+          <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0;">
+            <h1 style="color: #667eea; font-size: 32px; letter-spacing: 5px; margin: 0;">${otp}</h1>
+          </div>
+          <p style="color: #666;">This OTP will expire in 10 minutes.</p>
+          <p style="color: #999; font-size: 12px;">If you didn't request this, please ignore this email.</p>
+        </div>
+      `
     };
     const info = await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully:', info.messageId);
+    console.log('✅ Email sent successfully:', info.messageId);
+    console.log('Preview URL:', nodemailer.getTestMessageUrl(info));
     return info;
   } catch (error) {
-    console.error('Error sending email:', error);
-    return { success: false, error: error.message || 'Failed to send email' };
+    console.error('❌ Error sending email:', error.message);
+    console.error('Full error:', error);
+    throw error;
   }
 }
 
