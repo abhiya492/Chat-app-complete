@@ -66,9 +66,28 @@ const messageSchema = new mongoose.Schema(
         default: Date.now,
       },
     }],
+    disappearAfter: {
+      type: Number, // seconds
+      default: null,
+    },
+    expiresAt: {
+      type: Date,
+      index: true,
+    },
   },
   { timestamps: true }
 );
+
+// Auto-delete expired messages
+messageSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+
+// Set expiry before saving
+messageSchema.pre('save', function(next) {
+  if (this.disappearAfter && !this.expiresAt) {
+    this.expiresAt = new Date(Date.now() + this.disappearAfter * 1000);
+  }
+  next();
+});
 
 const Message = mongoose.model("Message", messageSchema);
 

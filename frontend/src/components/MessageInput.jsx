@@ -1,10 +1,11 @@
 import { useRef, useState, useEffect } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
-import { Image, Send, X, Paperclip, Mic, Video } from "lucide-react";
+import { Image, Send, X, Paperclip, Mic, Video, Timer } from "lucide-react";
 import toast from "react-hot-toast";
 import VoiceRecorder from "./VoiceRecorder";
 import SmartReplies from "./SmartReplies";
+import { motion } from "framer-motion";
 
 const MessageInput = () => {
   const [text, setText] = useState("");
@@ -14,6 +15,7 @@ const MessageInput = () => {
   const [voiceData, setVoiceData] = useState(null);
   const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [disappearAfter, setDisappearAfter] = useState(null);
   const fileInputRef = useRef(null);
   const videoInputRef = useRef(null);
   const docInputRef = useRef(null);
@@ -179,6 +181,7 @@ const MessageInput = () => {
           file: filePreview,
           video: videoPreview,
           voice: voiceData,
+          disappearAfter,
         });
       }
 
@@ -188,6 +191,7 @@ const MessageInput = () => {
       setVideoPreview(null);
       setFilePreview(null);
       setVoiceData(null);
+      setDisappearAfter(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
       if (videoInputRef.current) videoInputRef.current.value = "";
       if (docInputRef.current) docInputRef.current.value = "";
@@ -302,6 +306,23 @@ const MessageInput = () => {
         onSelectReply={(reply) => setText(reply)}
       />
 
+      <div className="flex items-center gap-2 mb-2">
+        <Timer size={16} className="text-base-content/60" />
+        <select 
+          value={disappearAfter || ""} 
+          onChange={(e) => setDisappearAfter(e.target.value ? parseInt(e.target.value) : null)}
+          className="select select-sm select-bordered"
+        >
+          <option value="">Don't disappear</option>
+          <option value="10">10 seconds</option>
+          <option value="30">30 seconds</option>
+          <option value="60">1 minute</option>
+          <option value="300">5 minutes</option>
+          <option value="3600">1 hour</option>
+          <option value="86400">24 hours</option>
+        </select>
+      </div>
+
       <form onSubmit={handleSendMessage} className="flex items-center gap-2">
         <div className="flex-1 flex gap-2">
           <input
@@ -373,13 +394,15 @@ const MessageInput = () => {
             <Mic size={20} />
           </button>
         </div>
-        <button
+        <motion.button
           type="submit"
-          className="btn btn-sm btn-circle btn-primary transition-all duration-200 hover:scale-110"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          className="btn btn-sm btn-circle btn-primary btn-ripple"
           disabled={!text.trim() && !imagePreview && !filePreview && !videoPreview && !voiceData}
         >
           <Send size={22} />
-        </button>
+        </motion.button>
       </form>
     </div>
   );

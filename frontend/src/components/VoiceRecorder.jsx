@@ -13,11 +13,21 @@ const VoiceRecorder = ({ onRecordingComplete, onCancel }) => {
 
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      streamRef.current = stream;
-      mediaRecorderRef.current = new MediaRecorder(stream, {
-        mimeType: 'audio/webm;codecs=opus'
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          sampleRate: 44100
+        }
       });
+      streamRef.current = stream;
+      
+      const options = { mimeType: 'audio/webm' };
+      if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+        options.mimeType = 'audio/webm;codecs=opus';
+      }
+      
+      mediaRecorderRef.current = new MediaRecorder(stream, options);
       chunksRef.current = [];
       startTimeRef.current = Date.now();
 
@@ -29,9 +39,27 @@ const VoiceRecorder = ({ onRecordingComplete, onCancel }) => {
 
       mediaRecorderRef.current.onstop = () => {
         const duration = Math.floor((Date.now() - startTimeRef.current) / 1000);
-        const blob = new Blob(chunksRef.current, { type: "audio/webm;codecs=opus" });
+        const blob = new Blob(chunksRef.current, { type: mediaRecorderRef.current.mimeType });
+        console.log('🎤 Recording stopped:', {
+          duration,
+          blobSize: blob.size,
+          mimeType: blob.type,
+          chunks: chunksRef.current.length
+        });
+        
+        // Test playback locally first
+        const audioUrl = URL.createObjectURL(blob);
+        const testAudio = new Audio(audioUrl);
+        testAudio.play().then(() => {
+          console.log('✅ Local playback works!');
+          testAudio.pause();
+        }).catch(err => {
+          console.error('❌ Local playback failed:', err);
+        });
+        
         const reader = new FileReader();
         reader.onloadend = () => {
+          console.log('📦 Base64 length:', reader.result.length);
           onRecordingComplete({
             data: reader.result,
             duration: duration || 1,
@@ -42,7 +70,7 @@ const VoiceRecorder = ({ onRecordingComplete, onCancel }) => {
         streamRef.current?.getTracks().forEach(track => track.stop());
       };
 
-      mediaRecorderRef.current.start(1000);
+      mediaRecorderRef.current.start(100); // Request data every 100ms
       setIsRecording(true);
       
       timerRef.current = setInterval(() => {
@@ -55,6 +83,10 @@ const VoiceRecorder = ({ onRecordingComplete, onCancel }) => {
 
   const stopRecording = () => {
     if (mediaRecorderRef.current && isRecording) {
+      if (recordingTime < 1) {
+        toast.error("Recording too short. Minimum 1 second.");
+        return;
+      }
       mediaRecorderRef.current.stop();
       setIsRecording(false);
       clearInterval(timerRef.current);

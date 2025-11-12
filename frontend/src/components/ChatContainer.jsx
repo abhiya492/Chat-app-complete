@@ -1,5 +1,6 @@
 import { useChatStore } from "../store/useChatStore";
 import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 import ChatHeader from "./ChatHeader";
 import MessageInput from "./MessageInput";
@@ -65,12 +66,18 @@ const ChatContainer = () => {
     } else {
       if (audioRef.current) {
         try {
+          console.log('🔊 Playing voice:', voiceUrl);
           audioRef.current.src = voiceUrl;
+          audioRef.current.load();
           await audioRef.current.play();
           setPlayingVoice(messageId);
           audioRef.current.onended = () => setPlayingVoice(null);
+          audioRef.current.onerror = (e) => {
+            console.error('❌ Audio error:', e);
+            setPlayingVoice(null);
+          };
         } catch (error) {
-          console.error('Audio play error:', error);
+          console.error('❌ Audio play error:', error);
           setPlayingVoice(null);
         }
       }
@@ -135,8 +142,12 @@ const ChatContainer = () => {
           const isOwnMessage = message.senderId === authUser._id;
           
           return (
-            <div
+            <motion.div
               key={message._id}
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.2 }}
               className={`chat ${isOwnMessage ? "chat-end" : "chat-start"} group relative`}
               ref={messageEndRef}
             >
@@ -159,7 +170,7 @@ const ChatContainer = () => {
                 </time>
               </div>
               <div className="relative">
-                <div className="chat-bubble flex flex-col">
+                <div className="chat-bubble flex flex-col message-bubble">
                   {message.replyTo && (
                     <div className="bg-base-300/50 p-2 rounded mb-2 text-xs border-l-2 border-primary">
                       <span className="font-semibold opacity-70">Replying to</span>
@@ -225,13 +236,15 @@ const ChatContainer = () => {
 
                 {!message.isDeleted && (
                   <div className={`absolute top-0 ${isOwnMessage ? 'left-0 -translate-x-full' : 'right-0 translate-x-full'} opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 px-2`}>
-                    <button
+                    <motion.button
+                      whileHover={{ scale: 1.2, rotate: 10 }}
+                      whileTap={{ scale: 0.9 }}
                       onClick={() => setShowEmojiPicker(showEmojiPicker === message._id ? null : message._id)}
                       className="btn btn-xs btn-circle btn-ghost hover:bg-base-300"
                       title="React"
                     >
                       <Smile size={14} />
-                    </button>
+                    </motion.button>
                     <button
                       onClick={() => setReplyingTo(message)}
                       className="btn btn-xs btn-circle btn-ghost hover:bg-base-300"
@@ -275,43 +288,57 @@ const ChatContainer = () => {
                 )}
 
                 {showEmojiPicker === message._id && (
-                  <div className={`absolute ${isOwnMessage ? 'right-0' : 'left-0'} top-full mt-2 bg-base-200 p-2 rounded-lg shadow-xl border border-base-300 flex gap-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200`}>
-                    {emojis.map(emoji => (
-                      <button
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.8, y: -10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    className={`absolute ${isOwnMessage ? 'right-0' : 'left-0'} top-full mt-2 bg-base-200 p-2 rounded-lg shadow-xl border border-base-300 flex gap-1 z-50 glass-effect`}
+                  >
+                    {emojis.map((emoji, idx) => (
+                      <motion.button
                         key={emoji}
+                        initial={{ scale: 0, rotate: -180 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ delay: idx * 0.05 }}
+                        whileHover={{ scale: 1.4, rotate: 15 }}
+                        whileTap={{ scale: 0.9 }}
                         onClick={() => {
                           addReaction(message._id, emoji);
                           setShowEmojiPicker(null);
                         }}
-                        className="btn btn-sm btn-ghost text-xl hover:scale-125 transition-transform duration-150"
+                        className="btn btn-sm btn-ghost text-xl"
                       >
                         {emoji}
-                      </button>
+                      </motion.button>
                     ))}
-                  </div>
+                  </motion.div>
                 )}
 
                 {message.reactions && message.reactions.length > 0 && (
                   <div className={`flex gap-1 mt-1 flex-wrap ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
                     {message.reactions.map((reaction, idx) => (
-                      <button
+                      <motion.button
                         key={idx}
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        whileHover={{ scale: 1.2, rotate: 5 }}
+                        whileTap={{ scale: 0.9 }}
                         onClick={() => {
                           if (reaction.userId === authUser._id) {
                             removeReaction(message._id);
                           }
                         }}
                         className={`text-sm px-2 py-0.5 rounded-full bg-base-300 hover:bg-base-200 transition-all duration-150 ${
-                          reaction.userId === authUser._id ? 'ring-1 ring-primary scale-105' : ''
+                          reaction.userId === authUser._id ? 'ring-2 ring-primary scale-105 neon-glow' : ''
                         }`}
                       >
                         {reaction.emoji}
-                      </button>
+                      </motion.button>
                     ))}
                   </div>
                 )}
               </div>
-            </div>
+            </motion.div>
           );
         })}
         
