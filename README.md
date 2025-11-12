@@ -26,7 +26,7 @@ Welcome to the Real-Time Chat App project! This repository contains a complete g
 🐞 **Comprehensive error handling on both server and client**  
 ⭐ **Deployment guidance to host your app for free**  
 
-### 💬 Advanced Messaging Features (NEW!)  
+### 💬 Advanced Messaging Features  
 😊 **Message reactions** - React with emojis  
 💬 **Reply to messages** - Quote and reply to specific messages  
 ✏️ **Edit messages** - Modify your sent messages  
@@ -34,6 +34,19 @@ Welcome to the Real-Time Chat App project! This repository contains a complete g
 📎 **File sharing** - Share images and documents (up to 10MB)  
 ⌨️ **Typing indicators** - See when someone is typing  
 ⏳ **And much more!**  
+
+### 🎥 Real-Time Communication  
+📞 **Voice & Video Calls** - WebRTC peer-to-peer calls  
+📹 **Video Controls** - Toggle camera and microphone  
+📊 **Call History** - Track all your calls with duration  
+🔔 **Call Notifications** - Incoming call alerts with accept/reject  
+
+### 👤 User Experience & Customization (NEW!)  
+📝 **User Profiles** - Bio, status, and profile pictures  
+🎨 **Custom Themes** - 30+ themes with dark/light modes  
+🔒 **Privacy Settings** - Control last seen, profile visibility  
+🚫 **Block/Unblock Users** - Manage unwanted contacts  
+👁️ **User Info Modal** - View detailed user profiles  
 
 ---
 
@@ -61,4 +74,8 @@ Welcome to the Real-Time Chat App project! This repository contains a complete g
   npm run dev
   ```
 
-📖 **See [MESSAGING_FEATURES.md](./MESSAGING_FEATURES.md) for detailed feature documentation**
+📖 **Documentation**  
+- [MESSAGING_FEATURES.md](./MESSAGING_FEATURES.md) - Messaging features guide  
+- [WEBRTC_FEATURES.md](./WEBRTC_FEATURES.md) - Voice & video calling guide  
+- [USER_PROFILE_FEATURES.md](./USER_PROFILE_FEATURES.md) - Profile & customization guide  
+- [UX_ENHANCEMENTS.md](./UX_ENHANCEMENTS.md) - PWA, notifications, i18n guide
