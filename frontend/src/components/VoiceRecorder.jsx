@@ -8,12 +8,18 @@ const VoiceRecorder = ({ onRecordingComplete, onCancel }) => {
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
   const timerRef = useRef(null);
+  const streamRef = useRef(null);
+  const startTimeRef = useRef(null);
 
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorderRef.current = new MediaRecorder(stream);
+      streamRef.current = stream;
+      mediaRecorderRef.current = new MediaRecorder(stream, {
+        mimeType: 'audio/webm;codecs=opus'
+      });
       chunksRef.current = [];
+      startTimeRef.current = Date.now();
 
       mediaRecorderRef.current.ondataavailable = (e) => {
         if (e.data.size > 0) {
@@ -22,19 +28,21 @@ const VoiceRecorder = ({ onRecordingComplete, onCancel }) => {
       };
 
       mediaRecorderRef.current.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        const duration = Math.floor((Date.now() - startTimeRef.current) / 1000);
+        const blob = new Blob(chunksRef.current, { type: "audio/webm;codecs=opus" });
         const reader = new FileReader();
         reader.onloadend = () => {
           onRecordingComplete({
             data: reader.result,
-            duration: recordingTime,
+            duration: duration || 1,
           });
+          setRecordingTime(0);
         };
         reader.readAsDataURL(blob);
-        stream.getTracks().forEach(track => track.stop());
+        streamRef.current?.getTracks().forEach(track => track.stop());
       };
 
-      mediaRecorderRef.current.start();
+      mediaRecorderRef.current.start(1000);
       setIsRecording(true);
       
       timerRef.current = setInterval(() => {
@@ -60,6 +68,7 @@ const VoiceRecorder = ({ onRecordingComplete, onCancel }) => {
       clearInterval(timerRef.current);
       setRecordingTime(0);
     }
+    streamRef.current?.getTracks().forEach(track => track.stop());
     onCancel();
   };
 
