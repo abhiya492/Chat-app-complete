@@ -137,15 +137,24 @@ export class WebRTCService {
   }
 
   cleanup() {
+    console.log('🧹 Cleaning up WebRTC resources...');
+    
     if (this.localStream) {
-      this.localStream.getTracks().forEach((track) => track.stop());
+      this.localStream.getTracks().forEach((track) => {
+        console.log(`🛑 Stopping ${track.kind} track`);
+        track.stop();
+      });
       this.localStream = null;
     }
+    
     if (this.peerConnection) {
+      console.log('🔌 Closing peer connection');
       this.peerConnection.close();
       this.peerConnection = null;
     }
+    
     this.remoteStream = null;
     this.onRemoteStreamCallback = null;
+    console.log('✅ Cleanup complete');
   }
 }
