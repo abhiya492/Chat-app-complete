@@ -135,17 +135,19 @@ export const useCallStore = create((set, get) => ({
 
   toggleMute: () => {
     const { webrtcService, isMuted } = get();
+    const newMutedState = !isMuted;
     if (webrtcService) {
-      webrtcService.toggleAudio(!isMuted);
-      set({ isMuted: !isMuted });
+      webrtcService.toggleAudio(newMutedState);
+      set({ isMuted: newMutedState });
     }
   },
 
   toggleVideo: () => {
     const { webrtcService, isVideoOff } = get();
+    const newVideoOffState = !isVideoOff;
     if (webrtcService) {
-      webrtcService.toggleVideo(!isVideoOff);
-      set({ isVideoOff: !isVideoOff });
+      webrtcService.toggleVideo(newVideoOffState);
+      set({ isVideoOff: newVideoOffState });
     }
   },
 
