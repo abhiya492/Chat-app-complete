@@ -1,8 +1,10 @@
 import { useRef, useState, useEffect } from "react";
 import { useChatStore } from "../store/useChatStore";
+import { useAuthStore } from "../store/useAuthStore";
 import { Image, Send, X, Paperclip, Mic, Video } from "lucide-react";
 import toast from "react-hot-toast";
 import VoiceRecorder from "./VoiceRecorder";
+import SmartReplies from "./SmartReplies";
 
 const MessageInput = () => {
   const [text, setText] = useState("");
@@ -16,7 +18,10 @@ const MessageInput = () => {
   const videoInputRef = useRef(null);
   const docInputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
-  const { sendMessage, replyingTo, setReplyingTo, editingMessage, setEditingMessage, emitTyping, emitStopTyping } = useChatStore();
+  const { sendMessage, replyingTo, setReplyingTo, editingMessage, setEditingMessage, emitTyping, emitStopTyping, messages } = useChatStore();
+  const { authUser } = useAuthStore();
+  
+  const lastReceivedMessage = messages.filter(m => m.senderId !== authUser._id).slice(-1)[0];
 
   useEffect(() => {
     if (editingMessage) {
@@ -286,6 +291,11 @@ const MessageInput = () => {
           onCancel={() => setShowVoiceRecorder(false)}
         />
       )}
+
+      <SmartReplies 
+        lastMessage={lastReceivedMessage} 
+        onSelectReply={(reply) => setText(reply)}
+      />
 
       <form onSubmit={handleSendMessage} className="flex items-center gap-2">
         <div className="flex-1 flex gap-2">
