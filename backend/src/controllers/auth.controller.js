@@ -89,27 +89,69 @@ export const login = async (req, res) => {
 
   export const updateProfile = async (req, res) => {
     try {
-      const { profilePic } = req.body;
+      const { profilePic, bio, status, privacy } = req.body;
       const userId = req.user._id;
   
-      if (!profilePic) {
-        return res.status(400).json({ message: "Profile pic is required" });
+      const updateData = {};
+      
+      if (profilePic) {
+        const uploadResponse = await cloudinary.uploader.upload(profilePic, {
+          folder: "chat_app_profiles",
+          resource_type: "auto"
+        });
+        updateData.profilePic = uploadResponse.secure_url;
       }
+      
+      if (bio !== undefined) updateData.bio = bio;
+      if (status !== undefined) updateData.status = status;
+      if (privacy) updateData.privacy = privacy;
   
-      const uploadResponse = await cloudinary.uploader.upload(profilePic, {
-        folder: "chat_app_profiles",
-        resource_type: "auto"
-      });
       const updatedUser = await User.findByIdAndUpdate(
         userId,
-        { profilePic: uploadResponse.secure_url },
+        updateData,
         { new: true }
-      );
+      ).select("-password");
   
       res.status(200).json(updatedUser);
     } catch (error) {
       console.error("Error in update profile:", error.message);
       res.status(500).json({ message: error.message || "Internal server error" });
+    }
+  };
+
+  export const blockUser = async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const currentUserId = req.user._id;
+
+      const user = await User.findById(currentUserId);
+      if (user.blockedUsers.includes(userId)) {
+        return res.status(400).json({ message: "User already blocked" });
+      }
+
+      user.blockedUsers.push(userId);
+      await user.save();
+
+      res.status(200).json({ message: "User blocked successfully" });
+    } catch (error) {
+      console.error("Error in blockUser:", error.message);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  };
+
+  export const unblockUser = async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const currentUserId = req.user._id;
+
+      const user = await User.findById(currentUserId);
+      user.blockedUsers = user.blockedUsers.filter(id => id.toString() !== userId);
+      await user.save();
+
+      res.status(200).json({ message: "User unblocked successfully" });
+    } catch (error) {
+      console.error("Error in unblockUser:", error.message);
+      res.status(500).json({ message: "Internal server error" });
     }
   };
   export const checkAuth = (req, res) => {

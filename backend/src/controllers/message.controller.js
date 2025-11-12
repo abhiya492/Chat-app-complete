@@ -7,7 +7,12 @@ import { getReceiverSocketId, io } from "../lib/socket.js";
 export const getUsersForSidebar = async (req, res) => {
   try {
     const loggedInUserId = req.user._id;
-    const filteredUsers = await User.find({ _id: { $ne: loggedInUserId } }).select("-password");
+    const currentUser = await User.findById(loggedInUserId);
+    const blockedUsers = currentUser.blockedUsers || [];
+    
+    const filteredUsers = await User.find({ 
+      _id: { $ne: loggedInUserId, $nin: blockedUsers } 
+    }).select("-password");
 
     res.status(200).json(filteredUsers);
   } catch (error) {
@@ -19,16 +24,33 @@ export const getUsersForSidebar = async (req, res) => {
 export const getMessages = async (req, res) => {
   try {
     const { id: userToChatId } = req.params;
+    const { page = 1, limit = 50 } = req.query;
     const myId = req.user._id;
+
+    const skip = (page - 1) * limit;
 
     const messages = await Message.find({
       $or: [
         { senderId: myId, receiverId: userToChatId },
         { senderId: userToChatId, receiverId: myId },
       ],
+    })
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(parseInt(limit));
+
+    const total = await Message.countDocuments({
+      $or: [
+        { senderId: myId, receiverId: userToChatId },
+        { senderId: userToChatId, receiverId: myId },
+      ],
     });
 
-    res.status(200).json(messages);
+    res.status(200).json({
+      messages: messages.reverse(),
+      hasMore: skip + messages.length < total,
+      total
+    });
   } catch (error) {
     console.log("Error in getMessages controller: ", error.message);
     res.status(500).json({ error: "Internal server error" });
@@ -70,13 +92,51 @@ export const sendMessage = async (req, res) => {
 
     let voiceData;
     if (voice) {
-      const uploadResponse = await cloudinary.uploader.upload(voice.data, {
-        resource_type: "video",
-      });
-      voiceData = {
-        url: uploadResponse.secure_url,
-        duration: voice.duration,
-      };
+      try {
+        // Convert base64 to buffer for Cloudinary
+        const base64Data = voice.data.split(',')[1];
+        const buffer = Buffer.from(base64Data, 'base64');
+        
+        const uploadResponse = await cloudinary.uploader.upload_stream(
+          {
+            resource_type: "video",
+            format: "webm",
+            timeout: 120000
+          },
+          (error, result) => {
+            if (error) throw error;
+            return result;
+          }
+        );
+        
+        // Upload the buffer
+        const stream = require('stream');
+        const bufferStream = new stream.PassThrough();
+        bufferStream.end(buffer);
+        
+        const result = await new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            {
+              resource_type: "video",
+              format: "webm",
+              timeout: 120000
+            },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          );
+          bufferStream.pipe(uploadStream);
+        });
+        
+        voiceData = {
+          url: result.secure_url,
+          duration: voice.duration,
+        };
+      } catch (uploadError) {
+        console.error("Voice upload error:", uploadError.message);
+        return res.status(400).json({ error: "Failed to upload voice message: " + uploadError.message });
+      }
     }
 
     let fileData;
