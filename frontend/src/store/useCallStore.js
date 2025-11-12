@@ -100,6 +100,7 @@ export const useCallStore = create((set, get) => ({
   },
 
   endCall: async (socket, otherUserId) => {
+    console.log('📞 Ending call...');
     const { activeCall, webrtcService, callStartTime } = get();
     
     if (activeCall) {
@@ -119,7 +120,9 @@ export const useCallStore = create((set, get) => ({
       }
     }
 
+    // Cleanup WebRTC resources (stops camera/mic)
     if (webrtcService) {
+      console.log('🧹 Calling webrtcService.cleanup()');
       webrtcService.cleanup();
     }
 
@@ -131,21 +134,25 @@ export const useCallStore = create((set, get) => ({
       isVideoOff: false,
       callStartTime: null,
     });
+    
+    console.log('✅ Call ended successfully');
   },
 
   toggleMute: () => {
     const { webrtcService, isMuted } = get();
+    const newMutedState = !isMuted;
     if (webrtcService) {
-      webrtcService.toggleAudio(!isMuted);
-      set({ isMuted: !isMuted });
+      webrtcService.toggleAudio(newMutedState);
+      set({ isMuted: newMutedState });
     }
   },
 
   toggleVideo: () => {
     const { webrtcService, isVideoOff } = get();
+    const newVideoOffState = !isVideoOff;
     if (webrtcService) {
-      webrtcService.toggleVideo(!isVideoOff);
-      set({ isVideoOff: !isVideoOff });
+      webrtcService.toggleVideo(newVideoOffState);
+      set({ isVideoOff: newVideoOffState });
     }
   },
 

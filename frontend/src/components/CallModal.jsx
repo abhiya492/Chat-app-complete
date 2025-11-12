@@ -49,6 +49,17 @@ const CallModal = () => {
       remoteVideoRef.current.srcObject = webrtcService.remoteStream;
       setRemoteStreamReady(true);
     }
+
+    // Cleanup on unmount
+    return () => {
+      console.log('🧹 CallModal unmounting, cleaning up streams');
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = null;
+      }
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = null;
+      }
+    };
   }, [isCallActive, webrtcService]);
 
   useEffect(() => {
@@ -84,13 +95,19 @@ const CallModal = () => {
               playsInline
               className="w-full h-full object-cover"
             />
-            <video
-              ref={localVideoRef}
-              autoPlay
-              playsInline
-              muted
-              className="absolute top-4 right-4 w-32 h-24 rounded-lg border-2 border-base-100 object-cover"
-            />
+            {!isVideoOff ? (
+              <video
+                ref={localVideoRef}
+                autoPlay
+                playsInline
+                muted
+                className="absolute top-4 right-4 w-32 h-24 rounded-lg border-2 border-base-100 object-cover"
+              />
+            ) : (
+              <div className="absolute top-4 right-4 w-32 h-24 rounded-lg border-2 border-base-100 bg-base-300 flex items-center justify-center">
+                <VideoOff size={32} className="text-base-content/50" />
+              </div>
+            )}
           </>
         ) : (
           <div className="flex items-center justify-center h-full">

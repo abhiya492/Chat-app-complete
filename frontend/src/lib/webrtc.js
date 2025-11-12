@@ -42,6 +42,20 @@ export class WebRTCService {
         audio: true,
         video: isVideo,
       });
+      
+      // Ensure tracks are enabled by default
+      this.localStream.getAudioTracks().forEach(track => {
+        track.enabled = true;
+        console.log('🎤 Audio track enabled');
+      });
+      
+      if (isVideo) {
+        this.localStream.getVideoTracks().forEach(track => {
+          track.enabled = true;
+          console.log('📹 Video track enabled');
+        });
+      }
+      
       return this.localStream;
     } catch (error) {
       console.error("Error accessing media devices:", error);
@@ -86,20 +100,36 @@ export class WebRTCService {
     }
   }
 
-  toggleAudio(enabled) {
-    if (this.localStream) {
-      this.localStream.getAudioTracks().forEach((track) => {
-        track.enabled = enabled;
-      });
+  toggleAudio(muted) {
+    if (!this.localStream) {
+      console.warn('No local stream available for audio toggle');
+      return;
     }
+    const audioTracks = this.localStream.getAudioTracks();
+    if (audioTracks.length === 0) {
+      console.warn('No audio tracks found');
+      return;
+    }
+    audioTracks.forEach((track) => {
+      track.enabled = !muted;
+      console.log(`🎤 Audio ${muted ? 'muted' : 'unmuted'}`);
+    });
   }
 
-  toggleVideo(enabled) {
-    if (this.localStream) {
-      this.localStream.getVideoTracks().forEach((track) => {
-        track.enabled = enabled;
-      });
+  toggleVideo(videoOff) {
+    if (!this.localStream) {
+      console.warn('No local stream available for video toggle');
+      return;
     }
+    const videoTracks = this.localStream.getVideoTracks();
+    if (videoTracks.length === 0) {
+      console.warn('No video tracks found');
+      return;
+    }
+    videoTracks.forEach((track) => {
+      track.enabled = !videoOff;
+      console.log(`📹 Video ${videoOff ? 'off' : 'on'}`);
+    });
   }
 
   setOnRemoteStream(callback) {
@@ -107,15 +137,24 @@ export class WebRTCService {
   }
 
   cleanup() {
+    console.log('🧹 Cleaning up WebRTC resources...');
+    
     if (this.localStream) {
-      this.localStream.getTracks().forEach((track) => track.stop());
+      this.localStream.getTracks().forEach((track) => {
+        console.log(`🛑 Stopping ${track.kind} track`);
+        track.stop();
+      });
       this.localStream = null;
     }
+    
     if (this.peerConnection) {
+      console.log('🔌 Closing peer connection');
       this.peerConnection.close();
       this.peerConnection = null;
     }
+    
     this.remoteStream = null;
     this.onRemoteStreamCallback = null;
+    console.log('✅ Cleanup complete');
   }
 }
