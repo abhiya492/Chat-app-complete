@@ -20,6 +20,25 @@ const userSchema = new mongoose.Schema(
         type: String,
         default: "",
     },
+    bio: {
+        type: String,
+        default: "",
+        maxlength: 200,
+    },
+    status: {
+        type: String,
+        default: "Hey there! I'm using this chat app",
+        maxlength: 100,
+    },
+    privacy: {
+        showLastSeen: { type: Boolean, default: true },
+        showProfilePic: { type: Boolean, default: true },
+        showStatus: { type: Boolean, default: true },
+    },
+    blockedUsers: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+    }],
     resetPasswordOTP: {
         type: String,
     },
