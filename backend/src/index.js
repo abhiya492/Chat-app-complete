@@ -3,6 +3,9 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/auth.route.js';
 import messageRoutes from './routes/message.route.js';
 import invitationRoutes from './routes/invitation.route.js';
+import callRoutes from './routes/call.route.js';
+import analyticsRoutes from './routes/analytics.route.js';
+import aiRoutes from './routes/ai.route.js';
 import cors from 'cors';
 
 import path from 'path';
@@ -33,6 +36,9 @@ app.get("/health", (req, res) => {
 app.use("/api/auth",authRoutes);
 app.use("/api/messages",messageRoutes);
 app.use("/api/invitations",invitationRoutes);
+app.use("/api/calls",callRoutes);
+app.use("/api/analytics",analyticsRoutes);
+app.use("/api/ai",aiRoutes);
 
 if (process.env.NODE_ENV === "production") {
     const frontendPath = path.join(__dirname, "../frontend/dist");
