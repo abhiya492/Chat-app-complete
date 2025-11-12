@@ -1,5 +1,5 @@
 import express from 'express';
-import { checkAuth, login, logout, signup, updateProfile, forgotPassword, resetPassword } from '../controllers/auth.controller.js';
+import { checkAuth, login, logout, signup, updateProfile, forgotPassword, resetPassword, blockUser, unblockUser } from '../controllers/auth.controller.js';
 import { protectRoute } from '../middleware/auth.middleware.js';
 
 
@@ -10,6 +10,8 @@ router.post("/login",login);
 router.post("/logout",logout);
 
 router.put("/update-profile",protectRoute,updateProfile);
+router.post("/block/:userId",protectRoute,blockUser);
+router.post("/unblock/:userId",protectRoute,unblockUser);
 
 router.get("/check",protectRoute,checkAuth);
 
