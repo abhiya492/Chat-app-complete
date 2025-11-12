@@ -4,21 +4,6 @@ const GROQ_KEY = process.env.GROQ_API_KEY || '';
 
 export const aiService = {
   async generateSmartReplies(messageText) {
-    try {
-      const response = await fetch(`${HF_API}/facebook/blenderbot-400M-distill`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ inputs: messageText, parameters: { max_length: 50 } })
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        const reply = data[0]?.generated_text || '';
-        return [reply.substring(0, 30), this.getFallbackReplies(messageText)[0], this.getFallbackReplies(messageText)[1]];
-      }
-    } catch (error) {
-      console.error('Smart replies error:', error);
-    }
     return this.getFallbackReplies(messageText);
   },
 
@@ -50,27 +35,6 @@ export const aiService = {
   },
 
   async analyzeSentiment(text) {
-    try {
-      const response = await fetch(`${HF_API}/distilbert-base-uncased-finetuned-sst-2-english`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ inputs: text })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data[0] && Array.isArray(data[0])) {
-          const result = data[0].reduce((max, item) => item.score > max.score ? item : max);
-          return { 
-            sentiment: result.label.toLowerCase().includes('pos') ? 'positive' : 'negative',
-            score: result.score 
-          };
-        }
-      }
-    } catch (error) {
-      console.error('Sentiment AI error:', error);
-    }
-    
     return this.basicSentiment(text);
   },
   

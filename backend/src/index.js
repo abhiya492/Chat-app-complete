@@ -6,6 +6,8 @@ import invitationRoutes from './routes/invitation.route.js';
 import callRoutes from './routes/call.route.js';
 import analyticsRoutes from './routes/analytics.route.js';
 import aiRoutes from './routes/ai.route.js';
+import storyRoutes from './routes/story.route.js';
+import streakRoutes from './routes/streak.route.js';
 import cors from 'cors';
 
 import path from 'path';
@@ -39,6 +41,8 @@ app.use("/api/invitations",invitationRoutes);
 app.use("/api/calls",callRoutes);
 app.use("/api/analytics",analyticsRoutes);
 app.use("/api/ai",aiRoutes);
+app.use("/api/stories",storyRoutes);
+app.use("/api/streaks",streakRoutes);
 
 if (process.env.NODE_ENV === "production") {
     const frontendPath = path.join(__dirname, "../frontend/dist");

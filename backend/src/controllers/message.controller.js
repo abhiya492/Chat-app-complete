@@ -1,8 +1,10 @@
 import User from "../models/user.model.js";
 import Message from "../models/message.model.js";
+import { Readable } from "stream";
 
 import cloudinary from "../lib/cloudinary.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
+import { updateStreak } from "./streak.controller.js";
 
 export const getUsersForSidebar = async (req, res) => {
   try {
@@ -59,9 +61,18 @@ export const getMessages = async (req, res) => {
 
 export const sendMessage = async (req, res) => {
   try {
-    const { text, image, file, replyTo, video, voice } = req.body;
+    const { text, image, file, replyTo, video, voice, disappearAfter } = req.body;
     const { id: receiverId } = req.params;
     const senderId = req.user._id;
+    
+    console.log('📨 Received:', { 
+      hasText: !!text, 
+      hasImage: !!image, 
+      hasFile: !!file, 
+      fileType: typeof file,
+      hasVideo: !!video, 
+      hasVoice: !!voice 
+    });
 
     let imageUrl;
     if (image) {
@@ -106,66 +117,73 @@ export const sendMessage = async (req, res) => {
     let voiceData;
     if (voice) {
       try {
-        // Convert base64 to buffer for Cloudinary
-        const base64Data = voice.data.split(',')[1];
+        console.log('🎤 Uploading voice, duration:', voice.duration);
+        
+        if (!voice.data || voice.data.length < 100) {
+          return res.status(400).json({ error: "Voice recording is empty or too short" });
+        }
+        
+        // Convert base64 to buffer
+        const base64Data = voice.data.split(',')[1] || voice.data;
         const buffer = Buffer.from(base64Data, 'base64');
+        console.log('📦 Buffer size:', buffer.length);
         
-        const uploadResponse = await cloudinary.uploader.upload_stream(
-          {
-            resource_type: "video",
-            format: "webm",
-            timeout: 120000
-          },
-          (error, result) => {
-            if (error) throw error;
-            return result;
-          }
-        );
-        
-        // Upload the buffer
-        const stream = require('stream');
-        const bufferStream = new stream.PassThrough();
-        bufferStream.end(buffer);
-        
+        // Upload using stream
         const result = await new Promise((resolve, reject) => {
           const uploadStream = cloudinary.uploader.upload_stream(
-            {
+            { 
               resource_type: "video",
               format: "webm",
-              timeout: 120000
             },
             (error, result) => {
               if (error) reject(error);
               else resolve(result);
             }
           );
+          
+          const bufferStream = Readable.from(buffer);
           bufferStream.pipe(uploadStream);
         });
         
+        console.log('✅ Voice uploaded:', result.secure_url);
         voiceData = {
           url: result.secure_url,
           duration: voice.duration,
         };
       } catch (uploadError) {
-        console.error("Voice upload error:", uploadError.message);
-        return res.status(400).json({ error: "Failed to upload voice message: " + uploadError.message });
+        console.error('❌ Voice upload error:', uploadError);
+        return res.status(400).json({ 
+          error: "Failed to upload voice: " + (uploadError.message || "Unknown error")
+        });
       }
     }
 
     let fileData;
     if (file) {
-      const uploadResponse = await cloudinary.uploader.upload(file.data, {
-        resource_type: "auto",
-      });
-      fileData = {
-        url: uploadResponse.secure_url,
-        name: file.name,
-        size: file.size,
-        type: file.type,
-      };
+      // Check if file is already uploaded (has url) or needs upload
+      if (file.url) {
+        // Already uploaded, just use the data
+        fileData = {
+          url: file.url,
+          name: file.name,
+          size: file.size,
+          type: file.type,
+        };
+      } else if (file.data) {
+        // Needs upload
+        const uploadResponse = await cloudinary.uploader.upload(file.data, {
+          resource_type: "auto",
+        });
+        fileData = {
+          url: uploadResponse.secure_url,
+          name: file.name,
+          size: file.size,
+          type: file.type,
+        };
+      }
     }
 
-    const newMessage = new Message({
+    const messagePayload = {
       senderId,
       receiverId,
       text,
@@ -174,14 +192,29 @@ export const sendMessage = async (req, res) => {
       voice: voiceData,
       file: fileData,
       replyTo: replyTo || null,
+      disappearAfter: disappearAfter || null,
+    };
+    
+    console.log('💾 Saving message:', {
+      hasImage: !!imageUrl,
+      hasFile: !!fileData,
+      fileData: fileData ? JSON.stringify(fileData) : null
     });
+    
+    const newMessage = new Message(messagePayload);
 
     await newMessage.save();
     await newMessage.populate('replyTo');
 
+    // Update streak
+    const streak = await updateStreak(senderId, receiverId);
+
     const receiverSocketId = getReceiverSocketId(receiverId);
      if (receiverSocketId) {
         io.to(receiverSocketId).emit("newMessage", newMessage);
+        if (streak) {
+          io.to(receiverSocketId).emit("streakUpdated", streak);
+        }
      }
 
     res.status(201).json(newMessage);
