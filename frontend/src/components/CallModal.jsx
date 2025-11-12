@@ -49,6 +49,17 @@ const CallModal = () => {
       remoteVideoRef.current.srcObject = webrtcService.remoteStream;
       setRemoteStreamReady(true);
     }
+
+    // Cleanup on unmount
+    return () => {
+      console.log('🧹 CallModal unmounting, cleaning up streams');
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = null;
+      }
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = null;
+      }
+    };
   }, [isCallActive, webrtcService]);
 
   useEffect(() => {
