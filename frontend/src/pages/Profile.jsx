@@ -1,52 +1,23 @@
 import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
-import { Camera, Mail, User } from "lucide-react";
+import { User as UserIcon, Settings, UserX, Palette, BarChart3 } from "lucide-react";
+import ProfileSettings from "../components/ProfileSettings";
+import BlockedUsers from "../components/BlockedUsers";
+import AnalyticsDashboard from "../components/AnalyticsDashboard";
+import { useThemeStore } from "../store/useThemeStore";
+import { THEMES } from "../constants";
 
 const Profile = () => {
-  const { authUser, isUpdatingProfile, updateProfile } = useAuthStore();
-  const [selectedImg, setSelectedImg] = useState(null);
+  const { authUser } = useAuthStore();
+  const { theme, setTheme } = useThemeStore();
+  const [activeTab, setActiveTab] = useState("profile");
 
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-
-    reader.onload = async () => {
-      const img = new Image();
-      img.src = reader.result;
-      
-      img.onload = async () => {
-        const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 400;
-        const MAX_HEIGHT = 400;
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height) {
-          if (width > MAX_WIDTH) {
-            height *= MAX_WIDTH / width;
-            width = MAX_WIDTH;
-          }
-        } else {
-          if (height > MAX_HEIGHT) {
-            width *= MAX_HEIGHT / height;
-            height = MAX_HEIGHT;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-        
-        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
-        setSelectedImg(compressedBase64);
-        await updateProfile({ profilePic: compressedBase64 });
-      };
-    };
-  };
+  const tabs = [
+    { id: "profile", label: "Profile", icon: UserIcon },
+    { id: "theme", label: "Theme", icon: Palette },
+    { id: "blocked", label: "Blocked", icon: UserX },
+    { id: "analytics", label: "Analytics", icon: BarChart3 },
+  ];
 
   return (
     <div className="min-h-screen pt-20 bg-gradient-to-br from-base-200 via-base-100 to-base-200 relative overflow-hidden">
@@ -54,92 +25,70 @@ const Profile = () => {
         <div className="absolute top-20 left-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/5 rounded-full blur-3xl animate-pulse delay-700"></div>
       </div>
-      <div className="max-w-2xl mx-auto p-4 py-8 relative z-10">
-        <div className="glass-effect rounded-3xl p-8 space-y-8 shadow-2xl animate-fade-in">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-primary to-secondary bg-clip-text text-transparent">Profile</h1>
-            <p className="mt-2 text-base-content/60 text-lg">Your profile information</p>
+      <div className="max-w-4xl mx-auto p-4 py-8 relative z-10">
+        <div className="glass-effect rounded-3xl p-6 shadow-2xl">
+          <div className="text-center mb-6">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Settings</h1>
+            <p className="mt-2 text-base-content/60">Manage your profile and preferences</p>
           </div>
 
-          <div className="flex flex-col items-center gap-4">
-            <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary rounded-full blur-2xl opacity-40 group-hover:opacity-60 transition-all duration-300 pointer-events-none animate-pulse"></div>
-              <img
-                src={selectedImg || authUser.profilePic || "/avatar.png"}
-                alt="Profile"
-                className="size-40 rounded-full object-cover border-4 border-base-100 shadow-2xl relative ring-4 ring-primary/30 group-hover:ring-primary/50 group-hover:scale-105 transition-all duration-300"
-              />
-              <label
-                htmlFor="avatar-upload"
-                className={`
-                  absolute bottom-2 right-2
-                  bg-gradient-to-br from-primary via-primary to-secondary hover:scale-125 hover:rotate-12
-                  p-3 rounded-full cursor-pointer 
-                  transition-all duration-300 shadow-xl shadow-primary/40
-                  ${isUpdatingProfile ? "animate-pulse pointer-events-none" : ""}
-                `}
-              >
-                <Camera className="w-5 h-5 text-primary-content" />
-              </label>
-              <input
-                type="file"
-                id="avatar-upload"
-                className="hidden"
-                accept="image/*"
-                onChange={handleImageUpload}
-                disabled={isUpdatingProfile}
-              />
-            </div>
-            <p className="text-sm text-base-content/60 font-medium animate-fade-in">
-              {isUpdatingProfile ? (
-                <span className="flex items-center gap-2">
-                  <span className="size-2 bg-primary rounded-full animate-pulse"></span>
-                  Uploading...
-                </span>
-              ) : "Click the camera icon to update your photo"}
-            </p>
+          {/* Tabs */}
+          <div className="flex gap-2 mb-6 border-b border-base-300">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 px-4 py-3 font-medium transition-all ${
+                    activeTab === tab.id
+                      ? "text-primary border-b-2 border-primary"
+                      : "text-base-content/60 hover:text-base-content"
+                  }`}
+                >
+                  <Icon size={18} />
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
 
-          <div className="space-y-4">
-            <div className="space-y-2 bg-base-200/50 p-4 rounded-xl border border-base-300/50 hover:border-primary/30 hover:shadow-lg transition-all duration-300">
-              <div className="text-sm text-base-content/60 flex items-center gap-2 font-semibold">
-                <div className="p-1.5 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10">
-                  <User className="w-4 h-4 text-primary" />
+          {/* Tab Content */}
+          <div>
+            {activeTab === "profile" && <ProfileSettings />}
+            {activeTab === "theme" && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <Palette size={20} className="text-primary" />
+                  Choose Theme
+                </h3>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                  {THEMES.map((t) => (
+                    <button
+                      key={t}
+                      className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all hover:scale-105 ${
+                        theme === t ? "ring-2 ring-primary scale-105" : "bg-base-200/50"
+                      }`}
+                      onClick={() => setTheme(t)}
+                    >
+                      <div className="h-10 w-full rounded-lg overflow-hidden" data-theme={t}>
+                        <div className="grid grid-cols-4 gap-px p-1 h-full">
+                          <div className="rounded bg-primary"></div>
+                          <div className="rounded bg-secondary"></div>
+                          <div className="rounded bg-accent"></div>
+                          <div className="rounded bg-neutral"></div>
+                        </div>
+                      </div>
+                      <span className="text-xs font-medium truncate w-full text-center">
+                        {t.charAt(0).toUpperCase() + t.slice(1)}
+                      </span>
+                    </button>
+                  ))}
                 </div>
-                Full Name
               </div>
-              <p className="px-4 py-3 bg-base-100 rounded-lg border border-base-300/50 font-medium text-lg">{authUser?.fullName}</p>
-            </div>
-
-            <div className="space-y-2 bg-base-200/50 p-4 rounded-xl border border-base-300/50 hover:border-primary/30 hover:shadow-lg transition-all duration-300">
-              <div className="text-sm text-base-content/60 flex items-center gap-2 font-semibold">
-                <div className="p-1.5 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10">
-                  <Mail className="w-4 h-4 text-primary" />
-                </div>
-                Email Address
-              </div>
-              <p className="px-4 py-3 bg-base-100 rounded-lg border border-base-300/50 font-medium text-lg">{authUser?.email}</p>
-            </div>
-          </div>
-
-          <div className="mt-6 bg-gradient-to-br from-base-200/50 to-base-300/30 rounded-xl p-6 border border-base-300/50 hover:shadow-xl transition-all duration-300">
-            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-              <div className="w-1 h-6 bg-gradient-to-b from-primary to-secondary rounded-full"></div>
-              Account Information
-            </h2>
-            <div className="space-y-3 text-sm">
-              <div className="flex items-center justify-between py-3 px-4 bg-base-100/50 rounded-lg hover:bg-base-100/70 transition-all">
-                <span className="font-medium text-base-content/70">Member Since</span>
-                <span className="font-semibold">{authUser.createdAt?.split("T")[0]}</span>
-              </div>
-              <div className="flex items-center justify-between py-3 px-4 bg-base-100/50 rounded-lg hover:bg-base-100/70 transition-all">
-                <span className="font-medium text-base-content/70">Account Status</span>
-                <span className="flex items-center gap-2">
-                  <span className="size-2 bg-gradient-to-r from-green-400 to-green-500 rounded-full animate-pulse shadow-sm shadow-green-500/50"></span>
-                  <span className="text-green-500 font-semibold">Active</span>
-                </span>
-              </div>
-            </div>
+            )}
+            {activeTab === "blocked" && <BlockedUsers />}
+            {activeTab === "analytics" && <AnalyticsDashboard />}
           </div>
         </div>
       </div>
