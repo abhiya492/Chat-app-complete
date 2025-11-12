@@ -3,12 +3,15 @@ import { useEffect, useRef, useState } from "react";
 
 import ChatHeader from "./ChatHeader";
 import MessageInput from "./MessageInput";
-import MessageSkeleton from "./skeletons/MessageSkeleton";
+import ChatSkeleton from "./skeletons/ChatSkeleton";
 import MessageSearch from "./MessageSearch";
 import ForwardModal from "./ForwardModal";
 import { useAuthStore } from "../store/useAuthStore";
 import { formatMessageTime } from "../lib/utils";
 import { Smile, Reply, Edit2, Trash2, Download, Pin, Forward, Check, CheckCheck, Play, Pause } from "lucide-react";
+import SmartReplies from "./SmartReplies";
+import MessageTranslator from "./MessageTranslator";
+import SentimentIndicator from "./SentimentIndicator";
 
 const ChatContainer = () => {
   const {
@@ -24,14 +27,18 @@ const ChatContainer = () => {
     setReplyingTo,
     setEditingMessage,
     typingUsers,
+    loadMoreMessages,
+    hasMoreMessages,
   } = useChatStore();
   const { authUser } = useAuthStore();
   const messageEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(null);
   const [showActions, setShowActions] = useState(null);
   const [showSearch, setShowSearch] = useState(false);
   const [playingVoice, setPlayingVoice] = useState(null);
   const audioRef = useRef(null);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const emojis = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
   const { forwardingMessage, setForwardingMessage, markAsRead, pinMessage } = useChatStore();
@@ -51,39 +58,54 @@ const ChatContainer = () => {
     });
   }, [messages, authUser._id, markAsRead]);
 
-  const toggleVoicePlay = (voiceUrl, messageId) => {
+  const toggleVoicePlay = async (voiceUrl, messageId) => {
     if (playingVoice === messageId) {
       audioRef.current?.pause();
       setPlayingVoice(null);
     } else {
       if (audioRef.current) {
-        audioRef.current.src = voiceUrl;
-        audioRef.current.play();
-        setPlayingVoice(messageId);
-        audioRef.current.onended = () => setPlayingVoice(null);
+        try {
+          audioRef.current.src = voiceUrl;
+          await audioRef.current.play();
+          setPlayingVoice(messageId);
+          audioRef.current.onended = () => setPlayingVoice(null);
+        } catch (error) {
+          console.error('Audio play error:', error);
+          setPlayingVoice(null);
+        }
       }
     }
   };
 
   useEffect(() => {
-    if (messageEndRef.current && messages) {
+    if (messageEndRef.current && messages && !isLoadingMore) {
       messageEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages]);
+  }, [messages, isLoadingMore]);
 
-  if (isMessagesLoading) {
-    return (
-      <div className="flex-1 flex flex-col overflow-auto">
-        <ChatHeader 
-          onSearchClick={() => setShowSearch(true)}
-          onPinnedClick={() => {
-            useChatStore.getState().getPinnedMessages(selectedUser._id);
-          }}
-        />
-        <MessageSkeleton />
-        <MessageInput />
-      </div>
-    );
+  const handleScroll = async (e) => {
+    const { scrollTop } = e.target;
+    if (scrollTop === 0 && hasMoreMessages && !isMessagesLoading) {
+      setIsLoadingMore(true);
+      const prevHeight = messagesContainerRef.current?.scrollHeight || 0;
+      try {
+        await loadMoreMessages();
+        setTimeout(() => {
+          if (messagesContainerRef.current) {
+            const newHeight = messagesContainerRef.current.scrollHeight;
+            messagesContainerRef.current.scrollTop = newHeight - prevHeight;
+          }
+          setIsLoadingMore(false);
+        }, 100);
+      } catch (error) {
+        console.error('Failed to load more messages:', error);
+        setIsLoadingMore(false);
+      }
+    }
+  };
+
+  if (isMessagesLoading && messages.length === 0) {
+    return <ChatSkeleton />;
   }
 
   return (
@@ -99,7 +121,16 @@ const ChatContainer = () => {
       {forwardingMessage && <ForwardModal message={forwardingMessage} onClose={() => setForwardingMessage(null)} />}
       <audio ref={audioRef} />
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div 
+        ref={messagesContainerRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto p-4 space-y-4"
+      >
+        {isLoadingMore && (
+          <div className="flex justify-center py-2">
+            <span className="loading loading-spinner loading-sm"></span>
+          </div>
+        )}
         {messages.map((message) => {
           const isOwnMessage = message.senderId === authUser._id;
           
