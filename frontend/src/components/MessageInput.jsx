@@ -37,6 +37,11 @@ const MessageInput = () => {
       return;
     }
 
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Image too large. Maximum size is 10MB");
+      return;
+    }
+
     const reader = new FileReader();
     reader.onloadend = () => {
       setImagePreview(reader.result);
