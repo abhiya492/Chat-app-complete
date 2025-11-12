@@ -4,6 +4,7 @@ import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
 import { useCallStore } from "../store/useCallStore";
 import { useState } from "react";
+import StreakBadge from "./StreakBadge";
 
 const ChatHeader = ({ onSearchClick, onPinnedClick }) => {
   const { selectedUser, setSelectedUser } = useChatStore();
@@ -41,7 +42,10 @@ const ChatHeader = ({ onSearchClick, onPinnedClick }) => {
 
           {/* User info */}
           <div>
-            <h3 className="font-medium">{selectedUser.fullName}</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="font-medium">{selectedUser.fullName}</h3>
+              <StreakBadge userId={selectedUser._id} />
+            </div>
             <p className="text-sm text-base-content/70">
               {onlineUsers.includes(selectedUser._id) ? "Online" : "Offline"}
             </p>

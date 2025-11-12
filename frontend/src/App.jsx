@@ -20,11 +20,13 @@ import NotificationPrompt from './components/NotificationPrompt'
 import ChatbotButton from './components/ChatbotButton'
 import { useCallStore } from './store/useCallStore'
 import { trackPageView } from './lib/analytics'
+import { useStoryStore } from './store/useStoryStore'
 
 const App = () => {
   const { authUser,checkAuth,isCheckingAuth,onlineUsers,socket } = useAuthStore();
   const { theme } = useThemeStore();
   const { setupCallListeners, cleanupCallListeners } = useCallStore();
+  const { subscribeToStoryEvents, unsubscribeFromStoryEvents } = useStoryStore();
 
   console.log({ onlineUsers})
 
@@ -39,9 +41,13 @@ const App = () => {
   useEffect(() => {
     if (socket && authUser) {
       setupCallListeners(socket);
-      return () => cleanupCallListeners(socket);
+      subscribeToStoryEvents();
+      return () => {
+        cleanupCallListeners(socket);
+        unsubscribeFromStoryEvents();
+      };
     }
-  }, [socket, authUser, setupCallListeners, cleanupCallListeners]);
+  }, [socket, authUser, setupCallListeners, cleanupCallListeners, subscribeToStoryEvents, unsubscribeFromStoryEvents]);
 
 
   console.log(authUser);
