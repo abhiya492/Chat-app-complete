@@ -17,11 +17,9 @@ export const useAuthStore = create((set, get) => ({
   checkAuth: async () => {
     try {
       const res = await axiosInstance.get("/auth/check");
-
       set({ authUser: res.data });
       get().connectSocket();
     } catch (error) {
-      console.log("Error in checkAuth:", error);
       set({ authUser: null });
     } finally {
       set({ isCheckingAuth: false });
@@ -60,11 +58,12 @@ export const useAuthStore = create((set, get) => ({
   logout: async () => {
     try {
       await axiosInstance.post("/auth/logout");
-      set({ authUser: null });
-      toast.success("Logged out successfully");
-      get().disconnectSocket();
     } catch (error) {
-      toast.error(error.response.data.message);
+      // Ignore logout errors
+    } finally {
+      set({ authUser: null });
+      get().disconnectSocket();
+      toast.success("Logged out successfully");
     }
   },
 
@@ -122,6 +121,38 @@ export const useAuthStore = create((set, get) => ({
     } catch (error) {
       toast.error(error.response.data.message);
       return false;
+    }
+  },
+
+  blockUser: async (userId) => {
+    try {
+      await axiosInstance.post(`/auth/block/${userId}`);
+      const { authUser } = get();
+      set({ 
+        authUser: { 
+          ...authUser, 
+          blockedUsers: [...(authUser.blockedUsers || []), userId] 
+        } 
+      });
+      toast.success("User blocked");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to block user");
+    }
+  },
+
+  unblockUser: async (userId) => {
+    try {
+      await axiosInstance.post(`/auth/unblock/${userId}`);
+      const { authUser } = get();
+      set({ 
+        authUser: { 
+          ...authUser, 
+          blockedUsers: authUser.blockedUsers.filter(id => id !== userId) 
+        } 
+      });
+      toast.success("User unblocked");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to unblock user");
     }
   },
 }));
