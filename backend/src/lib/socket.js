@@ -1,6 +1,7 @@
 import { Server } from "socket.io";
 import http from "http";
 import express from "express";
+import User from "../models/user.model.js";
 
 const app = express();
 const server = http.createServer(app);
@@ -15,8 +16,78 @@ export function getReceiverSocketId(userId) {
   return userSocketMap[userId];
 }
 
-// used to store online users
+// Store online users
 const userSocketMap = {}; // {userId: socketId}
+
+// Voice rooms storage
+const activeRooms = new Map(); // roomId -> { participants, speakers, etc }
+
+// Games storage - ADDED THIS!
+const activeGames = new Map(); // gameId -> game state
+
+// Game cleanup after 1 hour of inactivity
+const GAME_TIMEOUT = 60 * 60 * 1000;
+
+// Helper function to clean up old games
+function cleanupGame(gameId) {
+  const game = activeGames.get(gameId);
+  if (game) {
+    clearTimeout(game.timeoutId);
+    activeGames.delete(gameId);
+    io.to(`game:${gameId}`).emit("game:cleanup");
+  }
+}
+
+// Helper function to initialize chess board
+function initializeChessBoard() {
+  const board = Array(8).fill(null).map(() => Array(8).fill(null));
+  
+  board[0] = ['rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook'].map(piece => ({ type: piece, color: 'black' }));
+  board[1] = Array(8).fill(null).map(() => ({ type: 'pawn', color: 'black' }));
+  
+  board[6] = Array(8).fill(null).map(() => ({ type: 'pawn', color: 'white' }));
+  board[7] = ['rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook'].map(piece => ({ type: piece, color: 'white' }));
+  
+  return board;
+}
+
+// Helper function to validate chess move (basic validation)
+function isValidChessMove(board, move, currentPlayer) {
+  // Add your chess validation logic here
+  // This is a placeholder - you should implement proper chess rules
+  return true;
+}
+
+// Helper function to check tic-tac-toe winner
+function checkTicTacToeWinner(board) {
+  const winPatterns = [
+    [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+    [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
+    [0, 4, 8], [2, 4, 6] // diagonals
+  ];
+
+  for (const pattern of winPatterns) {
+    const [a, b, c] = pattern;
+    if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+      return board[a];
+    }
+  }
+
+  return board.every(cell => cell !== null) ? 'draw' : null;
+}
+
+// Helper function to determine RPS winner
+function determineRPSWinner(move1, move2) {
+  if (move1 === move2) return 'draw';
+  
+  const wins = {
+    rock: 'scissors',
+    paper: 'rock',
+    scissors: 'paper'
+  };
+  
+  return wins[move1] === move2 ? 'player1' : 'player2';
+}
 
 io.on("connection", (socket) => {
   console.log("A user connected", socket.id);
@@ -76,10 +147,523 @@ io.on("connection", (socket) => {
     }
   });
 
+  // Voice Room Events
+  socket.on("room:join", async ({ roomId }) => {
+    if (!activeRooms.has(roomId)) {
+      activeRooms.set(roomId, {
+        participants: new Map(),
+        speakers: new Set(),
+        handRaised: new Set(),
+      });
+    }
+
+    const room = activeRooms.get(roomId);
+    
+    if (room.participants.size >= 20) {
+      return socket.emit("room:error", { message: "Room is full" });
+    }
+
+    const user = await User.findById(userId).select('fullName profilePic');
+    
+    socket.join(`room:${roomId}`);
+    room.participants.set(userId, {
+      userId,
+      fullName: user?.fullName || 'Unknown',
+      profilePic: user?.profilePic || '/avatar.png',
+      socketId: socket.id,
+      role: 'listener',
+      isMuted: false,
+      joinedAt: Date.now(),
+    });
+
+    const participants = Array.from(room.participants.values());
+    io.to(`room:${roomId}`).emit("room:participant-joined", { userId, participants });
+    socket.emit("room:state", { participants, speakers: Array.from(room.speakers) });
+  });
+
+  socket.on("room:leave", ({ roomId }) => {
+    const room = activeRooms.get(roomId);
+    if (room) {
+      room.participants.delete(userId);
+      room.speakers.delete(userId);
+      room.handRaised.delete(userId);
+      socket.leave(`room:${roomId}`);
+      io.to(`room:${roomId}`).emit("room:participant-left", { userId });
+      
+      if (room.participants.size === 0) {
+        activeRooms.delete(roomId);
+      }
+    }
+  });
+
+  socket.on("room:hand-raise", ({ roomId }) => {
+    const room = activeRooms.get(roomId);
+    if (room) {
+      room.handRaised.add(userId);
+      io.to(`room:${roomId}`).emit("room:hand-raised", { userId });
+    }
+  });
+
+  socket.on("room:hand-lower", ({ roomId }) => {
+    const room = activeRooms.get(roomId);
+    if (room) {
+      room.handRaised.delete(userId);
+      io.to(`room:${roomId}`).emit("room:hand-lowered", { userId });
+    }
+  });
+
+  socket.on("room:promote", ({ roomId, targetUserId }) => {
+    const room = activeRooms.get(roomId);
+    if (room && room.speakers.size < 6) {
+      room.speakers.add(targetUserId);
+      room.handRaised.delete(targetUserId);
+      const participant = room.participants.get(targetUserId);
+      if (participant) {
+        participant.role = 'speaker';
+      }
+      io.to(`room:${roomId}`).emit("room:role-changed", { userId: targetUserId, role: 'speaker' });
+    }
+  });
+
+  socket.on("room:demote", ({ roomId, targetUserId }) => {
+    const room = activeRooms.get(roomId);
+    if (room) {
+      room.speakers.delete(targetUserId);
+      const participant = room.participants.get(targetUserId);
+      if (participant) {
+        participant.role = 'listener';
+      }
+      io.to(`room:${roomId}`).emit("room:role-changed", { userId: targetUserId, role: 'listener' });
+    }
+  });
+
+  socket.on("room:speaking", ({ roomId, isSpeaking }) => {
+    io.to(`room:${roomId}`).emit("room:speaking-changed", { userId, isSpeaking });
+  });
+
+  // WebRTC signaling for rooms
+  socket.on("room:webrtc:offer", ({ roomId, targetUserId, offer }) => {
+    const targetSocket = userSocketMap[targetUserId];
+    if (targetSocket) {
+      io.to(targetSocket).emit("room:webrtc:offer", { fromUserId: userId, offer });
+    }
+  });
+
+  socket.on("room:webrtc:answer", ({ roomId, targetUserId, answer }) => {
+    const targetSocket = userSocketMap[targetUserId];
+    if (targetSocket) {
+      io.to(targetSocket).emit("room:webrtc:answer", { fromUserId: userId, answer });
+    }
+  });
+
+  socket.on("room:webrtc:ice-candidate", ({ roomId, targetUserId, candidate }) => {
+    const targetSocket = userSocketMap[targetUserId];
+    if (targetSocket) {
+      io.to(targetSocket).emit("room:webrtc:ice-candidate", { fromUserId: userId, candidate });
+    }
+  });
+
+  // ========== TIC-TAC-TOE GAME (FIXED) ==========
+  socket.on("game:invite", ({ chatId, gameId, hostId, hostName, invitedUserId }) => {
+    const invitedSocket = getReceiverSocketId(invitedUserId);
+    if (invitedSocket) {
+      io.to(invitedSocket).emit("game:invite", {
+        gameId,
+        hostName,
+        hostId
+      });
+    }
+  });
+
+  socket.on("game:invite-accept", ({ gameId, hostId, playerId }) => {
+    const newBoard = Array(9).fill(null);
+    
+    // Create game state on server
+    activeGames.set(gameId, {
+      type: 'tictactoe',
+      board: newBoard,
+      players: {
+        [hostId]: 'X',
+        [playerId]: 'O'
+      },
+      currentPlayer: hostId,
+      status: 'playing',
+      createdAt: Date.now(),
+      timeoutId: setTimeout(() => cleanupGame(gameId), GAME_TIMEOUT)
+    });
+    
+    socket.join(`game:${gameId}`);
+    const hostSocket = getReceiverSocketId(hostId);
+    if (hostSocket) {
+      const hostSocketObj = io.sockets.sockets.get(hostSocket);
+      if (hostSocketObj) {
+        hostSocketObj.join(`game:${gameId}`);
+      }
+      
+      io.to(hostSocket).emit("game:start", {
+        board: newBoard,
+        gameId,
+        yourSymbol: 'X'
+      });
+    }
+    
+    socket.emit("game:start", {
+      board: newBoard,
+      gameId,
+      yourSymbol: 'O'
+    });
+  });
+
+  socket.on("game:invite-decline", ({ hostId }) => {
+    const hostSocket = getReceiverSocketId(hostId);
+    if (hostSocket) {
+      io.to(hostSocket).emit("game:invite-declined");
+    }
+  });
+
+  socket.on("game:move", ({ gameId, position, playerId }) => {
+    const game = activeGames.get(gameId);
+    
+    if (!game) {
+      return socket.emit("game:error", { message: "Game not found" });
+    }
+    
+    // Validate it's player's turn
+    if (game.currentPlayer !== playerId) {
+      return socket.emit("game:error", { message: "Not your turn" });
+    }
+    
+    // Validate move
+    if (game.board[position] !== null) {
+      return socket.emit("game:error", { message: "Invalid move" });
+    }
+    
+    // Make move
+    game.board[position] = game.players[playerId];
+    
+    // Check winner
+    const winner = checkTicTacToeWinner(game.board);
+    
+    if (winner) {
+      game.status = 'finished';
+      io.to(`game:${gameId}`).emit("game:over", { 
+        board: game.board, 
+        winner: winner === 'draw' ? 'tie' : game.players[playerId],
+        gameId 
+      });
+      setTimeout(() => cleanupGame(gameId), 10000);
+    } else {
+      // Switch turns
+      const players = Object.keys(game.players);
+      game.currentPlayer = players.find(p => p !== playerId);
+      
+      io.to(`game:${gameId}`).emit("game:move", { 
+        board: game.board, 
+        currentPlayer: game.players[game.currentPlayer],
+        gameId 
+      });
+    }
+  });
+
+  socket.on("game:leave", ({ gameId }) => {
+    cleanupGame(gameId);
+    io.to(`game:${gameId}`).emit("game:ended", { reason: "Player left" });
+  });
+
+  // ========== ROCK PAPER SCISSORS (FIXED) ==========
+  socket.on("rps:invite", ({ chatId, hostId, hostName, invitedUserId }) => {
+    const invitedSocket = getReceiverSocketId(invitedUserId);
+    if (invitedSocket) {
+      io.to(invitedSocket).emit("rps:invite", {
+        hostName,
+        hostId
+      });
+    }
+  });
+
+  socket.on("rps:invite-accept", ({ hostId, playerId }) => {
+    const gameId = `rps_${Date.now()}`;
+    
+    // Create game state
+    activeGames.set(gameId, {
+      type: 'rps',
+      players: {
+        [hostId]: { move: null, ready: false },
+        [playerId]: { move: null, ready: false }
+      },
+      round: 1,
+      scores: { [hostId]: 0, [playerId]: 0 },
+      status: 'playing',
+      createdAt: Date.now(),
+      timeoutId: setTimeout(() => cleanupGame(gameId), GAME_TIMEOUT)
+    });
+    
+    socket.join(`rps:${gameId}`);
+    const hostSocket = getReceiverSocketId(hostId);
+    if (hostSocket) {
+      const hostSocketObj = io.sockets.sockets.get(hostSocket);
+      if (hostSocketObj) {
+        hostSocketObj.join(`rps:${gameId}`);
+      }
+      
+      io.to(hostSocket).emit("rps:invite-accepted", { gameId });
+      io.to(hostSocket).emit("rps:game-start", { gameId, opponentId: playerId });
+    }
+    
+    socket.emit("rps:game-start", { gameId, opponentId: hostId });
+  });
+
+  socket.on("rps:invite-decline", ({ hostId }) => {
+    const hostSocket = getReceiverSocketId(hostId);
+    if (hostSocket) {
+      io.to(hostSocket).emit("rps:invite-declined");
+    }
+  });
+
+  socket.on("rps:move", ({ gameId, move, playerId }) => {
+    const game = activeGames.get(gameId);
+    
+    if (!game || game.type !== 'rps') {
+      return socket.emit("game:error", { message: "Game not found" });
+    }
+    
+    // Store player's secret move
+    game.players[playerId].move = move;
+    game.players[playerId].ready = true;
+    
+    // Notify opponent that player is ready (but not the move!)
+    socket.to(`rps:${gameId}`).emit("rps:opponent-ready", { playerId });
+    
+    // Check if both players have moved
+    const players = Object.keys(game.players);
+    const bothReady = players.every(p => game.players[p].ready);
+    
+    if (bothReady) {
+      const [player1, player2] = players;
+      const move1 = game.players[player1].move;
+      const move2 = game.players[player2].move;
+      
+      // Determine winner
+      const result = determineRPSWinner(move1, move2);
+      
+      if (result === 'player1') {
+        game.scores[player1]++;
+      } else if (result === 'player2') {
+        game.scores[player2]++;
+      }
+      
+      // Send result to both players
+      const winner = result === 'draw' ? 'draw' : (result === 'player1' ? player1 : player2);
+      
+      // Send to player1
+      const player1Socket = getReceiverSocketId(player1);
+      if (player1Socket) {
+        io.to(player1Socket).emit("rps:result", { 
+          moves: { [player1]: move1, [player2]: move2 },
+          winner,
+          scores: game.scores,
+          round: game.round,
+          opponentId: player2
+        });
+      }
+      
+      // Send to player2
+      const player2Socket = getReceiverSocketId(player2);
+      if (player2Socket) {
+        io.to(player2Socket).emit("rps:result", { 
+          moves: { [player1]: move1, [player2]: move2 },
+          winner,
+          scores: game.scores,
+          round: game.round,
+          opponentId: player1
+        });
+      }
+      
+      // Reset for next round
+      game.round++;
+      game.players[player1].move = null;
+      game.players[player1].ready = false;
+      game.players[player2].move = null;
+      game.players[player2].ready = false;
+      
+      // Check if game is over (best of 5)
+      if (game.scores[player1] >= 3 || game.scores[player2] >= 3) {
+        game.status = 'finished';
+        const winner = game.scores[player1] > game.scores[player2] ? player1 : player2;
+        io.to(`rps:${gameId}`).emit("rps:game-over", { winner, scores: game.scores });
+        setTimeout(() => cleanupGame(gameId), 10000);
+      }
+    }
+  });
+
+  socket.on("rps:leave", ({ gameId }) => {
+    cleanupGame(gameId);
+    io.to(`rps:${gameId}`).emit("rps:opponent-disconnected");
+  });
+
+  // ========== CHESS GAME (FIXED) ==========
+  socket.on("chess:invite", ({ chatId, hostId, hostName, invitedUserId }) => {
+    const invitedSocket = getReceiverSocketId(invitedUserId);
+    if (invitedSocket) {
+      io.to(invitedSocket).emit("chess:invite", {
+        hostName,
+        hostId
+      });
+    }
+  });
+
+  socket.on("chess:invite-accept", ({ hostId, playerId }) => {
+    const gameId = `chess_${Date.now()}`;
+    const initialBoard = initializeChessBoard();
+    
+    // Create game state on server
+    activeGames.set(gameId, {
+      type: 'chess',
+      board: initialBoard,
+      players: {
+        white: hostId,
+        black: playerId
+      },
+      currentPlayer: 'white',
+      moveHistory: [],
+      status: 'playing',
+      createdAt: Date.now(),
+      timeoutId: setTimeout(() => cleanupGame(gameId), GAME_TIMEOUT)
+    });
+    
+    socket.join(`chess:${gameId}`);
+    const hostSocket = getReceiverSocketId(hostId);
+    if (hostSocket) {
+      const hostSocketObj = io.sockets.sockets.get(hostSocket);
+      if (hostSocketObj) {
+        hostSocketObj.join(`chess:${gameId}`);
+      }
+      
+      io.to(hostSocket).emit("chess:invite-accepted", { gameId });
+      io.to(hostSocket).emit("chess:game-start", { 
+        gameId, 
+        yourColor: 'white',
+        opponent: playerId,
+        board: initialBoard,
+        currentPlayer: 'white'
+      });
+    }
+    
+    socket.emit("chess:game-start", { 
+      gameId, 
+      yourColor: 'black',
+      opponent: hostId,
+      board: initialBoard,
+      currentPlayer: 'white'
+    });
+  });
+
+  socket.on("chess:invite-decline", ({ hostId }) => {
+    const hostSocket = getReceiverSocketId(hostId);
+    if (hostSocket) {
+      io.to(hostSocket).emit("chess:invite-declined");
+    }
+  });
+
+  socket.on("chess:move", ({ gameId, move }) => {
+    const game = activeGames.get(gameId);
+    
+    if (!game || game.type !== 'chess') {
+      return socket.emit("game:error", { message: "Game not found" });
+    }
+    
+    // Validate it's the correct player's turn
+    const playerColor = Object.entries(game.players).find(([color, id]) => id === userId)?.[0];
+    
+    if (playerColor !== game.currentPlayer) {
+      return socket.emit("game:error", { message: "Not your turn" });
+    }
+    
+    // Update game state
+    game.board = move.board;
+    game.moveHistory.push(move);
+    game.currentPlayer = game.currentPlayer === 'white' ? 'black' : 'white';
+    
+    // Broadcast move to ALL players in room
+    io.to(`chess:${gameId}`).emit("chess:move", { 
+      board: game.board,
+      move: move,
+      currentPlayer: game.currentPlayer
+    });
+  });
+
+  socket.on("chess:leave", ({ gameId }) => {
+    cleanupGame(gameId);
+    io.to(`chess:${gameId}`).emit("chess:opponent-disconnected");
+  });
+
+  socket.on("chess:game-end", ({ gameId, result, winner }) => {
+    const game = activeGames.get(gameId);
+    if (game) {
+      game.status = 'finished';
+      io.to(`chess:${gameId}`).emit("chess:game-end", { result, winner });
+      setTimeout(() => cleanupGame(gameId), 10000);
+    }
+  });
+
+  socket.on("chess:resign", ({ gameId }) => {
+    const game = activeGames.get(gameId);
+    if (game) {
+      game.status = 'finished';
+      io.to(`chess:${gameId}`).emit("chess:game-end", { 
+        result: 'resign',
+        winner: userId === game.players.white ? game.players.black : game.players.white
+      });
+      setTimeout(() => cleanupGame(gameId), 10000);
+    }
+  });
+
+  // Cursor Share Events
+  socket.on("cursor:start", ({ chatId }) => {
+    socket.join(`cursor:${chatId}`);
+  });
+
+  socket.on("cursor:move", ({ chatId, userId, x, y, username }) => {
+    socket.to(`cursor:${chatId}`).emit("cursor:move", { userId, x, y, username });
+  });
+
+  socket.on("cursor:leave", ({ chatId, userId }) => {
+    socket.to(`cursor:${chatId}`).emit("cursor:leave", { userId });
+    socket.leave(`cursor:${chatId}`);
+  });
+
   socket.on("disconnect", () => {
     console.log("A user disconnected", socket.id);
     delete userSocketMap[userId];
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
+    
+    // Remove from all rooms
+    activeRooms.forEach((room, roomId) => {
+      if (room.participants.has(userId)) {
+        room.participants.delete(userId);
+        room.speakers.delete(userId);
+        room.handRaised.delete(userId);
+        io.to(`room:${roomId}`).emit("room:participant-left", { userId });
+        
+        if (room.participants.size === 0) {
+          activeRooms.delete(roomId);
+        }
+      }
+    });
+    
+    // Handle disconnection from active games
+    activeGames.forEach((game, gameId) => {
+      if (game.type === 'chess' && (game.players.white === userId || game.players.black === userId)) {
+        io.to(`chess:${gameId}`).emit("chess:opponent-disconnected", { userId });
+        setTimeout(() => cleanupGame(gameId), 30000); // 30 second grace period
+      } else if (game.type === 'tictactoe' && Object.keys(game.players).includes(userId)) {
+        io.to(`game:${gameId}`).emit("game:opponent-disconnected", { userId });
+        setTimeout(() => cleanupGame(gameId), 30000);
+      } else if (game.type === 'rps' && Object.keys(game.players).includes(userId)) {
+        io.to(`rps:${gameId}`).emit("rps:opponent-disconnected", { userId });
+        setTimeout(() => cleanupGame(gameId), 30000);
+      }
+    });
   });
 });
 
