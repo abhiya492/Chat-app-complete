@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
-import { LogOut, MessageSquare, Settings, User } from "lucide-react";
+import { LogOut, MessageSquare, Settings, User, Radio } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import LanguageSelector from "./LanguageSelector";
 
@@ -27,6 +27,16 @@ const Navbar = () => {
             <LanguageSelector />
             <ThemeToggle />
             
+            {authUser && (
+              <Link
+                to="/rooms"
+                className="btn btn-sm gap-2 btn-ghost hover:bg-primary/10 hover:text-primary transition-all hover:scale-105 hover:shadow-md"
+              >
+                <Radio className="w-4 h-4" />
+                <span className="hidden sm:inline font-medium">Rooms</span>
+              </Link>
+            )}
+
             <Link
               to="/settings"
               className="btn btn-sm gap-2 btn-ghost hover:bg-primary/10 hover:text-primary transition-all hover:scale-105 hover:shadow-md"
