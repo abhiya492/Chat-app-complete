@@ -7,6 +7,8 @@ import Settings from './pages/Setting'
 import Profile from './pages/Profile'
 import SignUp from './pages/SignUp'
 import ForgotPassword from './pages/ForgotPassword'
+import Rooms from './pages/Rooms'
+import RoomView from './pages/RoomView'
 import { useAuthStore } from './store/useAuthStore'
 import { useThemeStore } from './store/useThemeStore'
 import { useEffect } from 'react'
@@ -69,6 +71,8 @@ const App = () => {
         <Route path="/forgot-password" element={!authUser ? <ForgotPassword /> : <Navigate to="/" />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/profile" element={authUser ? <Profile /> : <Navigate to="/login" />} />
+        <Route path="/rooms" element={authUser ? <Rooms /> : <Navigate to="/login" />} />
+        <Route path="/room/:id" element={authUser ? <RoomView /> : <Navigate to="/login" />} />
       </Routes> 
 
       <Toaster />

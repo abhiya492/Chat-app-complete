@@ -13,6 +13,7 @@ import { Smile, Reply, Edit2, Trash2, Download, Pin, Forward, Check, CheckCheck,
 import SmartReplies from "./SmartReplies";
 import MessageTranslator from "./MessageTranslator";
 import SentimentIndicator from "./SentimentIndicator";
+import SharedExperiencePanel from "./SharedExperiences/SharedExperiencePanel";
 
 const ChatContainer = () => {
   const {
@@ -116,7 +117,8 @@ const ChatContainer = () => {
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-auto">
+    <div className="flex h-full">
+      <div className="flex-1 flex flex-col overflow-auto max-w-4xl mx-auto">
       <ChatHeader 
         onSearchClick={() => setShowSearch(true)}
         onPinnedClick={() => {
@@ -235,53 +237,67 @@ const ChatContainer = () => {
                 )}
 
                 {!message.isDeleted && (
-                  <div className={`absolute top-0 ${isOwnMessage ? 'left-0 -translate-x-full' : 'right-0 translate-x-full'} opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 px-2`}>
+                  <div className={`absolute top-0 ${isOwnMessage ? 'left-0 -translate-x-full' : 'right-0 translate-x-full'} opacity-0 group-hover:opacity-100 transition-all duration-300 flex gap-1 px-2`}>
                     <motion.button
-                      whileHover={{ scale: 1.2, rotate: 10 }}
+                      whileHover={{ scale: 1.2, rotate: 10, y: -2 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={() => setShowEmojiPicker(showEmojiPicker === message._id ? null : message._id)}
-                      className="btn btn-xs btn-circle btn-ghost hover:bg-base-300"
+                      className="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-500 hover:to-orange-500 flex items-center justify-center shadow-lg transition-all duration-200"
                       title="React"
                     >
-                      <Smile size={14} />
+                      <Smile size={14} className="text-white" />
                     </motion.button>
-                    <button
+                    <motion.button
+                      whileHover={{ scale: 1.2, y: -2 }}
+                      whileTap={{ scale: 0.9 }}
                       onClick={() => setReplyingTo(message)}
-                      className="btn btn-xs btn-circle btn-ghost hover:bg-base-300"
+                      className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-400 to-cyan-400 hover:from-blue-500 hover:to-cyan-500 flex items-center justify-center shadow-lg transition-all duration-200"
                       title="Reply"
                     >
-                      <Reply size={14} />
-                    </button>
-                    <button
+                      <Reply size={14} className="text-white" />
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.2, y: -2 }}
+                      whileTap={{ scale: 0.9 }}
                       onClick={() => pinMessage(message._id)}
-                      className="btn btn-xs btn-circle btn-ghost hover:bg-base-300"
+                      className={`w-8 h-8 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${
+                        message.isPinned 
+                          ? 'bg-gradient-to-r from-red-400 to-pink-400 hover:from-red-500 hover:to-pink-500' 
+                          : 'bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600'
+                      }`}
                       title={message.isPinned ? "Unpin" : "Pin"}
                     >
-                      <Pin size={14} className={message.isPinned ? "fill-current" : ""} />
-                    </button>
-                    <button
+                      <Pin size={14} className="text-white" />
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.2, y: -2 }}
+                      whileTap={{ scale: 0.9 }}
                       onClick={() => setForwardingMessage(message)}
-                      className="btn btn-xs btn-circle btn-ghost hover:bg-base-300"
+                      className="w-8 h-8 rounded-full bg-gradient-to-r from-green-400 to-emerald-400 hover:from-green-500 hover:to-emerald-500 flex items-center justify-center shadow-lg transition-all duration-200"
                       title="Forward"
                     >
-                      <Forward size={14} />
-                    </button>
+                      <Forward size={14} className="text-white" />
+                    </motion.button>
                     {isOwnMessage && (
                       <>
-                        <button
+                        <motion.button
+                          whileHover={{ scale: 1.2, y: -2 }}
+                          whileTap={{ scale: 0.9 }}
                           onClick={() => setEditingMessage(message)}
-                          className="btn btn-xs btn-circle btn-ghost hover:bg-base-300"
+                          className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-400 to-indigo-400 hover:from-purple-500 hover:to-indigo-500 flex items-center justify-center shadow-lg transition-all duration-200"
                           title="Edit"
                         >
-                          <Edit2 size={14} />
-                        </button>
-                        <button
+                          <Edit2 size={14} className="text-white" />
+                        </motion.button>
+                        <motion.button
+                          whileHover={{ scale: 1.2, y: -2 }}
+                          whileTap={{ scale: 0.9 }}
                           onClick={() => deleteMessage(message._id)}
-                          className="btn btn-xs btn-circle btn-ghost hover:bg-error hover:text-error-content"
+                          className="w-8 h-8 rounded-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 flex items-center justify-center shadow-lg transition-all duration-200"
                           title="Delete"
                         >
-                          <Trash2 size={14} />
-                        </button>
+                          <Trash2 size={14} className="text-white" />
+                        </motion.button>
                       </>
                     )}
                   </div>
@@ -292,7 +308,7 @@ const ChatContainer = () => {
                     initial={{ opacity: 0, scale: 0.8, y: -10 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.8 }}
-                    className={`absolute ${isOwnMessage ? 'right-0' : 'left-0'} top-full mt-2 bg-base-200 p-2 rounded-lg shadow-xl border border-base-300 flex gap-1 z-50 glass-effect`}
+                    className={`absolute ${isOwnMessage ? 'right-0' : 'left-0'} top-full mt-2 bg-gradient-to-r from-purple-500/90 to-pink-500/90 backdrop-blur-md p-3 rounded-2xl shadow-2xl border border-white/20 flex gap-2 z-50`}
                   >
                     {emojis.map((emoji, idx) => (
                       <motion.button
@@ -300,13 +316,13 @@ const ChatContainer = () => {
                         initial={{ scale: 0, rotate: -180 }}
                         animate={{ scale: 1, rotate: 0 }}
                         transition={{ delay: idx * 0.05 }}
-                        whileHover={{ scale: 1.4, rotate: 15 }}
+                        whileHover={{ scale: 1.4, rotate: 15, y: -5 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={() => {
                           addReaction(message._id, emoji);
                           setShowEmojiPicker(null);
                         }}
-                        className="btn btn-sm btn-ghost text-xl"
+                        className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-xl transition-all duration-200 backdrop-blur-sm"
                       >
                         {emoji}
                       </motion.button>
@@ -315,24 +331,24 @@ const ChatContainer = () => {
                 )}
 
                 {message.reactions && message.reactions.length > 0 && (
-                  <div className={`flex gap-1 mt-1 flex-wrap ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`flex gap-2 mt-2 flex-wrap ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
                     {message.reactions.map((reaction, idx) => (
                       <motion.button
                         key={idx}
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        whileHover={{ scale: 1.2, rotate: 5 }}
-                        whileTap={{ scale: 0.9 }}
+                        whileHover={{ scale: 1.1, y: -2 }}
+                        whileTap={{ scale: 0.95 }}
                         onClick={() => {
                           if (reaction.userId === authUser._id) {
                             removeReaction(message._id);
                           }
                         }}
-                        className={`text-sm px-2 py-0.5 rounded-full bg-base-300 hover:bg-base-200 transition-all duration-150 ${
-                          reaction.userId === authUser._id ? 'ring-2 ring-primary scale-105 neon-glow' : ''
+                        className={`text-sm px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-100 to-pink-100 hover:from-purple-200 hover:to-pink-200 border transition-all duration-200 ${
+                          reaction.userId === authUser._id ? 'border-purple-400 shadow-lg shadow-purple-200' : 'border-gray-200'
                         }`}
                       >
-                        {reaction.emoji}
+                        <span className="text-base">{reaction.emoji}</span>
                       </motion.button>
                     ))}
                   </div>
@@ -343,19 +359,39 @@ const ChatContainer = () => {
         })}
         
         {typingUsers.size > 0 && (
-          <div className="chat chat-start animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <div className="chat-bubble bg-base-300">
+          <motion.div 
+            className="chat chat-start"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+          >
+            <div className="chat-bubble bg-gradient-to-r from-gray-100 to-gray-200 border border-gray-300 shadow-lg">
               <div className="flex gap-1 items-end h-4">
-                <span className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDuration: '1s' }}></span>
-                <span className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDuration: '1s', animationDelay: '0.2s' }}></span>
-                <span className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDuration: '1s', animationDelay: '0.4s' }}></span>
+                <motion.span 
+                  className="w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"
+                  animate={{ y: [-2, 2, -2] }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <motion.span 
+                  className="w-2 h-2 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full"
+                  animate={{ y: [-2, 2, -2] }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
+                />
+                <motion.span 
+                  className="w-2 h-2 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full"
+                  animate={{ y: [-2, 2, -2] }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}
+                />
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
       </div>
 
       <MessageInput />
+      </div>
+      
+      <SharedExperiencePanel />
     </div>
   );
 };
