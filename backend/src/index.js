@@ -8,6 +8,8 @@ import analyticsRoutes from './routes/analytics.route.js';
 import aiRoutes from './routes/ai.route.js';
 import storyRoutes from './routes/story.route.js';
 import streakRoutes from './routes/streak.route.js';
+import roomRoutes from './routes/room.route.js';
+import sharedExperienceRoutes from './routes/sharedExperience.route.js';
 import cors from 'cors';
 
 import path from 'path';
@@ -43,6 +45,8 @@ app.use("/api/analytics",analyticsRoutes);
 app.use("/api/ai",aiRoutes);
 app.use("/api/stories",storyRoutes);
 app.use("/api/streaks",streakRoutes);
+app.use("/api/rooms",roomRoutes);
+app.use("/api/shared",sharedExperienceRoutes);
 
 if (process.env.NODE_ENV === "production") {
     const frontendPath = path.join(__dirname, "../frontend/dist");
