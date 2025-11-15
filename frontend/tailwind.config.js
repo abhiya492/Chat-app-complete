@@ -1,4 +1,4 @@
-import daisyui from 'daisyui'
+import daisyui from 'daisyui';
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -7,7 +7,11 @@ export default {
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      animation: {
+        'bounce-slow': 'bounce 3s infinite',
+      },
+    },
   },
   plugins: [daisyui],
   daisyui: {
