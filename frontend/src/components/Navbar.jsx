@@ -12,58 +12,60 @@ const Navbar = () => {
       className="bg-base-100/70 border-b border-base-300/50 fixed w-full top-0 z-40 
     backdrop-blur-2xl shadow-lg shadow-base-300/20"
     >
-      <div className="container mx-auto px-4 h-16">
+      <div className="container mx-auto px-2 sm:px-4 h-14 sm:h-16">
         <div className="flex items-center justify-between h-full">
-          <div className="flex items-center gap-8">
-            <Link to="/" className="flex items-center gap-3 hover:scale-105 transition-all duration-300 group">
-              <div className="size-10 rounded-xl bg-gradient-to-br from-primary via-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/30 group-hover:shadow-xl group-hover:shadow-primary/50 group-hover:rotate-6 transition-all duration-300">
-                <MessageSquare className="w-5 h-5 text-primary-content" />
+          <div className="flex items-center gap-2 sm:gap-8">
+            <Link to="/" className="flex items-center gap-2 sm:gap-3 hover:scale-105 transition-all duration-300 group">
+              <div className="size-8 sm:size-10 rounded-xl bg-gradient-to-br from-primary via-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/30 group-hover:shadow-xl group-hover:shadow-primary/50 group-hover:rotate-6 transition-all duration-300">
+                <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-primary-content" />
               </div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-primary via-primary to-secondary bg-clip-text text-transparent group-hover:tracking-wide transition-all">Chatty</h1>
+              <h1 className="text-base sm:text-xl font-bold bg-gradient-to-r from-primary via-primary to-secondary bg-clip-text text-transparent group-hover:tracking-wide transition-all">Chatty</h1>
             </Link>
           </div>
 
-          <div className="flex items-center gap-3">
-            <LanguageSelector />
+          <div className="flex items-center gap-1 sm:gap-3">
+            <div className="hidden md:block">
+              <LanguageSelector />
+            </div>
             <ThemeToggle />
             
             {authUser && (
               <>
                 <Link
                   to="/rooms"
-                  className="btn btn-sm gap-2 btn-ghost hover:bg-primary/10 hover:text-primary transition-all hover:scale-105 hover:shadow-md"
+                  className="btn btn-xs sm:btn-sm gap-1 sm:gap-2 btn-ghost hover:bg-primary/10 hover:text-primary transition-all hover:scale-105 hover:shadow-md"
                 >
-                  <Radio className="w-4 h-4" />
-                  <span className="hidden sm:inline font-medium">Rooms</span>
+                  <Radio className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden md:inline font-medium text-xs sm:text-sm">Rooms</span>
                 </Link>
                 <Link
                   to="/random-chat"
-                  className="btn btn-sm gap-2 btn-primary hover:scale-105 hover:shadow-md transition-all"
+                  className="btn btn-xs sm:btn-sm gap-1 sm:gap-2 btn-primary hover:scale-105 hover:shadow-md transition-all"
                 >
-                  <Shuffle className="w-4 h-4" />
-                  <span className="hidden sm:inline font-medium">Random</span>
+                  <Shuffle className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden md:inline font-medium text-xs sm:text-sm">Random</span>
                 </Link>
               </>
             )}
 
             <Link
               to="/settings"
-              className="btn btn-sm gap-2 btn-ghost hover:bg-primary/10 hover:text-primary transition-all hover:scale-105 hover:shadow-md"
+              className="btn btn-xs sm:btn-sm gap-1 sm:gap-2 btn-ghost hover:bg-primary/10 hover:text-primary transition-all hover:scale-105 hover:shadow-md"
             >
-              <Settings className="w-4 h-4 hover:rotate-90 transition-transform duration-300" />
-              <span className="hidden sm:inline font-medium">Settings</span>
+              <Settings className="w-3 h-3 sm:w-4 sm:h-4 hover:rotate-90 transition-transform duration-300" />
+              <span className="hidden lg:inline font-medium text-xs sm:text-sm">Settings</span>
             </Link>
 
             {authUser && (
               <>
-                <Link to="/profile" className="btn btn-sm gap-2 btn-ghost hover:bg-primary/10 hover:text-primary transition-all hover:scale-105 hover:shadow-md">
-                  <User className="size-5" />
-                  <span className="hidden sm:inline font-medium">Profile</span>
+                <Link to="/profile" className="hidden sm:flex btn btn-sm gap-2 btn-ghost hover:bg-primary/10 hover:text-primary transition-all hover:scale-105 hover:shadow-md">
+                  <User className="w-4 h-4" />
+                  <span className="hidden lg:inline font-medium text-sm">Profile</span>
                 </Link>
 
-                <button className="btn btn-sm gap-2 btn-ghost hover:bg-error/10 hover:text-error transition-all hover:scale-105 hover:shadow-md" onClick={logout}>
-                  <LogOut className="size-5 hover:-rotate-12 transition-transform" />
-                  <span className="hidden sm:inline font-medium">Logout</span>
+                <button className="btn btn-xs sm:btn-sm gap-1 sm:gap-2 btn-ghost hover:bg-error/10 hover:text-error transition-all hover:scale-105 hover:shadow-md" onClick={logout}>
+                  <LogOut className="w-3 h-3 sm:w-4 sm:h-4 hover:-rotate-12 transition-transform" />
+                  <span className="hidden lg:inline font-medium text-xs sm:text-sm">Logout</span>
                 </button>
               </>
             )}
