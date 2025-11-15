@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRandomChatStore } from "../store/useRandomChatStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { useCallStore } from "../store/useCallStore";
-import { Shuffle, SkipForward, X, Send, Mic, MicOff, Video, VideoOff, Globe } from "lucide-react";
+import { Shuffle, SkipForward, X, Send, Mic, MicOff, Video, VideoOff, Globe, Smile, Image as ImageIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const RandomChat = () => {
@@ -35,7 +35,18 @@ const RandomChat = () => {
   const [selectedLanguage, setSelectedLanguage] = useState('any');
   const [interests, setInterests] = useState([]);
   const [chatDuration, setChatDuration] = useState(0);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showGifPicker, setShowGifPicker] = useState(false);
+  const [gifSearch, setGifSearch] = useState('');
   const messagesEndRef = useRef(null);
+
+  const emojis = ['😀', '😂', '😍', '🥰', '😎', '🤔', '👍', '👋', '🎉', '❤️', '🔥', '✨', '💯', '🙌', '👏', '🤝'];
+  const trendingGifs = [
+    'https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif',
+    'https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif',
+    'https://media.giphy.com/media/g9582DNuQppxC/giphy.gif',
+    'https://media.giphy.com/media/3o7TKMt1VVNkHV2PaE/giphy.gif',
+  ];
 
   const languages = [
     { code: 'any', name: 'Any Language' },
@@ -162,7 +173,18 @@ const RandomChat = () => {
     if (messageInput.trim()) {
       sendMessage(messageInput, socket);
       setMessageInput("");
+      setShowEmojiPicker(false);
+      setShowGifPicker(false);
     }
+  };
+
+  const handleEmojiClick = (emoji) => {
+    setMessageInput(messageInput + emoji);
+  };
+
+  const handleGifClick = (gifUrl) => {
+    sendMessage(gifUrl, socket, 'gif');
+    setShowGifPicker(false);
   };
 
   const toggleMute = () => {
@@ -318,14 +340,51 @@ const RandomChat = () => {
           )}
           {messages.map((msg, idx) => (
             <div key={idx} className={`chat ${msg.from === "me" ? "chat-end" : "chat-start"}`}>
-              <div className="chat-bubble">{msg.text}</div>
+              <div className="chat-bubble">
+                {msg.type === 'gif' ? (
+                  <img src={msg.text} alt="gif" className="max-w-full rounded" />
+                ) : (
+                  msg.text
+                )}
+              </div>
             </div>
           ))}
           <div ref={messagesEndRef} />
         </div>
 
         <form onSubmit={handleSendMessage} className="p-4 border-t border-base-300">
+          {showEmojiPicker && (
+            <div className="mb-2 p-2 bg-base-100 rounded-lg grid grid-cols-8 gap-1 max-h-32 overflow-y-auto">
+              {emojis.map((emoji, idx) => (
+                <button key={idx} type="button" onClick={() => handleEmojiClick(emoji)} className="text-2xl hover:scale-125 transition-transform">
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          )}
+          {showGifPicker && (
+            <div className="mb-2 p-2 bg-base-100 rounded-lg">
+              <input
+                type="text"
+                placeholder="Search GIFs..."
+                value={gifSearch}
+                onChange={(e) => setGifSearch(e.target.value)}
+                className="input input-sm input-bordered w-full mb-2"
+              />
+              <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                {trendingGifs.map((gif, idx) => (
+                  <img key={idx} src={gif} alt="gif" onClick={() => handleGifClick(gif)} className="w-full h-24 object-cover rounded cursor-pointer hover:opacity-80" />
+                ))}
+              </div>
+            </div>
+          )}
           <div className="flex gap-2">
+            <button type="button" onClick={() => { setShowEmojiPicker(!showEmojiPicker); setShowGifPicker(false); }} className="btn btn-ghost btn-sm">
+              <Smile size={20} />
+            </button>
+            <button type="button" onClick={() => { setShowGifPicker(!showGifPicker); setShowEmojiPicker(false); }} className="btn btn-ghost btn-sm">
+              <ImageIcon size={20} />
+            </button>
             <input
               type="text"
               value={messageInput}
