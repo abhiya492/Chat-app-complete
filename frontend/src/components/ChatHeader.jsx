@@ -80,14 +80,14 @@ const ChatHeader = ({ onSearchClick, onPinnedClick }) => {
           </button>
           <button 
             onClick={onSearchClick}
-            className="hidden sm:flex btn btn-ghost btn-sm btn-circle"
+            className="hidden md:flex btn btn-ghost btn-sm btn-circle"
             title="Search messages"
           >
             <Search size={18} />
           </button>
           <button 
             onClick={onPinnedClick}
-            className="hidden sm:flex btn btn-ghost btn-sm btn-circle"
+            className="hidden md:flex btn btn-ghost btn-sm btn-circle"
             title="Pinned messages"
           >
             <Pin size={18} />
@@ -102,15 +102,21 @@ const ChatHeader = ({ onSearchClick, onPinnedClick }) => {
             {showMenu && (
               <div className="absolute right-0 mt-2 w-40 sm:w-48 bg-base-100 rounded-lg shadow-xl border border-base-300 z-50">
                 <button
-                  onClick={onSearchClick}
-                  className="w-full px-3 sm:px-4 py-2 text-left hover:bg-base-200 flex items-center gap-2 sm:hidden text-sm"
+                  onClick={() => {
+                    onSearchClick();
+                    setShowMenu(false);
+                  }}
+                  className="w-full px-3 sm:px-4 py-2 text-left hover:bg-base-200 flex items-center gap-2 md:hidden text-sm"
                 >
                   <Search size={16} />
                   Search
                 </button>
                 <button
-                  onClick={onPinnedClick}
-                  className="w-full px-3 sm:px-4 py-2 text-left hover:bg-base-200 flex items-center gap-2 sm:hidden text-sm"
+                  onClick={() => {
+                    onPinnedClick();
+                    setShowMenu(false);
+                  }}
+                  className="w-full px-3 sm:px-4 py-2 text-left hover:bg-base-200 flex items-center gap-2 md:hidden text-sm"
                 >
                   <Pin size={16} />
                   Pinned

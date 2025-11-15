@@ -23,10 +23,7 @@ const Navbar = () => {
             </Link>
           </div>
 
-          <div className="flex items-center gap-1 sm:gap-3">
-            <div className="hidden md:block">
-              <LanguageSelector />
-            </div>
+          <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
             <ThemeToggle />
             
             {authUser && (
@@ -58,9 +55,9 @@ const Navbar = () => {
 
             {authUser && (
               <>
-                <Link to="/profile" className="hidden sm:flex btn btn-sm gap-2 btn-ghost hover:bg-primary/10 hover:text-primary transition-all hover:scale-105 hover:shadow-md">
-                  <User className="w-4 h-4" />
-                  <span className="hidden lg:inline font-medium text-sm">Profile</span>
+                <Link to="/profile" className="btn btn-xs sm:btn-sm gap-1 sm:gap-2 btn-ghost hover:bg-primary/10 hover:text-primary transition-all hover:scale-105 hover:shadow-md">
+                  <User className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden lg:inline font-medium text-xs sm:text-sm">Profile</span>
                 </Link>
 
                 <button className="btn btn-xs sm:btn-sm gap-1 sm:gap-2 btn-ghost hover:bg-error/10 hover:text-error transition-all hover:scale-105 hover:shadow-md" onClick={logout}>
