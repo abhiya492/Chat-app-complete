@@ -1,4 +1,4 @@
-import { X, Search, Pin, Phone, Video, MoreVertical, UserX, Info } from "lucide-react";
+import { X, Search, Pin, Phone, Video, MoreVertical, UserX, Info, Trash2 } from "lucide-react";
 import UserInfoModal from "./UserInfoModal";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
@@ -25,6 +25,13 @@ const ChatHeader = ({ onSearchClick, onPinnedClick }) => {
     await blockUser(selectedUser._id);
     setSelectedUser(null);
     setShowMenu(false);
+  };
+
+  const handleDeleteChat = async () => {
+    if (confirm('Delete all messages with this user? This cannot be undone.')) {
+      await useChatStore.getState().deleteChat(selectedUser._id);
+      setShowMenu(false);
+    }
   };
 
   const isBlocked = authUser?.blockedUsers?.includes(selectedUser._id);
@@ -130,6 +137,13 @@ const ChatHeader = ({ onSearchClick, onPinnedClick }) => {
                 >
                   <Info size={16} />
                   User Info
+                </button>
+                <button
+                  onClick={handleDeleteChat}
+                  className="w-full px-3 sm:px-4 py-2 text-left hover:bg-base-200 flex items-center gap-2 text-error text-sm"
+                >
+                  <Trash2 size={16} />
+                  Delete Chat
                 </button>
                 <button
                   onClick={handleBlock}

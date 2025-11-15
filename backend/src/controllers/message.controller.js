@@ -494,3 +494,22 @@ export const getPinnedMessages = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+export const deleteChat = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const myId = req.user._id;
+
+    await Message.deleteMany({
+      $or: [
+        { senderId: myId, receiverId: userId },
+        { senderId: userId, receiverId: myId },
+      ],
+    });
+
+    res.status(200).json({ message: "Chat deleted successfully" });
+  } catch (error) {
+    console.log("Error in deleteChat controller: ", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};

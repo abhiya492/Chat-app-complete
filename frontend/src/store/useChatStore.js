@@ -217,6 +217,16 @@ export const useChatStore = create((set,get) => ({
     }
   },
 
+  deleteChat: async (userId) => {
+    try {
+      await axiosInstance.delete(`/messages/chat/${userId}`);
+      set({ messages: [] });
+      toast.success('Chat deleted successfully');
+    } catch (error) {
+      handleApiError(error, 'Failed to delete chat');
+    }
+  },
+
   setForwardingMessage: (message) => set({ forwardingMessage: message }),
   setShowPinned: (show) => set({ showPinned: show }),
   clearSearch: () => set({ searchQuery: "", searchResults: [] }),
