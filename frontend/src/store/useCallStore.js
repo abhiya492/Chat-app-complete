@@ -176,12 +176,16 @@ export const useCallStore = create((set, get) => ({
 
     socket.on("call:offer", async ({ offer, from, callId, type }) => {
       console.log('📥 Received offer from:', from);
-      const { webrtcService } = get();
-      if (webrtcService) {
-        await webrtcService.setRemoteDescription(offer);
-        const answer = await webrtcService.createAnswer();
-        console.log('📤 Sending answer to:', from);
-        socket.emit("call:answer", { answer, to: from, callId });
+      const { webrtcService, isCallActive } = get();
+      if (webrtcService && isCallActive) {
+        try {
+          await webrtcService.setRemoteDescription(offer);
+          const answer = await webrtcService.createAnswer();
+          console.log('📤 Sending answer to:', from);
+          socket.emit("call:answer", { answer, to: from, callId });
+        } catch (error) {
+          console.error('❌ Error handling offer:', error);
+        }
       } else {
         console.log('💾 Storing offer until call is accepted');
         set({ pendingOffer: { offer, from, callId } });

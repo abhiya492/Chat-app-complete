@@ -20,6 +20,7 @@ const CallModal = () => {
   const remoteVideoRef = useRef(null);
   const [callDuration, setCallDuration] = useState(0);
   const [remoteStreamReady, setRemoteStreamReady] = useState(false);
+  const [audioInitialized, setAudioInitialized] = useState(false);
 
   const isVideo = activeCall?.type === "video";
   const otherUser =
@@ -33,21 +34,53 @@ const CallModal = () => {
     // Set local stream
     if (webrtcService.localStream && localVideoRef.current) {
       localVideoRef.current.srcObject = webrtcService.localStream;
+      console.log('🎥 Local stream set');
     }
 
     // Set callback for remote stream
     webrtcService.setOnRemoteStream((stream) => {
       console.log('📹 Remote stream callback triggered');
+      console.log('🎵 Audio tracks:', stream.getAudioTracks().length);
+      console.log('📹 Video tracks:', stream.getVideoTracks().length);
+      
       if (remoteVideoRef.current) {
         remoteVideoRef.current.srcObject = stream;
+        remoteVideoRef.current.volume = 1.0; // Ensure full volume
+        remoteVideoRef.current.muted = false; // Explicitly unmute
         setRemoteStreamReady(true);
+        
+        // Ensure audio plays (handle autoplay policy)
+        remoteVideoRef.current.play().then(() => {
+          console.log('✅ Remote stream playing successfully');
+          setAudioInitialized(true);
+        }).catch(err => {
+          console.error('❌ Failed to play remote stream:', err);
+          // Try to play again on user interaction
+          const playOnClick = () => {
+            remoteVideoRef.current?.play().then(() => {
+              console.log('✅ Remote stream playing after user interaction');
+              setAudioInitialized(true);
+            }).catch(console.error);
+          };
+          document.addEventListener('click', playOnClick, { once: true });
+        });
+        
+        // Log audio track status
+        stream.getAudioTracks().forEach(track => {
+          console.log(`🎤 Remote audio track: ${track.label}, enabled: ${track.enabled}, muted: ${track.muted}, readyState: ${track.readyState}`);
+        });
       }
     });
 
     // Check if remote stream already exists
     if (webrtcService.remoteStream && remoteVideoRef.current) {
       remoteVideoRef.current.srcObject = webrtcService.remoteStream;
+      remoteVideoRef.current.volume = 1.0;
+      remoteVideoRef.current.muted = false;
       setRemoteStreamReady(true);
+      remoteVideoRef.current.play().then(() => {
+        setAudioInitialized(true);
+      }).catch(console.error);
     }
 
     // Cleanup on unmount
@@ -93,6 +126,7 @@ const CallModal = () => {
               ref={remoteVideoRef}
               autoPlay
               playsInline
+              muted={false}
               className="w-full h-full object-cover"
             />
             {!isVideoOff ? (
@@ -123,6 +157,13 @@ const CallModal = () => {
               <h2 className="text-2xl font-semibold">{otherUser?.fullName}</h2>
               <p className="text-base-content/70 mt-2">{formatDuration(callDuration)}</p>
             </div>
+            {/* Hidden audio element for voice calls */}
+            <audio
+              ref={remoteVideoRef}
+              autoPlay
+              playsInline
+              className="hidden"
+            />
           </div>
         )}
       </div>
