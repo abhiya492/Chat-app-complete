@@ -57,6 +57,34 @@ const resources = {
       blocked: "Bloqueados",
       offlineMessage: "Estás desconectado. Algunas funciones pueden no estar disponibles.",
     }
+  },
+  hi: {
+    translation: {
+      welcome: "स्वागत है",
+      login: "लॉगिन",
+      signup: "साइन अप",
+      logout: "लॉगआउट",
+      profile: "प्रोफाइल",
+      settings: "सेटिंग्स",
+      chats: "चैट्स",
+      calls: "कॉल्स",
+      search: "खोजें",
+      typeMessage: "एक संदेश टाइप करें...",
+      send: "भेजें",
+      online: "ऑनलाइन",
+      offline: "ऑफलाइन",
+      voiceCall: "वॉयस कॉल",
+      videoCall: "वीडियो कॉल",
+      blockUser: "यूजर को ब्लॉक करें",
+      unblockUser: "यूजर को अनब्लॉक करें",
+      userInfo: "यूजर जानकारी",
+      bio: "बायो",
+      status: "स्टेटस",
+      theme: "थीम",
+      privacy: "गोपनीयता",
+      blocked: "ब्लॉक किए गए",
+      offlineMessage: "आप ऑफलाइन हैं। कुछ सुविधाएं अनुपलब्ध हो सकती हैं।",
+    }
   }
 };
 

@@ -6,12 +6,14 @@ const LanguageSelector = () => {
 
   const languages = [
     { code: 'en', name: 'English' },
-    { code: 'es', name: 'Español' }
+    { code: 'es', name: 'Español' },
+    { code: 'hi', name: 'हिन्दी' }
   ];
 
   const changeLanguage = (lng) => {
     i18n.changeLanguage(lng);
     localStorage.setItem('language', lng);
+    window.location.reload();
   };
 
   return (
