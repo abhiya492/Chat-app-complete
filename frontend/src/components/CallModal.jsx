@@ -23,8 +23,6 @@ const CallModal = () => {
   const [audioInitialized, setAudioInitialized] = useState(false);
   const playTimeoutRef = useRef(null);
   const [audioLevel, setAudioLevel] = useState(0);
-  const audioContextRef = useRef(null);
-  const analyserRef = useRef(null);
   const animationFrameRef = useRef(null);
 
   const isVideo = activeCall?.type === "video";
@@ -117,37 +115,15 @@ const CallModal = () => {
       }
     });
 
-    // Setup audio analyzer for visualizer
-    if (webrtcService?.remoteStream) {
-      const setupAudioAnalyzer = () => {
-        try {
-          const AudioContext = window.AudioContext || window.webkitAudioContext;
-          audioContextRef.current = new AudioContext();
-          analyserRef.current = audioContextRef.current.createAnalyser();
-          analyserRef.current.fftSize = 256;
-          
-          const source = audioContextRef.current.createMediaStreamSource(webrtcService.remoteStream);
-          source.connect(analyserRef.current);
-          
-          const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
-          
-          const updateAudioLevel = () => {
-            if (analyserRef.current) {
-              analyserRef.current.getByteFrequencyData(dataArray);
-              const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
-              setAudioLevel(Math.min(100, (average / 255) * 100));
-              animationFrameRef.current = requestAnimationFrame(updateAudioLevel);
-            }
-          };
-          
-          updateAudioLevel();
-        } catch (error) {
-          console.error('Failed to setup audio analyzer:', error);
-        }
-      };
-      
-      setupAudioAnalyzer();
-    }
+    // Simple audio level simulation (remove analyzer that interferes with playback)
+    const simulateAudioLevel = () => {
+      if (audioInitialized) {
+        // Simulate audio activity
+        setAudioLevel(Math.random() * 60 + 20);
+      }
+      animationFrameRef.current = requestAnimationFrame(simulateAudioLevel);
+    };
+    simulateAudioLevel();
 
     // Cleanup on unmount
     return () => {
@@ -160,9 +136,6 @@ const CallModal = () => {
       }
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
-      }
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
       }
       document.removeEventListener('click', handleClick);
     };
