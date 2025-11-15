@@ -22,8 +22,12 @@ const userSocketMap = {}; // {userId: socketId}
 // Voice rooms storage
 const activeRooms = new Map(); // roomId -> { participants, speakers, etc }
 
-// Games storage - ADDED THIS!
+// Games storage
 const activeGames = new Map(); // gameId -> game state
+
+// Random Chat Queue
+const randomChatQueue = [];
+const activeRandomChats = new Map(); // sessionId -> {user1, user2}
 
 // Game cleanup after 1 hour of inactivity
 const GAME_TIMEOUT = 60 * 60 * 1000;
@@ -632,10 +636,126 @@ io.on("connection", (socket) => {
     socket.leave(`cursor:${chatId}`);
   });
 
+  // ========== RANDOM CHAT (OMEGLE-STYLE) ==========
+  socket.on("random:join", async () => {
+    console.log(`User ${userId} joining random chat queue`);
+    
+    // Check if already in queue
+    if (randomChatQueue.includes(userId)) {
+      return socket.emit("random:error", { message: "Already in queue" });
+    }
+    
+    // Check if user has waiting partner
+    if (randomChatQueue.length > 0) {
+      const partnerId = randomChatQueue.shift();
+      const sessionId = `random_${Date.now()}`;
+      
+      // Get user details
+      const user = await User.findById(userId).select('fullName profilePic');
+      const partner = await User.findById(partnerId).select('fullName profilePic');
+      
+      // Store active session
+      activeRandomChats.set(sessionId, {
+        user1: userId,
+        user2: partnerId,
+        startedAt: Date.now()
+      });
+      
+      // Notify both users
+      const partnerSocket = getReceiverSocketId(partnerId);
+      if (partnerSocket) {
+        io.to(partnerSocket).emit("random:matched", {
+          sessionId,
+          partner: { _id: userId, fullName: user?.fullName, profilePic: user?.profilePic }
+        });
+      }
+      
+      socket.emit("random:matched", {
+        sessionId,
+        partner: { _id: partnerId, fullName: partner?.fullName, profilePic: partner?.profilePic }
+      });
+      
+      console.log(`Matched ${userId} with ${partnerId}`);
+    } else {
+      // Add to queue
+      randomChatQueue.push(userId);
+      socket.emit("random:searching");
+      console.log(`User ${userId} added to queue. Queue size: ${randomChatQueue.length}`);
+    }
+  });
+
+  socket.on("random:skip", ({ sessionId }) => {
+    const session = activeRandomChats.get(sessionId);
+    if (session) {
+      const partnerId = session.user1 === userId ? session.user2 : session.user1;
+      const partnerSocket = getReceiverSocketId(partnerId);
+      
+      if (partnerSocket) {
+        io.to(partnerSocket).emit("random:partner-skipped");
+      }
+      
+      activeRandomChats.delete(sessionId);
+      console.log(`Session ${sessionId} ended by skip`);
+    }
+  });
+
+  socket.on("random:leave", ({ sessionId }) => {
+    // Remove from queue if waiting
+    const queueIndex = randomChatQueue.indexOf(userId);
+    if (queueIndex > -1) {
+      randomChatQueue.splice(queueIndex, 1);
+    }
+    
+    // End active session
+    if (sessionId) {
+      const session = activeRandomChats.get(sessionId);
+      if (session) {
+        const partnerId = session.user1 === userId ? session.user2 : session.user1;
+        const partnerSocket = getReceiverSocketId(partnerId);
+        
+        if (partnerSocket) {
+          io.to(partnerSocket).emit("random:partner-left");
+        }
+        
+        activeRandomChats.delete(sessionId);
+      }
+    }
+  });
+
+  socket.on("random:message", ({ sessionId, message }) => {
+    const session = activeRandomChats.get(sessionId);
+    if (session) {
+      const partnerId = session.user1 === userId ? session.user2 : session.user1;
+      const partnerSocket = getReceiverSocketId(partnerId);
+      
+      if (partnerSocket) {
+        io.to(partnerSocket).emit("random:message", { message, from: userId });
+      }
+    }
+  });
+
   socket.on("disconnect", () => {
     console.log("A user disconnected", socket.id);
     delete userSocketMap[userId];
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
+    
+    // Remove from random chat queue
+    const queueIndex = randomChatQueue.indexOf(userId);
+    if (queueIndex > -1) {
+      randomChatQueue.splice(queueIndex, 1);
+    }
+    
+    // End active random chat sessions
+    activeRandomChats.forEach((session, sessionId) => {
+      if (session.user1 === userId || session.user2 === userId) {
+        const partnerId = session.user1 === userId ? session.user2 : session.user1;
+        const partnerSocket = getReceiverSocketId(partnerId);
+        if (partnerSocket) {
+          io.to(partnerSocket).emit("random:partner-disconnected");
+        }
+        activeRandomChats.delete(sessionId);
+      }
+    });
     
     // Remove from all rooms
     activeRooms.forEach((room, roomId) => {
