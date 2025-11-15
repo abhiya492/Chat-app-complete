@@ -656,26 +656,28 @@ io.on("connection", (socket) => {
       
       // Store active session
       activeRandomChats.set(sessionId, {
-        user1: userId,
-        user2: partnerId,
+        user1: partnerId,  // First user (caller)
+        user2: userId,     // Second user (receiver)
         startedAt: Date.now()
       });
       
-      // Notify both users
+      // Notify both users - partnerId is the CALLER, userId is the RECEIVER
       const partnerSocket = getReceiverSocketId(partnerId);
       if (partnerSocket) {
         io.to(partnerSocket).emit("random:matched", {
           sessionId,
-          partner: { _id: userId, fullName: user?.fullName, profilePic: user?.profilePic }
+          partner: { _id: userId, fullName: user?.fullName, profilePic: user?.profilePic },
+          isCaller: true  // This user should send offer
         });
       }
       
       socket.emit("random:matched", {
         sessionId,
-        partner: { _id: partnerId, fullName: partner?.fullName, profilePic: partner?.profilePic }
+        partner: { _id: partnerId, fullName: partner?.fullName, profilePic: partner?.profilePic },
+        isCaller: false  // This user should wait for offer
       });
       
-      console.log(`Matched ${userId} with ${partnerId}`);
+      console.log(`Matched ${partnerId} (caller) with ${userId} (receiver)`);
     } else {
       // Add to queue
       randomChatQueue.push(userId);
