@@ -79,13 +79,13 @@ const SharedExperiencePanel = () => {
     <>
       {/* Floating Action Button */}
       <motion.div 
-        className="fixed bottom-6 right-6 z-50"
+        className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-50"
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: "spring", stiffness: 260, damping: 20 }}
       >
         <motion.button
-          className="btn btn-circle btn-lg bg-gradient-to-r from-purple-500 to-pink-500 border-0 shadow-lg hover:shadow-xl"
+          className="btn btn-circle btn-md sm:btn-lg bg-gradient-to-r from-purple-500 to-pink-500 border-0 shadow-lg hover:shadow-xl"
           onClick={() => setIsExpanded(!isExpanded)}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
@@ -95,11 +95,11 @@ const SharedExperiencePanel = () => {
             transition={{ duration: 0.2 }}
           >
             {isExpanded ? (
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             ) : (
-              <span className="text-2xl">🎮</span>
+              <span className="text-xl sm:text-2xl">🎮</span>
             )}
           </motion.div>
         </motion.button>
@@ -107,7 +107,7 @@ const SharedExperiencePanel = () => {
         {/* Activity indicator */}
         {activeExperiences.length > 0 && (
           <motion.div 
-            className="absolute -top-2 -right-2 bg-success rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold text-white"
+            className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-success rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center text-[10px] sm:text-xs font-bold text-white"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2 }}
@@ -121,44 +121,44 @@ const SharedExperiencePanel = () => {
       <AnimatePresence>
         {isExpanded && (
           <motion.div 
-            className="fixed bottom-24 right-6 z-40 bg-base-100 rounded-2xl shadow-2xl border border-base-300 overflow-hidden"
+            className="fixed inset-x-2 bottom-32 sm:bottom-24 sm:right-6 sm:left-auto z-40 bg-base-100 rounded-2xl shadow-2xl border border-base-300 overflow-hidden"
             initial={{ opacity: 0, scale: 0.8, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            style={{ width: '380px', maxHeight: '500px' }}
+            style={{ maxWidth: '380px', maxHeight: '500px' }}
           >
             {/* Header */}
-            <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-4 text-white">
+            <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-3 sm:p-4 text-white">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold flex items-center gap-2">
-                  🎮 Shared Experiences
+                <h2 className="text-base sm:text-lg font-semibold flex items-center gap-2">
+                  🎮 <span className="hidden sm:inline">Shared Experiences</span><span className="sm:hidden">Games</span>
                 </h2>
                 <motion.button
-                  className="btn btn-circle btn-sm bg-white/20 border-0 hover:bg-white/30"
+                  className="btn btn-circle btn-xs sm:btn-sm bg-white/20 border-0 hover:bg-white/30"
                   onClick={() => setIsExpanded(false)}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </motion.button>
               </div>
               
               {activeExperiences.length > 0 && (
-                <div className="mt-2 text-sm text-white/80">
+                <div className="mt-2 text-xs sm:text-sm text-white/80">
                   {activeExperiences.length} active session{activeExperiences.length !== 1 ? 's' : ''}
                 </div>
               )}
             </div>
 
             {/* Tabs */}
-            <div className="flex bg-base-200">
+            <div className="flex bg-base-200 overflow-x-auto">
               {tabs.map((tab, index) => (
                 <motion.button
                   key={tab.id}
-                  className={`flex-1 px-4 py-3 text-sm font-medium transition-all relative ${
+                  className={`flex-1 px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium transition-all relative whitespace-nowrap ${
                     activeTab === tab.id
                       ? 'text-primary bg-base-100'
                       : 'text-base-content/70 hover:text-base-content hover:bg-base-300'
@@ -181,8 +181,8 @@ const SharedExperiencePanel = () => {
 
             {/* Content */}
             <motion.div 
-              className="p-4 overflow-y-auto" 
-              style={{ maxHeight: '350px' }}
+              className="p-3 sm:p-4 overflow-y-auto" 
+              style={{ maxHeight: '300px' }}
               key={activeTab}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
