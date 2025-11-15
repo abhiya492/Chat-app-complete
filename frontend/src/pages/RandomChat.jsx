@@ -38,9 +38,19 @@ const RandomChat = () => {
     setupRandomChatListeners(socket);
     setupCallListeners(socket);
     
+    return () => {
+      cleanupRandomChatListeners(socket);
+      cleanupCallListeners(socket);
+      leaveRandomChat(socket);
+    };
+  }, [socket]);
+
+  useEffect(() => {
+    if (!socket || !webrtcService || !partner) return;
+    
     // Handle WebRTC offer (for receiver)
     const handleOffer = async ({ offer, from, callId }) => {
-      if (webrtcService && partner && from === partner._id) {
+      if (from === partner._id) {
         await webrtcService.setRemoteDescription(offer);
         const answer = await webrtcService.createAnswer();
         socket.emit("call:answer", {
@@ -54,7 +64,7 @@ const RandomChat = () => {
     
     // Handle WebRTC answer (for caller)
     const handleAnswer = async ({ answer, from }) => {
-      if (webrtcService && partner && from === partner._id) {
+      if (from === partner._id) {
         await webrtcService.setRemoteDescription(answer);
         console.log('✅ Answer received and set');
       }
@@ -66,9 +76,6 @@ const RandomChat = () => {
     return () => {
       socket.off("call:offer", handleOffer);
       socket.off("call:answer", handleAnswer);
-      cleanupRandomChatListeners(socket);
-      cleanupCallListeners(socket);
-      leaveRandomChat(socket);
     };
   }, [socket, webrtcService, partner]);
 
