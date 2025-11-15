@@ -1,7 +1,9 @@
 const GoogleAuthButton = () => {
   const handleGoogleLogin = (e) => {
     e.preventDefault();
-    const apiUrl = import.meta.env.MODE === 'development' ? 'http://localhost:5001' : '';
+    const apiUrl = import.meta.env.MODE === 'development' 
+      ? 'http://localhost:5001' 
+      : 'https://chat-app-complete.onrender.com';
     window.location.href = `${apiUrl}/api/auth/google`;
   };
 
