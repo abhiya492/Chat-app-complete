@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import { axiosInstance } from "../lib/axios";
 import { useAuthStore } from "./useAuthStore";
 import { showNotification } from "../lib/notifications";
+import { handleApiError } from "../lib/errorHandler";
 
 export const useChatStore = create((set,get) => ({
   messages: [],
@@ -28,7 +29,7 @@ export const useChatStore = create((set,get) => ({
       const res = await axiosInstance.get("/messages/users");
       set({ users: res.data });
     } catch (error) {
-      toast.error(error.response.data.message);
+      handleApiError(error, 'Failed to load users');
     } finally {
       set({ isUsersLoading: false });
     }
@@ -50,7 +51,7 @@ export const useChatStore = create((set,get) => ({
         });
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to load messages");
+      handleApiError(error, 'Failed to load messages');
     } finally {
       set({ isMessagesLoading: false });
     }
@@ -101,9 +102,16 @@ export const useChatStore = create((set,get) => ({
         });
       }
     } catch (error) {
-      // Remove optimistic message on error
       set({ messages: messages.filter(m => m._id !== optimisticMessage._id) });
-      toast.error(error.response?.data?.message || "Failed to send message");
+      
+      if (!navigator.onLine) {
+        const queue = JSON.parse(localStorage.getItem('offlineQueue') || '[]');
+        queue.push({ messageData, selectedUserId: selectedUser._id, timestamp: Date.now() });
+        localStorage.setItem('offlineQueue', JSON.stringify(queue));
+        toast.error('Message queued. Will send when online.');
+      } else {
+        handleApiError(error, 'Failed to send message');
+      }
     } finally {
       set({ isSendingMessage: false });
     }
