@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
 import UserSkeleton from "./UserSkeleton";
-import { Users, UserPlus, Phone } from "lucide-react";
+import { Users, UserPlus, Phone, Trash2 } from "lucide-react";
 import InviteModal from "./InviteModal";
 import SearchBar from "./SearchBar";
 import CallHistory from "./CallHistory";
@@ -21,6 +21,13 @@ const Sidebar = () => {
   useEffect(() => {
     getUsers();
   }, [getUsers]);
+
+  const handleDeleteChat = async (e, userId) => {
+    e.stopPropagation();
+    if (confirm('Delete all messages with this user? This cannot be undone.')) {
+      await useChatStore.getState().deleteChat(userId);
+    }
+  };
 
   const filteredUsers = users
     .filter((user) => {
@@ -161,6 +168,15 @@ const Sidebar = () => {
             {selectedUser?._id !== user._id && Math.random() > 0.7 && (
               <div className="badge badge-primary badge-xs sm:badge-sm lg:badge-md font-bold shadow-md shadow-primary/30 animate-bounce-subtle">3</div>
             )}
+            
+            {/* Delete chat button - visible on hover */}
+            <button
+              onClick={(e) => handleDeleteChat(e, user._id)}
+              className="opacity-0 group-hover:opacity-100 btn btn-ghost btn-xs btn-circle text-error hover:bg-error/10 transition-all"
+              title="Delete chat"
+            >
+              <Trash2 size={14} />
+            </button>
           </button>
           ))
         )}
