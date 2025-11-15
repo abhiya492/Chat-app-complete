@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import ChatHeader from "./ChatHeader";
 import MessageInput from "./MessageInput";
-import ChatSkeleton from "./skeletons/ChatSkeleton";
+import MessageSkeleton from "./MessageSkeleton";
 import MessageSearch from "./MessageSearch";
 import ForwardModal from "./ForwardModal";
 import { useAuthStore } from "../store/useAuthStore";
@@ -116,7 +116,12 @@ const ChatContainer = () => {
   }, [hasMoreMessages, isMessagesLoading, loadMoreMessages]);
 
   if (isMessagesLoading && messages.length === 0) {
-    return <ChatSkeleton />;
+    return (
+      <div className="flex-1 flex flex-col overflow-auto w-full">
+        <ChatHeader onSearchClick={() => {}} onPinnedClick={() => {}} />
+        <MessageSkeleton />
+      </div>
+    );
   }
 
   return (
