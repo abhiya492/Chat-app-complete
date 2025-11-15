@@ -13,6 +13,7 @@ export class WebRTCService {
     this.localStream = null;
     this.remoteStream = null;
     this.onRemoteStreamCallback = null;
+    this.pendingCandidates = [];
   }
 
   async initializePeerConnection(socket, userId) {
@@ -31,21 +32,30 @@ export class WebRTCService {
     };
 
     this.peerConnection.ontrack = (event) => {
-      console.log('📹 Remote track received:', event.track.kind, 'readyState:', event.track.readyState, 'enabled:', event.track.enabled);
+      console.log('📹 Remote track received:', event.track.kind, 'readyState:', event.track.readyState, 'enabled:', event.track.enabled, 'muted:', event.track.muted);
       
-      if (!this.remoteStream) {
-        this.remoteStream = event.streams[0];
-        console.log('🎵 Remote stream set with', this.remoteStream.getTracks().length, 'tracks');
-        
-        if (this.onRemoteStreamCallback) {
-          this.onRemoteStreamCallback(this.remoteStream);
-        }
+      this.remoteStream = event.streams[0];
+      console.log('🎵 Remote stream updated with', this.remoteStream.getTracks().length, 'tracks');
+      
+      // Listen for unmute event and trigger callback when unmuted
+      if (event.track.muted) {
+        console.log('⚠️ Track is muted, waiting for unmute...');
+        event.track.onunmute = () => {
+          console.log('✅ Track unmuted:', event.track.kind);
+          // Trigger callback again when track unmutes
+          if (this.onRemoteStreamCallback) {
+            this.onRemoteStreamCallback(this.remoteStream);
+          }
+        };
       }
       
-      // Log all tracks in the stream
-      if (this.remoteStream) {
-        console.log('🎵 All remote tracks:', this.remoteStream.getTracks().map(t => `${t.kind}: enabled=${t.enabled}, muted=${t.muted}, readyState=${t.readyState}`));
+      // Always trigger callback when we get a track
+      if (this.onRemoteStreamCallback) {
+        this.onRemoteStreamCallback(this.remoteStream);
       }
+      
+      // Log all tracks
+      console.log('🎵 All remote tracks:', this.remoteStream.getTracks().map(t => `${t.kind}: enabled=${t.enabled}, muted=${t.muted}, readyState=${t.readyState}`));
     };
 
     this.peerConnection.onconnectionstatechange = () => {
@@ -143,13 +153,28 @@ export class WebRTCService {
     await this.peerConnection.setRemoteDescription(
       new RTCSessionDescription(description)
     );
+    
+    // Add any buffered ICE candidates
+    if (this.pendingCandidates.length > 0) {
+      console.log('📥 Adding', this.pendingCandidates.length, 'buffered ICE candidates');
+      for (const candidate of this.pendingCandidates) {
+        await this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+      }
+      this.pendingCandidates = [];
+    }
   }
 
   async addIceCandidate(candidate) {
     try {
-      await this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+      if (this.peerConnection && this.peerConnection.remoteDescription) {
+        await this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+        console.log('✅ ICE candidate added');
+      } else {
+        console.log('💾 Buffering ICE candidate until remote description is set');
+        this.pendingCandidates.push(candidate);
+      }
     } catch (error) {
-      console.error("Error adding ICE candidate:", error);
+      console.error("❌ Error adding ICE candidate:", error);
     }
   }
 
