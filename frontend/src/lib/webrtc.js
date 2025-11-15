@@ -35,21 +35,20 @@ export class WebRTCService {
       console.log('📹 Remote track received:', event.track.kind, 'readyState:', event.track.readyState, 'enabled:', event.track.enabled, 'muted:', event.track.muted);
       
       if (!this.remoteStream) {
-        this.remoteStream = event.streams[0];
-        console.log('🎵 Remote stream initialized with', this.remoteStream.getTracks().length, 'tracks');
+        this.remoteStream = new MediaStream();
+        console.log('🎵 Remote stream created');
       }
       
-      // Check if we have both audio and video tracks
-      const audioTracks = this.remoteStream.getAudioTracks();
-      const videoTracks = this.remoteStream.getVideoTracks();
-      const hasAudio = audioTracks.length > 0;
-      const hasVideo = videoTracks.length > 0;
+      // Add track to remote stream
+      this.remoteStream.addTrack(event.track);
+      console.log(`✅ Added ${event.track.kind} track to remote stream`);
       
-      console.log('🎵 Stream status: audio=${hasAudio}, video=${hasVideo}');
+      // Ensure track is enabled
+      event.track.enabled = true;
       
-      // Only trigger callback once we have both tracks
-      if (hasAudio && hasVideo && this.onRemoteStreamCallback) {
-        console.log('✅ Both tracks ready, triggering callback');
+      // Trigger callback immediately for each track
+      if (this.onRemoteStreamCallback) {
+        console.log('🔔 Triggering remote stream callback');
         this.onRemoteStreamCallback(this.remoteStream);
       }
     };

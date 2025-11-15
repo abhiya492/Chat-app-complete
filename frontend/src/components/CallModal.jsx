@@ -34,14 +34,17 @@ const CallModal = () => {
   useEffect(() => {
     if (!isCallActive || !webrtcService) return;
     
-    // Add click listener to play audio (browser autoplay policy)
-    const handleClick = () => {
+    // Ensure audio plays on any user interaction
+    const handleInteraction = () => {
       if (remoteVideoRef.current && remoteVideoRef.current.paused) {
-        console.log('👆 User clicked, attempting to play audio...');
+        console.log('👆 User interaction, playing audio...');
+        remoteVideoRef.current.muted = false;
+        remoteVideoRef.current.volume = 1.0;
         remoteVideoRef.current.play().catch(console.error);
       }
     };
-    document.addEventListener('click', handleClick);
+    document.addEventListener('click', handleInteraction);
+    document.addEventListener('touchstart', handleInteraction);
 
     // Set local stream
     if (webrtcService.localStream && localVideoRef.current) {
@@ -56,70 +59,48 @@ const CallModal = () => {
       console.log('📹 Video tracks:', stream.getVideoTracks().length);
       
       if (remoteVideoRef.current && stream) {
-        // Update srcObject only if it's different
-        if (remoteVideoRef.current.srcObject !== stream) {
-          remoteVideoRef.current.srcObject = stream;
-          remoteVideoRef.current.volume = 1.0;
-          remoteVideoRef.current.muted = false;
-          setRemoteStreamReady(true);
-          console.log('🔄 Remote stream srcObject updated');
-        }
+        // Always update srcObject
+        remoteVideoRef.current.srcObject = stream;
+        remoteVideoRef.current.volume = 1.0;
+        remoteVideoRef.current.muted = false;
+        remoteVideoRef.current.autoplay = true;
+        remoteVideoRef.current.playsInline = true;
         
-        // Debounce play() calls to avoid interruption
-        if (playTimeoutRef.current) {
-          clearTimeout(playTimeoutRef.current);
-        }
-        
-        playTimeoutRef.current = setTimeout(() => {
-          if (remoteVideoRef.current) {
-            console.log('🎬 Forcing play on remote stream...');
-            console.log('Element paused:', remoteVideoRef.current.paused);
-            console.log('Element muted:', remoteVideoRef.current.muted);
-            console.log('Element volume:', remoteVideoRef.current.volume);
-            console.log('Has srcObject:', !!remoteVideoRef.current.srcObject);
-            console.log('SrcObject tracks:', remoteVideoRef.current.srcObject?.getTracks().map(t => `${t.kind}: enabled=${t.enabled}, muted=${t.muted}`));
-            
-            // Force unmute and max volume
-            remoteVideoRef.current.muted = false;
-            remoteVideoRef.current.volume = 1.0;
-            
-            // Set audio output to default device
-            if (remoteVideoRef.current.setSinkId) {
-              remoteVideoRef.current.setSinkId('default').then(() => {
-                console.log('✅ Audio output set to default device');
-              }).catch(err => {
-                console.log('⚠️ Could not set audio output:', err);
-              });
-            }
-            
-            const playPromise = remoteVideoRef.current.play();
-            if (playPromise !== undefined) {
-              playPromise.then(() => {
-                console.log('✅ Remote stream playing successfully');
-                console.log('After play - paused:', remoteVideoRef.current.paused);
-                console.log('After play - muted:', remoteVideoRef.current.muted);
-                console.log('After play - volume:', remoteVideoRef.current.volume);
-                
-                // Test if audio is actually playing
-                const audioTracks = remoteVideoRef.current.srcObject.getAudioTracks();
-                console.log('🔊 Audio tracks in element:', audioTracks.length);
-                audioTracks.forEach(track => {
-                  console.log('🔊 Track:', track.label, 'enabled:', track.enabled, 'muted:', track.muted, 'readyState:', track.readyState);
-                });
-                
-                setAudioInitialized(true);
-              }).catch(err => {
-                console.error('❌ Failed to play remote stream:', err.name, err.message);
-                console.error('Full error:', err);
-              });
-            }
-          }
-        }, 500); // Wait 500ms for all tracks
-        
-        // Log audio track status
+        // Enable all audio tracks
         stream.getAudioTracks().forEach(track => {
-          console.log(`🎤 Remote audio track: ${track.label}, enabled: ${track.enabled}, muted: ${track.muted}, readyState: ${track.readyState}`);
+          track.enabled = true;
+          console.log(`🎤 Enabled audio track: ${track.label}`);
         });
+        
+        setRemoteStreamReady(true);
+        console.log('🔄 Remote stream srcObject updated');
+        
+        // Set audio output to default device
+        if (remoteVideoRef.current.setSinkId) {
+          remoteVideoRef.current.setSinkId('').then(() => {
+            console.log('✅ Audio output set to default device');
+          }).catch(err => {
+            console.log('⚠️ Could not set audio output:', err);
+          });
+        }
+        
+        // Play immediately
+        const playAudio = () => {
+          if (remoteVideoRef.current && remoteVideoRef.current.paused) {
+            remoteVideoRef.current.play()
+              .then(() => {
+                console.log('✅ Remote audio playing');
+                setAudioInitialized(true);
+              })
+              .catch(err => {
+                console.error('❌ Play failed:', err);
+                // Retry on user interaction
+                document.addEventListener('click', playAudio, { once: true });
+              });
+          }
+        };
+        
+        playAudio();
       }
     });
 
@@ -145,7 +126,8 @@ const CallModal = () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
-      document.removeEventListener('click', handleClick);
+      document.removeEventListener('click', handleInteraction);
+      document.removeEventListener('touchstart', handleInteraction);
     };
   }, [isCallActive, webrtcService]);
 
