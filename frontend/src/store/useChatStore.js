@@ -64,13 +64,34 @@ export const useChatStore = create((set,get) => ({
   },
   sendMessage: async (messageData) => {
     const { selectedUser, messages, replyingTo } = get();
-    set({ isSendingMessage: true });
+    const { authUser } = useAuthStore.getState();
+    
+    // Optimistic update
+    const optimisticMessage = {
+      _id: `temp-${Date.now()}`,
+      senderId: authUser._id,
+      text: messageData.text,
+      image: messageData.image,
+      video: messageData.video,
+      file: messageData.file,
+      voice: messageData.voice,
+      createdAt: new Date().toISOString(),
+      isOptimistic: true,
+    };
+    
+    set({ messages: [...messages, optimisticMessage], isSendingMessage: true });
+    
     try {
       const payload = { ...messageData };
       if (replyingTo) payload.replyTo = replyingTo._id;
       
       const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, payload);
-      set({ messages: [...messages, res.data], replyingTo: null });
+      
+      // Replace optimistic message with real one
+      set({ 
+        messages: messages.map(m => m._id === optimisticMessage._id ? res.data : m).concat(res.data._id === optimisticMessage._id ? [] : [res.data]),
+        replyingTo: null 
+      });
       
       if (window.analytics) {
         window.analytics.track('message_sent', { 
@@ -80,6 +101,8 @@ export const useChatStore = create((set,get) => ({
         });
       }
     } catch (error) {
+      // Remove optimistic message on error
+      set({ messages: messages.filter(m => m._id !== optimisticMessage._id) });
       toast.error(error.response?.data?.message || "Failed to send message");
     } finally {
       set({ isSendingMessage: false });

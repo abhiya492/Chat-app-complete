@@ -24,6 +24,7 @@ import ChatbotButton from './components/ChatbotButton'
 import { useCallStore } from './store/useCallStore'
 import { trackPageView } from './lib/analytics'
 import { useStoryStore } from './store/useStoryStore'
+import ConnectionStatus from './components/ConnectionStatus'
 
 const App = () => {
   const { authUser,checkAuth,isCheckingAuth,onlineUsers,socket } = useAuthStore();
@@ -91,6 +92,7 @@ const App = () => {
       </Routes> 
 
       <Toaster />
+      <ConnectionStatus />
       <OfflineBanner />
       {authUser && <NotificationPrompt />}
       {authUser && <ChatbotButton />}

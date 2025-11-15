@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
-import SidebarSkeleton from "./skeletons/SidebarSkeleton";
+import UserSkeleton from "./UserSkeleton";
 import { Users, UserPlus, Phone } from "lucide-react";
 import InviteModal from "./InviteModal";
 import SearchBar from "./SearchBar";
@@ -29,7 +29,14 @@ const Sidebar = () => {
       return matchesSearch && matchesOnline;
     });
 
-  if (isUsersLoading) return <SidebarSkeleton />;
+  if (isUsersLoading) return (
+    <aside className="h-full w-full sm:w-20 md:w-24 lg:w-80 border-r border-base-300/50 flex flex-col">
+      <div className="border-b border-base-300/50 p-5">
+        <div className="h-8 bg-base-300 rounded animate-pulse w-32" />
+      </div>
+      <UserSkeleton />
+    </aside>
+  );
 
   return (
     <aside className="h-full w-full sm:w-20 md:w-24 lg:w-80 border-r border-base-300/50 flex flex-col transition-all duration-200 bg-gradient-to-b from-base-100/80 via-base-100/60 to-base-100/80 backdrop-blur-xl flex-shrink-0 relative overflow-hidden">
