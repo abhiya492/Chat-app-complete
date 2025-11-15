@@ -12,7 +12,8 @@ import {
   pinMessage,
   forwardMessage,
   searchMessages,
-  getPinnedMessages
+  getPinnedMessages,
+  deleteChat
 } from "../controllers/message.controller.js";
 
 const router = express.Router();
@@ -28,6 +29,7 @@ router.post("/pin/:messageId", protectRoute, pinMessage);
 router.post("/forward/:messageId", protectRoute, forwardMessage);
 router.delete("/react/:messageId", protectRoute, removeReaction);
 router.put("/edit/:messageId", protectRoute, editMessage);
+router.delete("/chat/:userId", protectRoute, deleteChat);
 router.delete("/:messageId", protectRoute, deleteMessage);
 
 export default router;
