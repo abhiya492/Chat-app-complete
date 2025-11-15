@@ -20,6 +20,18 @@
     animation: slideInFromTop 0.2s ease-out;
   }
 
+  /* Mobile optimizations */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+
+  .safe-area-inset {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
   @keyframes fadeIn {
     from {
       opacity: 0;
@@ -55,6 +67,31 @@
 /* Smooth scrolling */
 .overflow-y-auto {
   scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile tap highlight */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent text selection on buttons */
+button {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Better mobile input */
+input, textarea {
+  font-size: 16px; /* Prevents zoom on iOS */
+}
+
+@media (min-width: 640px) {
+  input, textarea {
+    font-size: 14px;
+  }
 }
 
 /* Better hover transitions */
