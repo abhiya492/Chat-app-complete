@@ -737,6 +737,64 @@ io.on("connection", (socket) => {
     }
   });
 
+  // Challenge Events
+  socket.on("challenge-invite", ({ to, challengeId, challengeName, from }) => {
+    const targetSocket = getReceiverSocketId(to);
+    if (targetSocket) {
+      io.to(targetSocket).emit("challenge-invite", { challengeId, challengeName, from });
+    }
+  });
+
+  socket.on("challenge-accept", ({ to, challengeId, data }) => {
+    const targetSocket = getReceiverSocketId(to);
+    if (targetSocket) {
+      io.to(targetSocket).emit("challenge-accept", { challengeId, data });
+    }
+  });
+
+  socket.on("challenge-decline", ({ to }) => {
+    const targetSocket = getReceiverSocketId(to);
+    if (targetSocket) {
+      io.to(targetSocket).emit("challenge-decline");
+    }
+  });
+
+  socket.on("challenge-cancel", ({ to }) => {
+    const targetSocket = getReceiverSocketId(to);
+    if (targetSocket) {
+      io.to(targetSocket).emit("challenge-cancel");
+    }
+  });
+
+  socket.on("challenge-update", ({ to, data }) => {
+    const targetSocket = getReceiverSocketId(to);
+    if (targetSocket) {
+      io.to(targetSocket).emit("challenge-update", { data });
+    }
+  });
+
+  socket.on("challenge-end", ({ to }) => {
+    const targetSocket = getReceiverSocketId(to);
+    if (targetSocket) {
+      io.to(targetSocket).emit("challenge-end");
+    }
+  });
+
+  // Location Sharing
+  socket.on("request-location", ({ to }) => {
+    const targetSocket = getReceiverSocketId(to);
+    if (targetSocket) {
+      io.to(targetSocket).emit("request-location", { from: userId });
+    }
+  });
+
+  socket.on("share-location", ({ to, location }) => {
+    const targetSocket = getReceiverSocketId(to);
+    if (targetSocket) {
+      io.to(targetSocket).emit("share-location", { location });
+    }
+  });
+
   socket.on("disconnect", () => {
     console.log("A user disconnected", socket.id);
     delete userSocketMap[userId];
