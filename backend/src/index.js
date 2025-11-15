@@ -35,9 +35,9 @@ app.use(cors({
 }));
 app.use(passportConfig.initialize());
 
-// Health check endpoint for Kubernetes
+// Health check endpoint
 app.get("/health", (req, res) => {
-    res.status(200).json({ status: "ok" });
+    res.status(200).json({ status: "ok", timestamp: Date.now() });
 });
 
 // API routes MUST come before static files
