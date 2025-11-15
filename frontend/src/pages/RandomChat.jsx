@@ -103,8 +103,17 @@ const RandomChat = () => {
 
   useEffect(() => {
     if (remoteStream && remoteVideoRef.current) {
+      console.log('🎬 Attaching remote stream to video element');
+      console.log('Video element exists:', !!remoteVideoRef.current);
+      console.log('Stream tracks:', remoteStream.getTracks().map(t => `${t.kind}: ${t.readyState}`));
+      
       remoteVideoRef.current.srcObject = remoteStream;
-      remoteVideoRef.current.play().catch(console.error);
+      
+      // Force play
+      remoteVideoRef.current.play()
+        .then(() => console.log('✅ Remote video playing'))
+        .catch(err => console.error('❌ Remote video play failed:', err));
+      
       console.log('✅ Remote video set:', remoteStream.getTracks().map(t => t.kind));
     }
   }, [remoteStream]);

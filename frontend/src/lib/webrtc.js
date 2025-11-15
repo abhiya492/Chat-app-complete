@@ -34,28 +34,24 @@ export class WebRTCService {
     this.peerConnection.ontrack = (event) => {
       console.log('📹 Remote track received:', event.track.kind, 'readyState:', event.track.readyState, 'enabled:', event.track.enabled, 'muted:', event.track.muted);
       
-      this.remoteStream = event.streams[0];
-      console.log('🎵 Remote stream updated with', this.remoteStream.getTracks().length, 'tracks');
-      
-      // Listen for unmute event and trigger callback when unmuted
-      if (event.track.muted) {
-        console.log('⚠️ Track is muted, waiting for unmute...');
-        event.track.onunmute = () => {
-          console.log('✅ Track unmuted:', event.track.kind);
-          // Trigger callback again when track unmutes
-          if (this.onRemoteStreamCallback) {
-            this.onRemoteStreamCallback(this.remoteStream);
-          }
-        };
+      if (!this.remoteStream) {
+        this.remoteStream = event.streams[0];
+        console.log('🎵 Remote stream initialized with', this.remoteStream.getTracks().length, 'tracks');
       }
       
-      // Always trigger callback when we get a track
-      if (this.onRemoteStreamCallback) {
+      // Check if we have both audio and video tracks
+      const audioTracks = this.remoteStream.getAudioTracks();
+      const videoTracks = this.remoteStream.getVideoTracks();
+      const hasAudio = audioTracks.length > 0;
+      const hasVideo = videoTracks.length > 0;
+      
+      console.log('🎵 Stream status: audio=${hasAudio}, video=${hasVideo}');
+      
+      // Only trigger callback once we have both tracks
+      if (hasAudio && hasVideo && this.onRemoteStreamCallback) {
+        console.log('✅ Both tracks ready, triggering callback');
         this.onRemoteStreamCallback(this.remoteStream);
       }
-      
-      // Log all tracks
-      console.log('🎵 All remote tracks:', this.remoteStream.getTracks().map(t => `${t.kind}: enabled=${t.enabled}, muted=${t.muted}, readyState=${t.readyState}`));
     };
 
     this.peerConnection.onconnectionstatechange = () => {
