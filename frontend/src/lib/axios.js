@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { handleApiError } from './errorHandler';
+import toast from 'react-hot-toast';
 
 export const axiosInstance = axios.create({
     baseURL: import.meta.env.MODE === 'development' ? "http://localhost:5001/api" : "/api",
@@ -11,7 +12,12 @@ let retryQueue = [];
 let isRefreshing = false;
 
 axiosInstance.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (response.data?.message && response.config.method !== 'get' && !response.config.url?.includes('/logout')) {
+      toast.success(response.data.message);
+    }
+    return response;
+  },
   async (error) => {
     const originalRequest = error.config;
 

@@ -46,8 +46,6 @@ export const useAuthStore = create((set, get) => ({
     try {
       const res = await axiosInstance.post("/auth/login", data);
       set({ authUser: res.data });
-      toast.success("Logged in successfully");
-
       get().connectSocket();
     } catch (error) {
       toast.error(error.response.data.message);
@@ -60,6 +58,7 @@ export const useAuthStore = create((set, get) => ({
     set({ isLoggingOut: true });
     try {
       await axiosInstance.post("/auth/logout");
+      toast.success("Logged out successfully");
     } catch (error) {
       // Ignore logout errors
     } finally {
@@ -67,7 +66,6 @@ export const useAuthStore = create((set, get) => ({
       get().disconnectSocket();
       localStorage.clear();
       sessionStorage.clear();
-      toast.success("Logged out successfully");
     }
   },
 
@@ -120,7 +118,6 @@ export const useAuthStore = create((set, get) => ({
   resetPassword: async (email, otp, newPassword) => {
     try {
       await axiosInstance.post("/auth/reset-password", { email, otp, newPassword });
-      toast.success("Password reset successfully");
       return true;
     } catch (error) {
       toast.error(error.response.data.message);
@@ -138,7 +135,6 @@ export const useAuthStore = create((set, get) => ({
           blockedUsers: [...(authUser.blockedUsers || []), userId] 
         } 
       });
-      toast.success("User blocked");
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to block user");
     }
@@ -154,7 +150,6 @@ export const useAuthStore = create((set, get) => ({
           blockedUsers: authUser.blockedUsers.filter(id => id !== userId) 
         } 
       });
-      toast.success("User unblocked");
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to unblock user");
     }
