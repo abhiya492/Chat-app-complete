@@ -3,7 +3,7 @@ import { useAuthStore } from "../store/useAuthStore";
 import { Wifi, WifiOff } from "lucide-react";
 
 const ConnectionStatus = () => {
-  const { socket } = useAuthStore();
+  const { socket, isLoggingOut } = useAuthStore();
   const [isConnected, setIsConnected] = useState(true);
   const [showStatus, setShowStatus] = useState(false);
 
@@ -15,6 +15,7 @@ const ConnectionStatus = () => {
     };
 
     const handleOffline = () => {
+      if (isLoggingOut) return;
       setIsConnected(false);
       setShowStatus(true);
     };
@@ -35,7 +36,7 @@ const ConnectionStatus = () => {
         socket.off("disconnect", handleOffline);
       }
     };
-  }, [socket]);
+  }, [socket, isLoggingOut]);
 
   if (!showStatus) return null;
 
