@@ -50,6 +50,13 @@ const CallModal = () => {
     if (webrtcService.localStream && localVideoRef.current) {
       localVideoRef.current.srcObject = webrtcService.localStream;
       console.log('🎥 Local stream set');
+      
+      // Verify local audio is working
+      const audioTracks = webrtcService.localStream.getAudioTracks();
+      console.log('🎤 Local audio tracks:', audioTracks.length);
+      audioTracks.forEach(track => {
+        console.log('🎤 Local track:', track.label, 'enabled:', track.enabled, 'muted:', track.muted, 'readyState:', track.readyState);
+      });
     }
 
     // Set callback for remote stream
@@ -382,10 +389,16 @@ const CallModal = () => {
             }`}></span>
             <span>{remoteStreamReady ? 'Connected' : 'Connecting...'}</span>
           </div>
+          {webrtcService?.localStream?.getAudioTracks().length > 0 && (
+            <div className="flex items-center gap-1">
+              <Mic size={12} className={isMuted ? 'text-error' : 'text-success'} />
+              <span>Mic: {isMuted ? 'Off' : 'On'}</span>
+            </div>
+          )}
           {audioInitialized && (
             <div className="flex items-center gap-1">
-              <Mic size={12} />
-              <span>Audio active</span>
+              <span className="w-2 h-2 rounded-full bg-success animate-pulse"></span>
+              <span>Receiving audio</span>
             </div>
           )}
         </div>
