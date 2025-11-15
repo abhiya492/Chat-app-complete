@@ -152,6 +152,9 @@ const ChatContainer = () => {
         ref={messagesContainerRef}
         onScroll={handleScroll}
         className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-2 sm:space-y-4"
+        role="log"
+        aria-label="Chat messages"
+        aria-live="polite"
       >
         {isLoadingMore && (
           <div className="flex justify-center py-2">

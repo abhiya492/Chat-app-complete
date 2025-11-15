@@ -312,6 +312,7 @@ const MessageInput = () => {
           value={disappearAfter || ""} 
           onChange={(e) => setDisappearAfter(e.target.value ? parseInt(e.target.value) : null)}
           className="select select-xs sm:select-sm select-bordered text-xs sm:text-sm"
+          aria-label="Message disappear timer"
         >
           <option value="">Don't disappear</option>
           <option value="10">10 sec</option>
@@ -331,6 +332,7 @@ const MessageInput = () => {
             placeholder="Type a message..."
             value={text}
             onChange={handleTextChange}
+            aria-label="Message input"
           />
           <input
             type="file"
@@ -414,8 +416,9 @@ const MessageInput = () => {
           whileTap={{ scale: 0.9 }}
           className="btn btn-sm btn-circle btn-primary btn-ripple flex-shrink-0"
           disabled={(!text.trim() && !imagePreview && !filePreview && !videoPreview && !voiceData) || isSendingMessage}
+          aria-label={isSendingMessage ? 'Sending message' : 'Send message'}
         >
-          {isSendingMessage ? <Loader2 size={18} className="sm:w-5 sm:h-5 animate-spin" /> : <Send size={18} className="sm:w-5 sm:h-5" />}
+          {isSendingMessage ? <Loader2 size={18} className="sm:w-5 sm:h-5 animate-spin" aria-hidden="true" /> : <Send size={18} className="sm:w-5 sm:h-5" aria-hidden="true" />}
         </motion.button>
       </form>
     </div>
