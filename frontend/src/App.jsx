@@ -25,6 +25,7 @@ import { useCallStore } from './store/useCallStore'
 import { trackPageView } from './lib/analytics'
 import { useStoryStore } from './store/useStoryStore'
 import ConnectionStatus from './components/ConnectionStatus'
+import OfflineQueue from './components/OfflineQueue'
 
 const App = () => {
   const { authUser,checkAuth,isCheckingAuth,onlineUsers,socket } = useAuthStore();
@@ -93,6 +94,7 @@ const App = () => {
 
       <Toaster />
       <ConnectionStatus />
+      <OfflineQueue />
       <OfflineBanner />
       {authUser && <NotificationPrompt />}
       {authUser && <ChatbotButton />}

@@ -17,6 +17,7 @@ import SharedExperiencePanel from "./SharedExperiences/SharedExperiencePanel";
 import LazyImage from "./LazyImage";
 import LazyVideo from "./LazyVideo";
 import Message from "./Message";
+import RetryButton from "./RetryButton";
 
 const ChatContainer = () => {
   const {
@@ -120,6 +121,15 @@ const ChatContainer = () => {
       <div className="flex-1 flex flex-col overflow-auto w-full">
         <ChatHeader onSearchClick={() => {}} onPinnedClick={() => {}} />
         <MessageSkeleton />
+      </div>
+    );
+  }
+
+  if (!isMessagesLoading && messages.length === 0) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-4">
+        <p className="text-base-content/60 mb-4">Failed to load messages</p>
+        <RetryButton onRetry={() => getMessages(selectedUser._id)} />
       </div>
     );
   }

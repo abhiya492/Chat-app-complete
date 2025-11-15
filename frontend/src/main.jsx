@@ -6,6 +6,7 @@ import { BrowserRouter } from 'react-router-dom'
 import './i18n/config'
 import { analytics } from './lib/analytics'
 import { errorLogger } from './lib/errorLogger'
+import ErrorBoundary from './components/ErrorBoundary'
 
 // Initialize analytics and error logging
 window.analytics = analytics;
@@ -15,8 +16,10 @@ window.errorLogger = errorLogger;
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </ErrorBoundary>
   </StrictMode>
 )
