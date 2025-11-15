@@ -68,17 +68,18 @@ const Sidebar = () => {
           </button>
         </div>
         {activeTab === "chats" && (
-          <div className="mt-3 lg:mt-4 hidden lg:flex items-center justify-between gap-2 glass-effect p-3 rounded-xl hover:border-primary/30 transition-all">
-          <label className="cursor-pointer flex items-center gap-2 flex-1">
+          <div className="mt-2 sm:mt-3 lg:mt-4 flex items-center justify-between gap-2 glass-effect p-2 sm:p-3 rounded-xl hover:border-primary/30 transition-all">
+          <label className="cursor-pointer flex items-center gap-1 sm:gap-2 flex-1">
             <input
               type="checkbox"
               checked={showOnlineOnly}
               onChange={(e) => setShowOnlineOnly(e.target.checked)}
-              className="checkbox checkbox-sm checkbox-primary"
+              className="checkbox checkbox-xs sm:checkbox-sm checkbox-primary"
             />
-            <span className="text-sm font-medium">{t('online')}</span>
+            <span className="text-xs sm:text-sm font-medium hidden sm:inline">{t('online')}</span>
+            <span className="text-xs font-medium sm:hidden">Online</span>
           </label>
-          <span className="text-xs font-bold text-primary-content bg-gradient-to-r from-primary to-primary/80 px-2.5 py-1 rounded-full shadow-md animate-pulse">{onlineUsers.length - 1}</span>
+          <span className="text-[10px] sm:text-xs font-bold text-primary-content bg-gradient-to-r from-primary to-primary/80 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full shadow-md animate-pulse">{onlineUsers.length - 1}</span>
           </div>
         )}
       </div>
@@ -90,9 +91,16 @@ const Sidebar = () => {
           <div className="hidden lg:block">
             <CallHistory />
           </div>
+        ) : filteredUsers.length === 0 ? (
+          <div className="text-center text-base-content/60 py-8 sm:py-12 px-2 md:px-4 animate-fade-in">
+            <div className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center animate-bounce-subtle">
+              <Users className="size-8 md:size-10 text-primary/50" />
+            </div>
+            <p className="font-semibold text-sm md:text-base lg:text-lg mb-2">{t('search')}</p>
+            <p className="text-xs md:text-sm text-base-content/40 hidden sm:hidden lg:block">{t('search')}</p>
+          </div>
         ) : (
-          <>
-          {filteredUsers.map((user) => (
+          filteredUsers.map((user) => (
           <button
             key={user._id}
             onClick={() => setSelectedUser(user)}
@@ -139,18 +147,7 @@ const Sidebar = () => {
               <div className="badge badge-primary badge-xs sm:badge-sm lg:badge-md font-bold shadow-md shadow-primary/30 animate-bounce-subtle">3</div>
             )}
           </button>
-          ))}
-
-          {filteredUsers.length === 0 && (
-            <div className="text-center text-base-content/60 py-8 sm:py-12 px-2 md:px-4 animate-fade-in">
-              <div className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center animate-bounce-subtle">
-                <Users className="size-8 md:size-10 text-primary/50" />
-              </div>
-              <p className="font-semibold text-sm md:text-base lg:text-lg mb-2">{t('search')}</p>
-              <p className="text-xs md:text-sm text-base-content/40 hidden sm:hidden lg:block">{t('search')}</p>
-            </div>
-          )}
-          </>
+          ))
         )}
       </div>
 

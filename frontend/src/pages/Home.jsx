@@ -21,9 +21,7 @@ const Home = () => {
       <div className="flex items-center justify-center pt-14 sm:pt-16 md:pt-20 px-1 sm:px-2 md:px-4 pb-1 sm:pb-2 relative z-10 h-full">
         <div className="glass-effect rounded-lg sm:rounded-2xl md:rounded-3xl shadow-2xl w-full max-w-7xl h-full animate-fade-in border border-white/10">
           <div className="flex flex-col h-full rounded-lg sm:rounded-2xl md:rounded-3xl overflow-hidden">
-            <div className="hidden sm:block">
-              <StoryBar />
-            </div>
+            <StoryBar />
             <div className="flex flex-1 overflow-hidden relative">
               {/* Mobile: Show sidebar OR chat, not both */}
               <div className={`${selectedUser ? 'hidden sm:flex' : 'flex'} flex-shrink-0`}>

@@ -306,20 +306,20 @@ const MessageInput = () => {
         onSelectReply={(reply) => setText(reply)}
       />
 
-      <div className="hidden sm:flex items-center gap-2 mb-2">
-        <Timer size={16} className="text-base-content/60" />
+      <div className="flex items-center gap-2 mb-2">
+        <Timer size={14} className="sm:w-4 sm:h-4 text-base-content/60" />
         <select 
           value={disappearAfter || ""} 
           onChange={(e) => setDisappearAfter(e.target.value ? parseInt(e.target.value) : null)}
-          className="select select-sm select-bordered"
+          className="select select-xs sm:select-sm select-bordered text-xs sm:text-sm"
         >
           <option value="">Don't disappear</option>
-          <option value="10">10 seconds</option>
-          <option value="30">30 seconds</option>
-          <option value="60">1 minute</option>
-          <option value="300">5 minutes</option>
-          <option value="3600">1 hour</option>
-          <option value="86400">24 hours</option>
+          <option value="10">10 sec</option>
+          <option value="30">30 sec</option>
+          <option value="60">1 min</option>
+          <option value="300">5 min</option>
+          <option value="3600">1 hr</option>
+          <option value="86400">24 hrs</option>
         </select>
       </div>
 
@@ -354,11 +354,11 @@ const MessageInput = () => {
           />
 
           {/* Mobile attachment menu */}
-          <div className="dropdown dropdown-top sm:hidden">
-            <button type="button" tabIndex={0} className="btn btn-ghost btn-sm btn-circle">
-              <Paperclip size={18} />
+          <div className="dropdown dropdown-top md:hidden">
+            <button type="button" tabIndex={0} className="btn btn-ghost btn-xs sm:btn-sm btn-circle">
+              <Paperclip size={16} className="sm:w-[18px] sm:h-[18px]" />
             </button>
-            <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-40 mb-2">
+            <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-40 mb-2 z-50">
               <li><button type="button" onClick={() => fileInputRef.current?.click()} className="text-xs"><Image size={16} />Image</button></li>
               <li><button type="button" onClick={() => videoInputRef.current?.click()} className="text-xs"><Video size={16} />Video</button></li>
               <li><button type="button" onClick={() => docInputRef.current?.click()} className="text-xs"><Paperclip size={16} />File</button></li>
@@ -369,7 +369,7 @@ const MessageInput = () => {
           {/* Desktop attachment buttons */}
           <button
             type="button"
-            className={`hidden sm:flex btn btn-sm btn-circle transition-all duration-200 ${
+            className={`hidden md:flex btn btn-sm btn-circle transition-all duration-200 ${
               imagePreview ? "btn-success" : "btn-ghost"
             }`}
             onClick={() => fileInputRef.current?.click()}
@@ -379,7 +379,7 @@ const MessageInput = () => {
           </button>
           <button
             type="button"
-            className={`hidden sm:flex btn btn-sm btn-circle transition-all duration-200 ${
+            className={`hidden md:flex btn btn-sm btn-circle transition-all duration-200 ${
               videoPreview ? "btn-success" : "btn-ghost"
             }`}
             onClick={() => videoInputRef.current?.click()}
@@ -389,7 +389,7 @@ const MessageInput = () => {
           </button>
           <button
             type="button"
-            className={`hidden sm:flex btn btn-sm btn-circle transition-all duration-200 ${
+            className={`hidden md:flex btn btn-sm btn-circle transition-all duration-200 ${
               filePreview ? "btn-success" : "btn-ghost"
             }`}
             onClick={() => docInputRef.current?.click()}
@@ -399,7 +399,7 @@ const MessageInput = () => {
           </button>
           <button
             type="button"
-            className={`hidden sm:flex btn btn-sm btn-circle transition-all duration-200 ${
+            className={`hidden md:flex btn btn-sm btn-circle transition-all duration-200 ${
               voiceData ? "btn-success" : "btn-ghost"
             }`}
             onClick={() => setShowVoiceRecorder(!showVoiceRecorder)}

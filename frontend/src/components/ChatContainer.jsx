@@ -260,23 +260,23 @@ const ChatContainer = () => {
                       whileHover={{ scale: 1.2, y: -2 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={() => pinMessage(message._id)}
-                      className={`hidden sm:flex w-8 h-8 rounded-full items-center justify-center shadow-lg transition-all duration-200 ${
+                      className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${
                         message.isPinned 
                           ? 'bg-gradient-to-r from-red-400 to-pink-400 hover:from-red-500 hover:to-pink-500' 
                           : 'bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600'
                       }`}
                       title={message.isPinned ? "Unpin" : "Pin"}
                     >
-                      <Pin size={14} className="text-white" />
+                      <Pin size={12} className="sm:w-3.5 sm:h-3.5 text-white" />
                     </motion.button>
                     <motion.button
                       whileHover={{ scale: 1.2, y: -2 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={() => setForwardingMessage(message)}
-                      className="hidden sm:flex w-8 h-8 rounded-full bg-gradient-to-r from-green-400 to-emerald-400 hover:from-green-500 hover:to-emerald-500 items-center justify-center shadow-lg transition-all duration-200"
+                      className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-green-400 to-emerald-400 hover:from-green-500 hover:to-emerald-500 flex items-center justify-center shadow-lg transition-all duration-200"
                       title="Forward"
                     >
-                      <Forward size={14} className="text-white" />
+                      <Forward size={12} className="sm:w-3.5 sm:h-3.5 text-white" />
                     </motion.button>
                     {isOwnMessage && (
                       <>
@@ -284,10 +284,10 @@ const ChatContainer = () => {
                           whileHover={{ scale: 1.2, y: -2 }}
                           whileTap={{ scale: 0.9 }}
                           onClick={() => setEditingMessage(message)}
-                          className="hidden sm:flex w-8 h-8 rounded-full bg-gradient-to-r from-purple-400 to-indigo-400 hover:from-purple-500 hover:to-indigo-500 items-center justify-center shadow-lg transition-all duration-200"
+                          className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-purple-400 to-indigo-400 hover:from-purple-500 hover:to-indigo-500 flex items-center justify-center shadow-lg transition-all duration-200"
                           title="Edit"
                         >
-                          <Edit2 size={14} className="text-white" />
+                          <Edit2 size={12} className="sm:w-3.5 sm:h-3.5 text-white" />
                         </motion.button>
                         <motion.button
                           whileHover={{ scale: 1.2, y: -2 }}
@@ -391,9 +391,7 @@ const ChatContainer = () => {
       <MessageInput />
       </div>
       
-      <div className="hidden lg:block">
-        <SharedExperiencePanel />
-      </div>
+      <SharedExperiencePanel />
     </div>
   );
 };
