@@ -3,7 +3,9 @@ import { useAuthStore } from "../store/useAuthStore";
 import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare, User } from "lucide-react";  
 import { Link } from "react-router-dom";  
 import AuthImagePattern from "../components/AuthImagePattern";  
-import toast from "react-hot-toast";  
+import toast from "react-hot-toast";
+import GoogleAuthButton from "../components/GoogleAuthButton";
+import GitHubAuthButton from "../components/GitHubAuthButton";  
 
 const SignUp = () => {  
   const [showPassword, setShowPassword] = useState(false);  
@@ -59,7 +61,15 @@ const SignUp = () => {
             </div>  
           </div>  
 
-          <form onSubmit={handleSubmit} className="space-y-5 backdrop-blur-sm bg-base-100/50 p-8 rounded-2xl shadow-xl border border-base-300/50 hover:border-primary/30 transition-all duration-300">  
+          <form onSubmit={handleSubmit} className="space-y-5 backdrop-blur-sm bg-base-100/50 p-8 rounded-2xl shadow-xl border border-base-300/50 hover:border-primary/30 transition-all duration-300">
+            {/* OAuth Buttons */}
+            <div className="space-y-3">
+              <GoogleAuthButton />
+              <GitHubAuthButton />
+            </div>
+
+            {/* Divider */}
+            <div className="divider text-sm text-base-content/60">OR</div>  
             <div className="form-control">  
               <label className="label">  
                 <span className="label-text font-semibold text-sm">Full Name</span>  

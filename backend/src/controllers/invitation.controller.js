@@ -23,7 +23,17 @@ export const sendInvitation = async (req, res) => {
     });
 
     if (existingInvitation) {
-      return res.status(400).json({ message: "Invitation already sent" });
+      // Check if existing invitation is expired
+      if (new Date() > existingInvitation.expiresAt) {
+        existingInvitation.status = "expired";
+        await existingInvitation.save();
+        console.log('✅ Previous invitation expired automatically');
+      } else {
+        // Expire the old invitation to allow new one
+        existingInvitation.status = "expired";
+        await existingInvitation.save();
+        console.log('✅ Previous pending invitation expired to send new one');
+      }
     }
 
     const token = crypto.randomBytes(32).toString("hex");
@@ -38,12 +48,24 @@ export const sendInvitation = async (req, res) => {
     });
 
     await invitation.save();
-    await sendInvitationEmail(email, inviter.fullName, token);
+    console.log('✅ Invitation saved to database');
+    
+    try {
+      await sendInvitationEmail(email, inviter.fullName, token);
+      console.log('✅ Invitation email sent successfully');
+    } catch (emailError) {
+      console.error('❌ Email sending failed:', emailError.message);
+      // Still return success since invitation is saved
+      return res.status(200).json({ 
+        message: "Invitation created but email failed to send. Please check email configuration.",
+        warning: true 
+      });
+    }
 
     res.status(200).json({ message: "Invitation sent successfully" });
   } catch (error) {
-    console.error("Error sending invitation:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("❌ Error sending invitation:", error);
+    res.status(500).json({ message: error.message || "Internal server error" });
   }
 };
 
