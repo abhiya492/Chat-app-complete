@@ -24,6 +24,13 @@ export const useRandomChatStore = create((set, get) => ({
     try {
       // Initialize WebRTC
       const webrtcService = new WebRTCService();
+      
+      // Set up remote stream callback BEFORE initializing peer connection
+      webrtcService.setOnRemoteStream((stream) => {
+        console.log('📹 Remote stream callback in store:', stream.getTracks().map(t => t.kind));
+        set({ remoteStream: stream });
+      });
+      
       await webrtcService.initializePeerConnection(socket, partner._id);
       const stream = await webrtcService.getLocalStream(true);
       webrtcService.addLocalStreamToPeer();

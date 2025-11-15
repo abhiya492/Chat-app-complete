@@ -13,11 +13,12 @@ const RandomChat = () => {
     sessionId,
     webrtcService,
     messages,
+    localStream,
+    remoteStream,
     joinRandomChat,
     skipPartner,
     leaveRandomChat,
     sendMessage,
-    setRemoteStream,
     setupRandomChatListeners,
     cleanupRandomChatListeners,
   } = useRandomChatStore();
@@ -80,22 +81,19 @@ const RandomChat = () => {
   }, [socket, webrtcService, partner]);
 
   useEffect(() => {
-    if (webrtcService) {
-      // Set local stream
-      if (webrtcService.localStream && localVideoRef.current) {
-        localVideoRef.current.srcObject = webrtcService.localStream;
-      }
-
-      // Set remote stream callback
-      webrtcService.setOnRemoteStream((stream) => {
-        if (remoteVideoRef.current) {
-          remoteVideoRef.current.srcObject = stream;
-          remoteVideoRef.current.play().catch(console.error);
-          setRemoteStream(stream);
-        }
-      });
+    if (localStream && localVideoRef.current) {
+      localVideoRef.current.srcObject = localStream;
+      console.log('✅ Local video set:', localStream.getTracks().map(t => t.kind));
     }
-  }, [webrtcService]);
+  }, [localStream]);
+
+  useEffect(() => {
+    if (remoteStream && remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = remoteStream;
+      remoteVideoRef.current.play().catch(console.error);
+      console.log('✅ Remote video set:', remoteStream.getTracks().map(t => t.kind));
+    }
+  }, [remoteStream]);
 
   const handleStart = () => {
     joinRandomChat(socket);
