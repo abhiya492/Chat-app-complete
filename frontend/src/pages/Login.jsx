@@ -19,7 +19,7 @@ const Login = () => {
   useEffect(() => {
     const error = searchParams.get('error');
     if (error === 'auth_failed') {
-      toast.error('Google authentication failed. Please try again.');
+      toast.error('Authentication failed. Please try again.');
     } else if (error === 'server_error') {
       toast.error('Server error. Please try again later.');
     }
