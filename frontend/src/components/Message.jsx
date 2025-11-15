@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { motion } from 'framer-motion';
+import { useReducedMotion } from '../hooks/useReducedMotion';
 import { Smile, Reply, Edit2, Trash2, Download, Pin, Forward, Check, CheckCheck, Play, Pause } from 'lucide-react';
 import { formatMessageTime } from '../lib/utils';
 import LazyImage from './LazyImage';
@@ -23,13 +24,22 @@ const Message = memo(({
   playingVoice,
   toggleVoicePlay
 }) => {
+  const prefersReducedMotion = useReducedMotion();
+
+  const messageVariants = prefersReducedMotion ? {} : {
+    initial: { opacity: 0, y: 20, scale: 0.95 },
+    animate: { opacity: 1, y: 0, scale: 1 },
+    exit: { opacity: 0, scale: 0.9 }
+  };
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.9 }}
+      variants={messageVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
       transition={{ duration: 0.2 }}
-      className={`chat ${isOwnMessage ? "chat-end" : "chat-start"} group relative`}
+      className={`chat ${isOwnMessage ? "chat-end" : "chat-start"} group relative message-send`}
     >
       <div className="chat-image avatar">
         <div className="size-8 sm:size-10 rounded-full border">

@@ -70,7 +70,7 @@ const Navbar = () => {
         </div>
 
         {showMobileMenu && (
-          <div className="md:hidden absolute top-full left-0 right-0 bg-base-100 border-b border-base-300 shadow-lg z-50">
+          <div className="md:hidden absolute top-full left-0 right-0 bg-base-100 border-b border-base-300 shadow-lg z-50 animate-in slide-in-from-top-2">
             <div className="flex flex-col p-2 space-y-1">
               <div className="px-3 py-2"><LanguageSelector /></div>
               {authUser && (
