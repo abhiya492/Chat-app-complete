@@ -35,6 +35,15 @@ const CallModal = () => {
 
   useEffect(() => {
     if (!isCallActive || !webrtcService) return;
+    
+    // Add click listener to play audio (browser autoplay policy)
+    const handleClick = () => {
+      if (remoteVideoRef.current && remoteVideoRef.current.paused) {
+        console.log('👆 User clicked, attempting to play audio...');
+        remoteVideoRef.current.play().catch(console.error);
+      }
+    };
+    document.addEventListener('click', handleClick);
 
     // Set local stream
     if (webrtcService.localStream && localVideoRef.current) {
@@ -64,28 +73,42 @@ const CallModal = () => {
         }
         
         playTimeoutRef.current = setTimeout(() => {
-          if (remoteVideoRef.current && remoteVideoRef.current.paused) {
-            // Check if audio tracks are unmuted
-            const audioTracks = stream.getAudioTracks();
-            const allUnmuted = audioTracks.every(t => !t.muted);
+          if (remoteVideoRef.current) {
+            console.log('🎬 Forcing play on remote stream...');
+            console.log('Element paused:', remoteVideoRef.current.paused);
+            console.log('Element muted:', remoteVideoRef.current.muted);
+            console.log('Element volume:', remoteVideoRef.current.volume);
+            console.log('Has srcObject:', !!remoteVideoRef.current.srcObject);
+            console.log('SrcObject tracks:', remoteVideoRef.current.srcObject?.getTracks().map(t => `${t.kind}: enabled=${t.enabled}, muted=${t.muted}`));
             
-            if (audioTracks.length > 0 && !allUnmuted) {
-              console.log('⏳ Waiting for audio tracks to unmute...');
-              return; // Don't play yet, wait for unmute event
+            // Force unmute and max volume
+            remoteVideoRef.current.muted = false;
+            remoteVideoRef.current.volume = 1.0;
+            
+            // Set audio output to default device
+            if (remoteVideoRef.current.setSinkId) {
+              remoteVideoRef.current.setSinkId('default').then(() => {
+                console.log('✅ Audio output set to default device');
+              }).catch(err => {
+                console.log('⚠️ Could not set audio output:', err);
+              });
             }
             
-            console.log('🎬 Attempting to play remote stream...');
             const playPromise = remoteVideoRef.current.play();
             if (playPromise !== undefined) {
               playPromise.then(() => {
                 console.log('✅ Remote stream playing successfully');
+                console.log('After play - paused:', remoteVideoRef.current.paused);
+                console.log('After play - muted:', remoteVideoRef.current.muted);
+                console.log('After play - volume:', remoteVideoRef.current.volume);
                 setAudioInitialized(true);
               }).catch(err => {
                 console.error('❌ Failed to play remote stream:', err.name, err.message);
+                console.error('Full error:', err);
               });
             }
           }
-        }, 300); // Wait 300ms for all tracks to arrive and unmute
+        }, 500); // Wait 500ms for all tracks
         
         // Log audio track status
         stream.getAudioTracks().forEach(track => {
@@ -141,6 +164,7 @@ const CallModal = () => {
       if (audioContextRef.current) {
         audioContextRef.current.close();
       }
+      document.removeEventListener('click', handleClick);
     };
   }, [isCallActive, webrtcService]);
 
