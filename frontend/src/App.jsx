@@ -9,6 +9,7 @@ import SignUp from './pages/SignUp'
 import ForgotPassword from './pages/ForgotPassword'
 import Rooms from './pages/Rooms'
 import RoomView from './pages/RoomView'
+import RandomChat from './pages/RandomChat'
 import { useAuthStore } from './store/useAuthStore'
 import { useThemeStore } from './store/useThemeStore'
 import { useEffect } from 'react'
@@ -86,6 +87,7 @@ const App = () => {
         <Route path="/profile" element={authUser ? <Profile /> : <Navigate to="/login" />} />
         <Route path="/rooms" element={authUser ? <Rooms /> : <Navigate to="/login" />} />
         <Route path="/room/:id" element={authUser ? <RoomView /> : <Navigate to="/login" />} />
+        <Route path="/random-chat" element={authUser ? <RandomChat /> : <Navigate to="/login" />} />
       </Routes> 
 
       <Toaster />
