@@ -38,14 +38,38 @@ const RandomChat = () => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showGifPicker, setShowGifPicker] = useState(false);
   const [gifSearch, setGifSearch] = useState('');
+  const [liveReaction, setLiveReaction] = useState(null);
   const messagesEndRef = useRef(null);
 
-  const emojis = ['😀', '😂', '😍', '🥰', '😎', '🤔', '👍', '👋', '🎉', '❤️', '🔥', '✨', '💯', '🙌', '👏', '🤝'];
+  const emojiCategories = {
+    smileys: ['😀', '😂', '🤣', '😊', '😍', '🥰', '😘', '😎', '🤗', '🤔', '😏', '😜', '🤪', '😇', '🥳', '🤩'],
+    gestures: ['👍', '👎', '👏', '🙌', '👋', '🤝', '✌️', '🤞', '🤟', '🤘', '👌', '💪', '🙏', '✋', '🤚', '👊'],
+    hearts: ['❤️', '💕', '💖', '💗', '💓', '💝', '💘', '💞', '💟', '💙', '💚', '💛', '🧡', '💜', '🖤', '🤍'],
+    reactions: ['🔥', '✨', '💯', '⚡', '💥', '🌟', '⭐', '🎉', '🎊', '🎈', '🎁', '🏆', '🥇', '👑', '💎', '🚀'],
+    memes: ['😭', '💀', '🤡', '👻', '💩', '🤮', '🥴', '😵', '🤯', '😱', '🙄', '😤', '😠', '🤬', '😈', '👿']
+  };
+  const [activeEmojiTab, setActiveEmojiTab] = useState('smileys');
+  
+  const memeTemplates = [
+    { url: 'https://i.imgflip.com/30b1gx.jpg', name: 'Drake' },
+    { url: 'https://i.imgflip.com/1bij.jpg', name: 'Success Kid' },
+    { url: 'https://i.imgflip.com/1g8my4.jpg', name: 'Distracted Boyfriend' },
+    { url: 'https://i.imgflip.com/26am.jpg', name: 'Surprised Pikachu' },
+    { url: 'https://i.imgflip.com/1ur9b0.jpg', name: 'Stonks' },
+    { url: 'https://i.imgflip.com/4t0m5.jpg', name: 'Woman Yelling at Cat' },
+    { url: 'https://i.imgflip.com/3lmzyx.jpg', name: 'Bernie Sanders' },
+    { url: 'https://i.imgflip.com/1ihzfe.jpg', name: 'Expanding Brain' },
+  ];
+  
   const trendingGifs = [
     'https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif',
     'https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif',
     'https://media.giphy.com/media/g9582DNuQppxC/giphy.gif',
     'https://media.giphy.com/media/3o7TKMt1VVNkHV2PaE/giphy.gif',
+    'https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif',
+    'https://media.giphy.com/media/l3q2K5jinAlChoCLS/giphy.gif',
+    'https://media.giphy.com/media/3o6Zt481isNVuQI1l6/giphy.gif',
+    'https://media.giphy.com/media/26u4cqiYI30juCOGY/giphy.gif',
   ];
 
   const languages = [
@@ -185,6 +209,22 @@ const RandomChat = () => {
   const handleGifClick = (gifUrl) => {
     sendMessage(gifUrl, socket, 'gif');
     setShowGifPicker(false);
+    showLiveReaction(gifUrl, 'gif');
+  };
+
+  const handleMemeClick = (memeUrl) => {
+    sendMessage(memeUrl, socket, 'meme');
+    showLiveReaction(memeUrl, 'meme');
+  };
+
+  const showLiveReaction = (content, type) => {
+    setLiveReaction({ content, type });
+    setTimeout(() => setLiveReaction(null), 3000);
+  };
+
+  const sendQuickEmoji = (emoji) => {
+    sendMessage(emoji, socket, 'emoji');
+    showLiveReaction(emoji, 'emoji');
   };
 
   const toggleMute = () => {
@@ -281,6 +321,16 @@ const RandomChat = () => {
     <div className="fixed inset-0 z-50 bg-base-300 flex">
       {/* Video Section */}
       <div className="flex-1 relative">
+        {/* Live Reaction Overlay */}
+        {liveReaction && (
+          <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none animate-in fade-in zoom-in">
+            {liveReaction.type === 'gif' || liveReaction.type === 'meme' ? (
+              <img src={liveReaction.content} alt="reaction" className="max-w-lg max-h-[500px] rounded-xl shadow-2xl animate-bounce" />
+            ) : (
+              <span className="text-9xl drop-shadow-2xl animate-bounce">{liveReaction.content}</span>
+            )}
+          </div>
+        )}
         {/* Remote Video */}
         <video
           ref={remoteVideoRef}
@@ -298,6 +348,15 @@ const RandomChat = () => {
           muted
           className="absolute bottom-4 right-4 w-48 h-36 rounded-xl border-4 border-white/20 object-cover shadow-2xl bg-gray-800"
         />
+
+        {/* Quick Emoji Reactions */}
+        <div className="absolute top-4 left-4 flex gap-2">
+          {['👍', '❤️', '😂', '😮', '🔥'].map((emoji, idx) => (
+            <button key={idx} onClick={() => sendQuickEmoji(emoji)} className="btn btn-circle btn-sm bg-white/20 hover:bg-white/40 text-2xl border-0">
+              {emoji}
+            </button>
+          ))}
+        </div>
 
         {/* Controls */}
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-4">
@@ -341,8 +400,8 @@ const RandomChat = () => {
           {messages.map((msg, idx) => (
             <div key={idx} className={`chat ${msg.from === "me" ? "chat-end" : "chat-start"}`}>
               <div className="chat-bubble">
-                {msg.type === 'gif' ? (
-                  <img src={msg.text} alt="gif" className="max-w-full rounded" />
+                {msg.type === 'gif' || msg.type === 'meme' ? (
+                  <img src={msg.text} alt={msg.type} className="max-w-full rounded" />
                 ) : (
                   msg.text
                 )}
@@ -354,28 +413,54 @@ const RandomChat = () => {
 
         <form onSubmit={handleSendMessage} className="p-4 border-t border-base-300">
           {showEmojiPicker && (
-            <div className="mb-2 p-2 bg-base-100 rounded-lg grid grid-cols-8 gap-1 max-h-32 overflow-y-auto">
-              {emojis.map((emoji, idx) => (
-                <button key={idx} type="button" onClick={() => handleEmojiClick(emoji)} className="text-2xl hover:scale-125 transition-transform">
-                  {emoji}
-                </button>
-              ))}
+            <div className="mb-2 bg-base-100 rounded-lg">
+              <div className="flex gap-1 p-2 border-b overflow-x-auto">
+                {Object.keys(emojiCategories).map(cat => (
+                  <button key={cat} type="button" onClick={() => setActiveEmojiTab(cat)} className={`btn btn-xs ${activeEmojiTab === cat ? 'btn-primary' : 'btn-ghost'}`}>
+                    {cat}
+                  </button>
+                ))}
+              </div>
+              <div className="p-2 grid grid-cols-8 gap-1 max-h-40 overflow-y-auto">
+                {emojiCategories[activeEmojiTab].map((emoji, idx) => (
+                  <button key={idx} type="button" onClick={() => handleEmojiClick(emoji)} className="text-2xl hover:scale-125 transition-transform">
+                    {emoji}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
           {showGifPicker && (
-            <div className="mb-2 p-2 bg-base-100 rounded-lg">
-              <input
-                type="text"
-                placeholder="Search GIFs..."
-                value={gifSearch}
-                onChange={(e) => setGifSearch(e.target.value)}
-                className="input input-sm input-bordered w-full mb-2"
-              />
-              <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
-                {trendingGifs.map((gif, idx) => (
-                  <img key={idx} src={gif} alt="gif" onClick={() => handleGifClick(gif)} className="w-full h-24 object-cover rounded cursor-pointer hover:opacity-80" />
-                ))}
+            <div className="mb-2 bg-base-100 rounded-lg">
+              <div className="flex gap-1 p-2 border-b">
+                <button type="button" onClick={() => setGifSearch('')} className={`btn btn-xs ${!gifSearch ? 'btn-primary' : 'btn-ghost'}`}>GIFs</button>
+                <button type="button" onClick={() => setGifSearch('memes')} className={`btn btn-xs ${gifSearch === 'memes' ? 'btn-primary' : 'btn-ghost'}`}>Memes</button>
               </div>
+              {gifSearch !== 'memes' ? (
+                <div className="p-2">
+                  <input
+                    type="text"
+                    placeholder="Search GIFs..."
+                    value={gifSearch}
+                    onChange={(e) => setGifSearch(e.target.value)}
+                    className="input input-sm input-bordered w-full mb-2"
+                  />
+                  <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                    {trendingGifs.map((gif, idx) => (
+                      <img key={idx} src={gif} alt="gif" onClick={() => handleGifClick(gif)} className="w-full h-24 object-cover rounded cursor-pointer hover:opacity-80 hover:scale-105 transition-transform" />
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="p-2 grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                  {memeTemplates.map((meme, idx) => (
+                    <div key={idx} onClick={() => handleMemeClick(meme.url)} className="cursor-pointer hover:scale-105 transition-transform">
+                      <img src={meme.url} alt={meme.name} className="w-full h-24 object-cover rounded" />
+                      <p className="text-xs text-center mt-1">{meme.name}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
           <div className="flex gap-2">

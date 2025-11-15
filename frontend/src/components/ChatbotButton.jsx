@@ -31,13 +31,13 @@ const ChatbotButton = () => {
     <>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-4 right-4 btn btn-circle btn-primary shadow-lg z-50"
+        className="fixed bottom-24 right-4 btn btn-circle btn-primary shadow-lg z-50"
       >
         {isOpen ? <X size={24} /> : <Bot size={24} />}
       </button>
 
       {isOpen && (
-        <div className="fixed bottom-20 right-4 w-80 h-96 bg-base-100 rounded-lg shadow-xl z-50 flex flex-col">
+        <div className="fixed bottom-40 right-4 w-80 h-96 bg-base-100 rounded-lg shadow-xl z-50 flex flex-col">
           <div className="p-3 bg-primary text-primary-content rounded-t-lg font-semibold">
             AI Assistant
           </div>
