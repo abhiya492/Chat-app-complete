@@ -25,27 +25,41 @@ export class WebRTCService {
           candidate: event.candidate,
           to: userId,
         });
+      } else {
+        console.log('✅ ICE gathering complete');
       }
     };
 
     this.peerConnection.ontrack = (event) => {
-      console.log('📹 Remote track received:', event.track.kind, 'readyState:', event.track.readyState);
-      this.remoteStream = event.streams[0];
+      console.log('📹 Remote track received:', event.track.kind, 'readyState:', event.track.readyState, 'enabled:', event.track.enabled);
+      
+      if (!this.remoteStream) {
+        this.remoteStream = event.streams[0];
+        console.log('🎵 Remote stream set with', this.remoteStream.getTracks().length, 'tracks');
+        
+        if (this.onRemoteStreamCallback) {
+          this.onRemoteStreamCallback(this.remoteStream);
+        }
+      }
       
       // Log all tracks in the stream
-      console.log('🎵 Remote stream tracks:', this.remoteStream.getTracks().map(t => `${t.kind}: ${t.enabled}`));
-      
-      if (this.onRemoteStreamCallback) {
-        this.onRemoteStreamCallback(this.remoteStream);
+      if (this.remoteStream) {
+        console.log('🎵 All remote tracks:', this.remoteStream.getTracks().map(t => `${t.kind}: enabled=${t.enabled}, muted=${t.muted}, readyState=${t.readyState}`));
       }
     };
 
     this.peerConnection.onconnectionstatechange = () => {
       console.log('🔌 Connection state:', this.peerConnection.connectionState);
+      if (this.peerConnection.connectionState === 'failed') {
+        console.error('❌ Connection failed!');
+      }
     };
 
     this.peerConnection.oniceconnectionstatechange = () => {
       console.log('🧊 ICE connection state:', this.peerConnection.iceConnectionState);
+      if (this.peerConnection.iceConnectionState === 'failed') {
+        console.error('❌ ICE connection failed!');
+      }
     };
 
     return this.peerConnection;
@@ -92,35 +106,35 @@ export class WebRTCService {
 
   addLocalStreamToPeer() {
     if (this.localStream && this.peerConnection) {
+      const senders = [];
       this.localStream.getTracks().forEach((track) => {
         const sender = this.peerConnection.addTrack(track, this.localStream);
-        console.log(`✅ Added ${track.kind} track to peer connection`);
+        senders.push(sender);
+        console.log(`✅ Added ${track.kind} track to peer connection, enabled: ${track.enabled}`);
         
         // Log sender parameters for debugging
         if (track.kind === 'audio') {
           console.log('🎤 Audio sender parameters:', sender.getParameters());
         }
       });
+      
+      // Verify senders
+      console.log('📡 Total senders added:', senders.length);
+      return senders;
     }
   }
 
   async createOffer() {
-    const offer = await this.peerConnection.createOffer({
-      offerToReceiveAudio: true,
-      offerToReceiveVideo: true,
-    });
+    const offer = await this.peerConnection.createOffer();
     await this.peerConnection.setLocalDescription(offer);
-    console.log('📤 Offer created with audio/video');
+    console.log('📤 Offer created:', offer.sdp.includes('m=audio'), 'audio,', offer.sdp.includes('m=video'), 'video');
     return offer;
   }
 
   async createAnswer() {
-    const answer = await this.peerConnection.createAnswer({
-      offerToReceiveAudio: true,
-      offerToReceiveVideo: true,
-    });
+    const answer = await this.peerConnection.createAnswer();
     await this.peerConnection.setLocalDescription(answer);
-    console.log('📤 Answer created with audio/video');
+    console.log('📤 Answer created:', answer.sdp.includes('m=audio'), 'audio,', answer.sdp.includes('m=video'), 'video');
     return answer;
   }
 

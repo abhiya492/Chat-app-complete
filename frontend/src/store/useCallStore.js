@@ -29,6 +29,9 @@ export const useCallStore = create((set, get) => ({
       await webrtcService.initializePeerConnection(socket, receiverId);
       const stream = await webrtcService.getLocalStream(type === "video");
       webrtcService.addLocalStreamToPeer();
+      
+      // Small delay to ensure tracks are fully added
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       const offer = await webrtcService.createOffer();
       socket.emit("call:offer", {
@@ -58,6 +61,9 @@ export const useCallStore = create((set, get) => ({
       await webrtcService.initializePeerConnection(socket, call.callerId._id);
       const stream = await webrtcService.getLocalStream(call.type === "video");
       webrtcService.addLocalStreamToPeer();
+      
+      // Small delay to ensure tracks are fully added
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       set({
         activeCall: call,
