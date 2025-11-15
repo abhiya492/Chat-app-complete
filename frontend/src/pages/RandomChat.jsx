@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRandomChatStore } from "../store/useRandomChatStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { useCallStore } from "../store/useCallStore";
-import { Shuffle, SkipForward, X, Send, Mic, MicOff, Video, VideoOff } from "lucide-react";
+import { Shuffle, SkipForward, X, Send, Mic, MicOff, Video, VideoOff, Globe } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const RandomChat = () => {
@@ -32,6 +32,16 @@ const RandomChat = () => {
   const [messageInput, setMessageInput] = useState("");
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState('any');
+
+  const languages = [
+    { code: 'any', name: 'Any Language' },
+    { code: 'english', name: 'English' },
+    { code: 'hindi', name: 'हिन्दी (Hindi)' },
+    { code: 'spanish', name: 'Español' },
+    { code: 'french', name: 'Français' },
+    { code: 'german', name: 'Deutsch' },
+  ];
 
   useEffect(() => {
     if (!socket) return;
@@ -119,11 +129,11 @@ const RandomChat = () => {
   }, [remoteStream]);
 
   const handleStart = () => {
-    joinRandomChat(socket);
+    joinRandomChat(socket, selectedLanguage);
   };
 
   const handleSkip = () => {
-    skipPartner(socket);
+    skipPartner(socket, selectedLanguage);
   };
 
   const handleLeave = () => {
@@ -162,10 +172,31 @@ const RandomChat = () => {
           </div>
           <h1 className="text-4xl font-bold">Random Video Chat</h1>
           <p className="text-lg text-base-content/70">Connect with strangers around the world</p>
-          <button onClick={handleStart} className="btn btn-primary btn-lg gap-2">
-            <Shuffle size={24} />
-            Start Chatting
-          </button>
+          
+          <div className="flex flex-col items-center gap-4">
+            <div className="form-control w-full max-w-xs">
+              <label className="label">
+                <span className="label-text flex items-center gap-2">
+                  <Globe size={18} />
+                  Select Language
+                </span>
+              </label>
+              <select 
+                className="select select-bordered w-full"
+                value={selectedLanguage}
+                onChange={(e) => setSelectedLanguage(e.target.value)}
+              >
+                {languages.map(lang => (
+                  <option key={lang.code} value={lang.code}>{lang.name}</option>
+                ))}
+              </select>
+            </div>
+            
+            <button onClick={handleStart} className="btn btn-primary btn-lg gap-2">
+              <Shuffle size={24} />
+              Start Chatting
+            </button>
+          </div>
         </div>
       </div>
     );

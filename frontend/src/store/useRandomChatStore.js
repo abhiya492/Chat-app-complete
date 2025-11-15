@@ -12,9 +12,9 @@ export const useRandomChatStore = create((set, get) => ({
   localStream: null,
   remoteStream: null,
 
-  joinRandomChat: async (socket) => {
+  joinRandomChat: async (socket, language = 'any') => {
     set({ isSearching: true, messages: [] });
-    socket.emit("random:join");
+    socket.emit("random:join", { language });
   },
 
   handleMatched: async ({ sessionId, partner, isCaller }, socket) => {
@@ -56,7 +56,7 @@ export const useRandomChatStore = create((set, get) => ({
     }
   },
 
-  skipPartner: (socket) => {
+  skipPartner: (socket, language = 'any') => {
     const { sessionId, webrtcService } = get();
     
     if (webrtcService) {
@@ -75,7 +75,7 @@ export const useRandomChatStore = create((set, get) => ({
     });
     
     // Rejoin queue
-    get().joinRandomChat(socket);
+    get().joinRandomChat(socket, language);
   },
 
   leaveRandomChat: (socket) => {
