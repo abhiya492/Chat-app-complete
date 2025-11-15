@@ -10,10 +10,9 @@ const LanguageSelector = () => {
     { code: 'hi', name: 'हिन्दी' }
   ];
 
-  const changeLanguage = (lng) => {
-    i18n.changeLanguage(lng);
+  const changeLanguage = async (lng) => {
+    await i18n.changeLanguage(lng);
     localStorage.setItem('language', lng);
-    window.location.reload();
   };
 
   return (

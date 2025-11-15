@@ -1,6 +1,9 @@
 import { MessageSquare } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const NoChatSelected = () => {
+  const { t } = useTranslation();
+  
   return (
     <div className="w-full flex flex-1 flex-col items-center justify-center p-16 bg-gradient-to-br from-base-100 via-base-200/20 to-base-100 relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
@@ -22,9 +25,9 @@ const NoChatSelected = () => {
           </div>
         </div>
 
-        <h2 className="text-4xl font-bold bg-gradient-to-r from-primary via-primary to-secondary bg-clip-text text-transparent animate-fade-in">Welcome to Chatty!</h2>
+        <h2 className="text-4xl font-bold bg-gradient-to-r from-primary via-primary to-secondary bg-clip-text text-transparent animate-fade-in">{t('welcome')}</h2>
         <p className="text-base-content/60 text-lg leading-relaxed animate-slide-up">
-          Select a conversation from the sidebar to start chatting
+          {t('typeMessage')}
         </p>
         <div className="pt-4 animate-scale-in">
           <div className="inline-flex items-center gap-2 text-sm text-base-content/60 glass-effect px-5 py-2.5 rounded-full shadow-lg hover:scale-105 transition-transform">
