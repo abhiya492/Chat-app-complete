@@ -39,7 +39,10 @@ const RandomChat = () => {
   const [showGifPicker, setShowGifPicker] = useState(false);
   const [gifSearch, setGifSearch] = useState('');
   const [liveReaction, setLiveReaction] = useState(null);
+  const [isTyping, setIsTyping] = useState(false);
+  const [connectionQuality, setConnectionQuality] = useState('good');
   const messagesEndRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
 
   const emojiCategories = {
     smileys: ['😀', '😂', '🤣', '😊', '😍', '🥰', '😘', '😎', '🤗', '🤔', '😏', '😜', '🤪', '😇', '🥳', '🤩'],
@@ -282,7 +285,15 @@ const RandomChat = () => {
       setMessageInput("");
       setShowEmojiPicker(false);
       setShowGifPicker(false);
+      setIsTyping(false);
     }
+  };
+
+  const handleInputChange = (e) => {
+    setMessageInput(e.target.value);
+    setIsTyping(true);
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => setIsTyping(false), 1000);
   };
 
   const handleEmojiClick = (emoji) => {
@@ -435,14 +446,20 @@ const RandomChat = () => {
         {/* Quick Emoji Reactions */}
         <div className="absolute top-4 left-4 flex gap-2">
           {['👍', '❤️', '😂', '😮', '🔥'].map((emoji, idx) => (
-            <button key={idx} onClick={() => sendQuickEmoji(emoji)} className="btn btn-circle btn-sm bg-white/20 hover:bg-white/40 text-2xl border-0">
+            <button key={idx} onClick={() => sendQuickEmoji(emoji)} className="btn btn-circle btn-sm bg-white/20 hover:bg-white/40 backdrop-blur-sm text-2xl border-0 hover:scale-125 transition-transform shadow-lg">
               {emoji}
             </button>
           ))}
         </div>
 
+        {/* Connection Quality Indicator */}
+        <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm px-3 py-1 rounded-full text-white text-xs flex items-center gap-2">
+          <span className={`w-2 h-2 rounded-full ${connectionQuality === 'good' ? 'bg-green-500' : connectionQuality === 'medium' ? 'bg-yellow-500' : 'bg-red-500'} animate-pulse`}></span>
+          {connectionQuality === 'good' ? 'HD' : connectionQuality === 'medium' ? 'SD' : 'Poor'}
+        </div>
+
         {/* Controls */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-4">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-3 bg-black/50 backdrop-blur-md px-6 py-3 rounded-full shadow-2xl">
           <button onClick={toggleMute} className={`btn btn-circle ${isMuted ? "btn-error" : "btn-ghost bg-white/20"}`}>
             {isMuted ? <MicOff size={24} /> : <Mic size={24} />}
           </button>
@@ -460,37 +477,58 @@ const RandomChat = () => {
 
       {/* Chat Sidebar */}
       <div className="w-80 bg-base-200 flex flex-col">
-        <div className="p-4 border-b border-base-300">
-          <div className="flex items-center justify-between">
-            <h3 className="font-bold">Chat with Stranger</h3>
-            <span className="text-xs text-base-content/60">{Math.floor(chatDuration / 60)}:{(chatDuration % 60).toString().padStart(2, '0')}</span>
+        <div className="p-4 border-b border-base-300 bg-gradient-to-r from-primary/10 to-secondary/10">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <div className="avatar online placeholder">
+                <div className="bg-primary text-primary-content rounded-full w-10">
+                  <span className="text-xl">👤</span>
+                </div>
+              </div>
+              <div>
+                <h3 className="font-bold">Stranger</h3>
+                <div className="flex items-center gap-1 text-xs">
+                  <span className={`badge badge-xs ${connectionQuality === 'good' ? 'badge-success' : connectionQuality === 'medium' ? 'badge-warning' : 'badge-error'}`}></span>
+                  <span className="text-base-content/60">{Math.floor(chatDuration / 60)}:{(chatDuration % 60).toString().padStart(2, '0')}</span>
+                </div>
+              </div>
+            </div>
           </div>
           {partner?.interests?.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-2">
+            <div className="flex flex-wrap gap-1">
               {partner.interests.map((interest, idx) => (
-                <span key={idx} className="badge badge-xs badge-ghost">{interest}</span>
+                <span key={idx} className="badge badge-xs badge-primary">{interest}</span>
               ))}
             </div>
           )}
         </div>
         
-        <div className="flex-1 overflow-y-auto p-4 space-y-2">
+        <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gradient-to-b from-base-200 to-base-300">
           {messages.length === 0 && (
-            <div className="text-center text-base-content/50 text-sm mt-8">
-              Say hi to start the conversation! 👋
+            <div className="text-center mt-20">
+              <div className="text-6xl mb-4 animate-bounce">👋</div>
+              <p className="text-base-content/70 font-medium">Say hi to start the conversation!</p>
+              <p className="text-xs text-base-content/50 mt-2">Send a message, emoji, or GIF</p>
             </div>
           )}
           {messages.map((msg, idx) => (
-            <div key={idx} className={`chat ${msg.from === "me" ? "chat-end" : "chat-start"}`}>
-              <div className="chat-bubble">
+            <div key={idx} className={`chat ${msg.from === "me" ? "chat-end" : "chat-start"} animate-in slide-in-from-bottom-2`}>
+              <div className={`chat-bubble ${msg.from === "me" ? 'chat-bubble-primary' : 'chat-bubble-secondary'} shadow-md`}>
                 {msg.type === 'gif' || msg.type === 'meme' ? (
-                  <img src={msg.text} alt={msg.type} className="max-w-full rounded" />
+                  <img src={msg.text} alt={msg.type} className="max-w-full rounded-lg" />
                 ) : (
-                  msg.text
+                  <span className="text-sm">{msg.text}</span>
                 )}
               </div>
             </div>
           ))}
+          {isTyping && (
+            <div className="chat chat-start animate-pulse">
+              <div className="chat-bubble chat-bubble-secondary">
+                <span className="loading loading-dots loading-sm"></span>
+              </div>
+            </div>
+          )}
           <div ref={messagesEndRef} />
         </div>
 
@@ -557,7 +595,8 @@ const RandomChat = () => {
               <input
                 type="text"
                 value={messageInput}
-                onChange={(e) => setMessageInput(e.target.value)}
+                onChange={handleInputChange}
+                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage(e)}
                 placeholder="Type a message..."
                 className="input input-sm bg-transparent border-0 flex-1 focus:outline-none"
               />
