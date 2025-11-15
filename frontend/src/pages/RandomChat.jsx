@@ -59,6 +59,47 @@ const RandomChat = () => {
     { url: 'https://i.imgflip.com/4t0m5.jpg', name: 'Woman Yelling at Cat' },
     { url: 'https://i.imgflip.com/3lmzyx.jpg', name: 'Bernie Sanders' },
     { url: 'https://i.imgflip.com/1ihzfe.jpg', name: 'Expanding Brain' },
+    { url: 'https://i.imgflip.com/5c7lwq.jpg', name: 'Trade Offer' },
+    { url: 'https://i.imgflip.com/261o3j.jpg', name: 'Panik Kalm' },
+    { url: 'https://i.imgflip.com/2fm6x.jpg', name: 'Disaster Girl' },
+    { url: 'https://i.imgflip.com/1otk96.jpg', name: 'Mocking SpongeBob' },
+    { url: 'https://i.imgflip.com/2kbn1e.jpg', name: 'Is This a Pigeon' },
+    { url: 'https://i.imgflip.com/1c1uej.jpg', name: 'Leonardo DiCaprio' },
+    { url: 'https://i.imgflip.com/3oevdk.jpg', name: 'Buff Doge vs Cheems' },
+    { url: 'https://i.imgflip.com/4acd7j.jpg', name: 'Coffin Dance' },
+    { url: 'https://i.imgflip.com/5gimtn.jpg', name: 'Gigachad' },
+    { url: 'https://i.imgflip.com/5o32tt.jpg', name: 'Bing Chilling' },
+    { url: 'https://i.imgflip.com/6eewtf.jpg', name: 'Breaking Bad' },
+    { url: 'https://i.imgflip.com/7p4k5p.jpg', name: 'Barbie Oppenheimer' },
+    { url: 'https://i.imgflip.com/1bh6de.jpg', name: 'Roll Safe' },
+    { url: 'https://i.imgflip.com/1yxkcp.jpg', name: 'Monkey Puppet' },
+    { url: 'https://i.imgflip.com/2ybua0.jpg', name: 'Surprised Pikachu HD' },
+    { url: 'https://i.imgflip.com/3oqj4n.jpg', name: 'Doge' },
+    { url: 'https://i.imgflip.com/4hiybr.jpg', name: 'Always Has Been' },
+    { url: 'https://i.imgflip.com/5c7lwq.jpg', name: 'Trade Offer' },
+    { url: 'https://i.imgflip.com/5kdc6d.jpg', name: 'Sigma Male' },
+    { url: 'https://i.imgflip.com/6c8s1j.jpg', name: 'Gru Plan' },
+    { url: 'https://i.imgflip.com/1e7ql7.jpg', name: 'Tuxedo Winnie' },
+    { url: 'https://i.imgflip.com/2cp1.jpg', name: 'Bad Luck Brian' },
+    { url: 'https://i.imgflip.com/1o00in.jpg', name: 'Boardroom Meeting' },
+    { url: 'https://i.imgflip.com/1wz3as.jpg', name: 'Spiderman Pointing' },
+    { url: 'https://i.imgflip.com/3umnxp.jpg', name: 'Anakin Padme' },
+    { url: 'https://i.imgflip.com/4p3fy2.jpg', name: 'Wojak' },
+    { url: 'https://i.imgflip.com/5xtog5.jpg', name: 'Squid Game' },
+    { url: 'https://i.imgflip.com/6hl9v2.jpg', name: 'Wednesday Addams' },
+    { url: 'https://i.imgflip.com/7kqcxo.jpg', name: 'Oppenheimer' },
+    { url: 'https://i.imgflip.com/8g0ew4.jpg', name: 'Skibidi Toilet' },
+    { url: 'https://i.imgflip.com/8jw6jn.jpg', name: 'Sigma Grindset' },
+    { url: 'https://i.imgflip.com/1nck6k.jpg', name: 'Waiting Skeleton' },
+    { url: 'https://i.imgflip.com/1h7in3.jpg', name: 'Two Buttons' },
+    { url: 'https://i.imgflip.com/1bgw.jpg', name: 'Philosoraptor' },
+    { url: 'https://i.imgflip.com/1bhk.jpg', name: 'First World Problems' },
+    { url: 'https://i.imgflip.com/5xtog5.jpg', name: 'Pepe' },
+    { url: 'https://i.imgflip.com/2d3al6.jpg', name: 'Thanos Snap' },
+    { url: 'https://i.imgflip.com/3pnr0n.jpg', name: 'Baby Yoda' },
+    { url: 'https://i.imgflip.com/4apmep.jpg', name: 'Coffin Dance Meme' },
+    { url: 'https://i.imgflip.com/5c7lwq.jpg', name: 'Trade Offer 2' },
+    { url: 'https://i.imgflip.com/6eewtf.jpg', name: 'Better Call Saul' },
   ];
   
   const trendingGifs = [
@@ -70,6 +111,48 @@ const RandomChat = () => {
     'https://media.giphy.com/media/l3q2K5jinAlChoCLS/giphy.gif',
     'https://media.giphy.com/media/3o6Zt481isNVuQI1l6/giphy.gif',
     'https://media.giphy.com/media/26u4cqiYI30juCOGY/giphy.gif',
+    'https://media.giphy.com/media/xT0xeJpnrWC4XWblEk/giphy.gif',
+    'https://media.giphy.com/media/l0HlRnAWXxn0MhKLK/giphy.gif',
+    'https://media.giphy.com/media/3o7TKTDn976rzVgky4/giphy.gif',
+    'https://media.giphy.com/media/26BRuo6sLetdllPAQ/giphy.gif',
+    'https://media.giphy.com/media/l0MYC0LajbaPoEADu/giphy.gif',
+    'https://media.giphy.com/media/3o6Zt0hNCfak3QCqsw/giphy.gif',
+    'https://media.giphy.com/media/26tPplGWjN0xLybiU/giphy.gif',
+    'https://media.giphy.com/media/l0HlvtIPzPdt2usKs/giphy.gif',
+    'https://media.giphy.com/media/3o7TKSjRrfIPjeiVyM/giphy.gif',
+    'https://media.giphy.com/media/26BRBKqUiq586bRVm/giphy.gif',
+    'https://media.giphy.com/media/l0MYGb8Y3odnQPJXa/giphy.gif',
+    'https://media.giphy.com/media/3o7TKMt1VVNkHV2PaE/giphy.gif',
+    'https://media.giphy.com/media/26tPnAAJxXTvpLwJy/giphy.gif',
+    'https://media.giphy.com/media/l0HlQ7LRalQqdWfao/giphy.gif',
+    'https://media.giphy.com/media/3o6ZtaO9BZHcOjmErm/giphy.gif',
+    'https://media.giphy.com/media/26BRzozg4TCBXv6QU/giphy.gif',
+    'https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif',
+    'https://media.giphy.com/media/26tPqTOGf3MMAaJR6/giphy.gif',
+    'https://media.giphy.com/media/3o7TKnO6Wve6502iJ2/giphy.gif',
+    'https://media.giphy.com/media/26BRwW3ckGjcZmsxO/giphy.gif',
+    'https://media.giphy.com/media/l0MYC0LajbaPoEADu/giphy.gif',
+    'https://media.giphy.com/media/26tPo9rksWnfPo4HS/giphy.gif',
+    'https://media.giphy.com/media/3o7TKSjRrfIPjeiVyM/giphy.gif',
+    'https://media.giphy.com/media/26BRBKqUiq586bRVm/giphy.gif',
+    'https://media.giphy.com/media/l0HlQ7LRalQqdWfao/giphy.gif',
+    'https://media.giphy.com/media/3o6ZtaO9BZHcOjmErm/giphy.gif',
+    'https://media.giphy.com/media/26BRzozg4TCBXv6QU/giphy.gif',
+    'https://media.giphy.com/media/xT0xeJpnrWC4XWblEk/giphy.gif',
+    'https://media.giphy.com/media/l0HlRnAWXxn0MhKLK/giphy.gif',
+    'https://media.giphy.com/media/3o7TKTDn976rzVgky4/giphy.gif',
+    'https://media.giphy.com/media/26BRuo6sLetdllPAQ/giphy.gif',
+    'https://media.giphy.com/media/l0MYC0LajbaPoEADu/giphy.gif',
+    'https://media.giphy.com/media/3o6Zt0hNCfak3QCqsw/giphy.gif',
+    'https://media.giphy.com/media/26tPplGWjN0xLybiU/giphy.gif',
+    'https://media.giphy.com/media/l0HlvtIPzPdt2usKs/giphy.gif',
+    'https://media.giphy.com/media/3o7TKSjRrfIPjeiVyM/giphy.gif',
+    'https://media.giphy.com/media/26BRBKqUiq586bRVm/giphy.gif',
+    'https://media.giphy.com/media/l0MYGb8Y3odnQPJXa/giphy.gif',
+    'https://media.giphy.com/media/3o7TKMt1VVNkHV2PaE/giphy.gif',
+    'https://media.giphy.com/media/26tPnAAJxXTvpLwJy/giphy.gif',
+    'https://media.giphy.com/media/l0HlQ7LRalQqdWfao/giphy.gif',
+    'https://media.giphy.com/media/3o6ZtaO9BZHcOjmErm/giphy.gif',
   ];
 
   const languages = [
@@ -411,19 +494,19 @@ const RandomChat = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        <form onSubmit={handleSendMessage} className="p-4 border-t border-base-300">
+        <div className="border-t border-base-300">
           {showEmojiPicker && (
-            <div className="mb-2 bg-base-100 rounded-lg">
-              <div className="flex gap-1 p-2 border-b overflow-x-auto">
+            <div className="bg-base-100 border-b border-base-300">
+              <div className="flex gap-1 p-2 overflow-x-auto">
                 {Object.keys(emojiCategories).map(cat => (
-                  <button key={cat} type="button" onClick={() => setActiveEmojiTab(cat)} className={`btn btn-xs ${activeEmojiTab === cat ? 'btn-primary' : 'btn-ghost'}`}>
+                  <button key={cat} type="button" onClick={() => setActiveEmojiTab(cat)} className={`btn btn-xs capitalize ${activeEmojiTab === cat ? 'btn-primary' : 'btn-ghost'}`}>
                     {cat}
                   </button>
                 ))}
               </div>
-              <div className="p-2 grid grid-cols-8 gap-1 max-h-40 overflow-y-auto">
+              <div className="p-3 grid grid-cols-8 gap-2 max-h-48 overflow-y-auto">
                 {emojiCategories[activeEmojiTab].map((emoji, idx) => (
-                  <button key={idx} type="button" onClick={() => handleEmojiClick(emoji)} className="text-2xl hover:scale-125 transition-transform">
+                  <button key={idx} type="button" onClick={() => handleEmojiClick(emoji)} className="text-3xl hover:scale-125 transition-transform p-1">
                     {emoji}
                   </button>
                 ))}
@@ -431,57 +514,59 @@ const RandomChat = () => {
             </div>
           )}
           {showGifPicker && (
-            <div className="mb-2 bg-base-100 rounded-lg">
-              <div className="flex gap-1 p-2 border-b">
-                <button type="button" onClick={() => setGifSearch('')} className={`btn btn-xs ${!gifSearch ? 'btn-primary' : 'btn-ghost'}`}>GIFs</button>
-                <button type="button" onClick={() => setGifSearch('memes')} className={`btn btn-xs ${gifSearch === 'memes' ? 'btn-primary' : 'btn-ghost'}`}>Memes</button>
+            <div className="bg-base-100 border-b border-base-300">
+              <div className="flex gap-2 p-3 border-b">
+                <button type="button" onClick={() => setGifSearch('')} className={`btn btn-sm flex-1 ${!gifSearch ? 'btn-primary' : 'btn-ghost'}`}>🎬 GIFs</button>
+                <button type="button" onClick={() => setGifSearch('memes')} className={`btn btn-sm flex-1 ${gifSearch === 'memes' ? 'btn-primary' : 'btn-ghost'}`}>😂 Memes</button>
               </div>
               {gifSearch !== 'memes' ? (
-                <div className="p-2">
+                <div className="p-3">
                   <input
                     type="text"
-                    placeholder="Search GIFs..."
+                    placeholder="Search trending GIFs..."
                     value={gifSearch}
                     onChange={(e) => setGifSearch(e.target.value)}
-                    className="input input-sm input-bordered w-full mb-2"
+                    className="input input-sm input-bordered w-full mb-3"
                   />
-                  <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                  <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto">
                     {trendingGifs.map((gif, idx) => (
-                      <img key={idx} src={gif} alt="gif" onClick={() => handleGifClick(gif)} className="w-full h-24 object-cover rounded cursor-pointer hover:opacity-80 hover:scale-105 transition-transform" />
+                      <img key={idx} src={gif} alt="gif" onClick={() => handleGifClick(gif)} className="w-full h-28 object-cover rounded-lg cursor-pointer hover:opacity-80 hover:scale-105 transition-all shadow-md" />
                     ))}
                   </div>
                 </div>
               ) : (
-                <div className="p-2 grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                <div className="p-3 grid grid-cols-2 gap-2 max-h-64 overflow-y-auto">
                   {memeTemplates.map((meme, idx) => (
-                    <div key={idx} onClick={() => handleMemeClick(meme.url)} className="cursor-pointer hover:scale-105 transition-transform">
-                      <img src={meme.url} alt={meme.name} className="w-full h-24 object-cover rounded" />
-                      <p className="text-xs text-center mt-1">{meme.name}</p>
+                    <div key={idx} onClick={() => handleMemeClick(meme.url)} className="cursor-pointer hover:scale-105 transition-all">
+                      <img src={meme.url} alt={meme.name} className="w-full h-28 object-cover rounded-lg shadow-md" />
+                      <p className="text-xs text-center mt-1 font-medium">{meme.name}</p>
                     </div>
                   ))}
                 </div>
               )}
             </div>
           )}
-          <div className="flex gap-2">
-            <button type="button" onClick={() => { setShowEmojiPicker(!showEmojiPicker); setShowGifPicker(false); }} className="btn btn-ghost btn-sm">
-              <Smile size={20} />
-            </button>
-            <button type="button" onClick={() => { setShowGifPicker(!showGifPicker); setShowEmojiPicker(false); }} className="btn btn-ghost btn-sm">
-              <ImageIcon size={20} />
-            </button>
-            <input
-              type="text"
-              value={messageInput}
-              onChange={(e) => setMessageInput(e.target.value)}
-              placeholder="Type a message..."
-              className="input input-bordered flex-1"
-            />
-            <button type="submit" className="btn btn-primary">
-              <Send size={20} />
-            </button>
-          </div>
-        </form>
+          <form onSubmit={handleSendMessage} className="p-3">
+            <div className="flex items-center gap-2 bg-base-100 rounded-full px-2 py-1 shadow-lg">
+              <button type="button" onClick={() => { setShowEmojiPicker(!showEmojiPicker); setShowGifPicker(false); }} className="btn btn-circle btn-ghost btn-sm hover:bg-primary/20">
+                <Smile size={22} />
+              </button>
+              <button type="button" onClick={() => { setShowGifPicker(!showGifPicker); setShowEmojiPicker(false); }} className="btn btn-circle btn-ghost btn-sm hover:bg-primary/20">
+                <ImageIcon size={22} />
+              </button>
+              <input
+                type="text"
+                value={messageInput}
+                onChange={(e) => setMessageInput(e.target.value)}
+                placeholder="Type a message..."
+                className="input input-sm bg-transparent border-0 flex-1 focus:outline-none"
+              />
+              <button type="submit" disabled={!messageInput.trim()} className="btn btn-circle btn-primary btn-sm shadow-lg hover:scale-110 transition-transform disabled:opacity-50">
+                <Send size={20} />
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
