@@ -6,8 +6,10 @@ import { Users, UserPlus, Phone } from "lucide-react";
 import InviteModal from "./InviteModal";
 import SearchBar from "./SearchBar";
 import CallHistory from "./CallHistory";
+import { useTranslation } from "react-i18next";
 
 const Sidebar = () => {
+  const { t } = useTranslation();
   const { getUsers, users, selectedUser, setSelectedUser, isUsersLoading } = useChatStore();
 
   const { onlineUsers } = useAuthStore();
@@ -39,7 +41,7 @@ const Sidebar = () => {
             <div className="p-1.5 md:p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 shadow-md hover:shadow-lg hover:scale-105 transition-all">
               {activeTab === "chats" ? <Users className="size-4 md:size-5 text-primary" /> : <Phone className="size-4 md:size-5 text-primary" />}
             </div>
-            <span className="font-bold text-base lg:text-lg hidden lg:block bg-gradient-to-r from-base-content to-base-content/70 bg-clip-text text-transparent">{activeTab === "chats" ? "Contacts" : "Calls"}</span>
+            <span className="font-bold text-base lg:text-lg hidden lg:block bg-gradient-to-r from-base-content to-base-content/70 bg-clip-text text-transparent">{activeTab === "chats" ? t('chats') : t('calls')}</span>
           </div>
           <button
             onClick={() => setShowInviteModal(true)}
@@ -55,14 +57,14 @@ const Sidebar = () => {
             className={`btn btn-xs lg:btn-sm ${activeTab === "chats" ? "btn-primary" : "btn-ghost"}`}
           >
             <Users className="size-3 lg:size-4" />
-            <span className="hidden lg:inline">Chats</span>
+            <span className="hidden lg:inline">{t('chats')}</span>
           </button>
           <button
             onClick={() => setActiveTab("calls")}
             className={`btn btn-xs lg:btn-sm ${activeTab === "calls" ? "btn-primary" : "btn-ghost"}`}
           >
             <Phone className="size-3 lg:size-4" />
-            <span className="hidden lg:inline">Calls</span>
+            <span className="hidden lg:inline">{t('calls')}</span>
           </button>
         </div>
         {activeTab === "chats" && (
@@ -74,7 +76,7 @@ const Sidebar = () => {
               onChange={(e) => setShowOnlineOnly(e.target.checked)}
               className="checkbox checkbox-sm checkbox-primary"
             />
-            <span className="text-sm font-medium">Online only</span>
+            <span className="text-sm font-medium">{t('online')}</span>
           </label>
           <span className="text-xs font-bold text-primary-content bg-gradient-to-r from-primary to-primary/80 px-2.5 py-1 rounded-full shadow-md animate-pulse">{onlineUsers.length - 1}</span>
           </div>
@@ -126,7 +128,7 @@ const Sidebar = () => {
                 <div className="text-sm flex items-center gap-1.5 mt-0.5">
                   <span className={`size-2 rounded-full ${onlineUsers.includes(user._id) ? "bg-green-500" : "bg-gray-400"}`}></span>
                   <span className={onlineUsers.includes(user._id) ? "text-green-600 font-medium" : "text-base-content/60"}>
-                    {onlineUsers.includes(user._id) ? "Online" : "Offline"}
+                    {onlineUsers.includes(user._id) ? t('online') : t('offline')}
                   </span>
                 </div>
               </div>
@@ -144,8 +146,8 @@ const Sidebar = () => {
               <div className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center animate-bounce-subtle">
                 <Users className="size-8 md:size-10 text-primary/50" />
               </div>
-              <p className="font-semibold text-sm md:text-base lg:text-lg mb-2">No contacts found</p>
-              <p className="text-xs md:text-sm text-base-content/40 hidden lg:block">Try adjusting your search</p>
+              <p className="font-semibold text-sm md:text-base lg:text-lg mb-2">{t('search')}</p>
+              <p className="text-xs md:text-sm text-base-content/40 hidden lg:block">{t('search')}</p>
             </div>
           )}
           </>
