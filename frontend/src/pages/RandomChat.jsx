@@ -33,6 +33,9 @@ const RandomChat = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState('any');
+  const [interests, setInterests] = useState([]);
+  const [chatDuration, setChatDuration] = useState(0);
+  const messagesEndRef = useRef(null);
 
   const languages = [
     { code: 'any', name: 'Any Language' },
@@ -42,6 +45,19 @@ const RandomChat = () => {
     { code: 'french', name: 'Français' },
     { code: 'german', name: 'Deutsch' },
   ];
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  useEffect(() => {
+    if (!isMatched) {
+      setChatDuration(0);
+      return;
+    }
+    const timer = setInterval(() => setChatDuration(prev => prev + 1), 1000);
+    return () => clearInterval(timer);
+  }, [isMatched]);
 
   useEffect(() => {
     if (!socket) return;
@@ -173,8 +189,8 @@ const RandomChat = () => {
           <h1 className="text-4xl font-bold">Random Video Chat</h1>
           <p className="text-lg text-base-content/70">Connect with strangers around the world</p>
           
-          <div className="flex flex-col items-center gap-4">
-            <div className="form-control w-full max-w-xs">
+          <div className="flex flex-col items-center gap-4 w-full max-w-md">
+            <div className="form-control w-full">
               <label className="label">
                 <span className="label-text flex items-center gap-2">
                   <Globe size={18} />
@@ -191,8 +207,33 @@ const RandomChat = () => {
                 ))}
               </select>
             </div>
+
+            <div className="form-control w-full">
+              <label className="label">
+                <span className="label-text">Interests (optional)</span>
+              </label>
+              <input
+                type="text"
+                placeholder="e.g., music, sports, coding"
+                className="input input-bordered w-full"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && e.target.value.trim()) {
+                    setInterests([...interests, e.target.value.trim()]);
+                    e.target.value = '';
+                  }
+                }}
+              />
+              <div className="flex flex-wrap gap-2 mt-2">
+                {interests.map((interest, idx) => (
+                  <span key={idx} className="badge badge-primary gap-2">
+                    {interest}
+                    <button onClick={() => setInterests(interests.filter((_, i) => i !== idx))} className="text-xs">×</button>
+                  </span>
+                ))}
+              </div>
+            </div>
             
-            <button onClick={handleStart} className="btn btn-primary btn-lg gap-2">
+            <button onClick={handleStart} className="btn btn-primary btn-lg gap-2 w-full">
               <Shuffle size={24} />
               Start Chatting
             </button>
@@ -256,15 +297,31 @@ const RandomChat = () => {
       {/* Chat Sidebar */}
       <div className="w-80 bg-base-200 flex flex-col">
         <div className="p-4 border-b border-base-300">
-          <h3 className="font-bold">Chat with Stranger</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="font-bold">Chat with Stranger</h3>
+            <span className="text-xs text-base-content/60">{Math.floor(chatDuration / 60)}:{(chatDuration % 60).toString().padStart(2, '0')}</span>
+          </div>
+          {partner?.interests?.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {partner.interests.map((interest, idx) => (
+                <span key={idx} className="badge badge-xs badge-ghost">{interest}</span>
+              ))}
+            </div>
+          )}
         </div>
         
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
+          {messages.length === 0 && (
+            <div className="text-center text-base-content/50 text-sm mt-8">
+              Say hi to start the conversation! 👋
+            </div>
+          )}
           {messages.map((msg, idx) => (
             <div key={idx} className={`chat ${msg.from === "me" ? "chat-end" : "chat-start"}`}>
               <div className="chat-bubble">{msg.text}</div>
             </div>
           ))}
+          <div ref={messagesEndRef} />
         </div>
 
         <form onSubmit={handleSendMessage} className="p-4 border-t border-base-300">
