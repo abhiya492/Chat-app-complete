@@ -79,7 +79,8 @@ const SharedExperiencePanel = () => {
     <>
       {/* Floating Action Button */}
       <motion.div 
-        className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-50"
+        className="fixed bottom-24 sm:bottom-6 right-4 sm:right-6"
+        style={{ zIndex: 9999 }}
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: "spring", stiffness: 260, damping: 20 }}
@@ -121,12 +122,12 @@ const SharedExperiencePanel = () => {
       <AnimatePresence>
         {isExpanded && (
           <motion.div 
-            className="fixed inset-x-2 bottom-32 sm:bottom-24 sm:right-6 sm:left-auto z-40 bg-base-100 rounded-2xl shadow-2xl border border-base-300 overflow-hidden"
+            className="fixed inset-x-2 bottom-40 sm:bottom-24 sm:right-6 sm:left-auto bg-base-100 rounded-2xl shadow-2xl border border-base-300 overflow-hidden"
+            style={{ zIndex: 9998, maxWidth: '380px', maxHeight: '500px' }}
             initial={{ opacity: 0, scale: 0.8, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            style={{ maxWidth: '380px', maxHeight: '500px' }}
           >
             {/* Header */}
             <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-3 sm:p-4 text-white">
