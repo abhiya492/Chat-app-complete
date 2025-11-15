@@ -26,6 +26,7 @@ import { trackPageView } from './lib/analytics'
 import { useStoryStore } from './store/useStoryStore'
 import ConnectionStatus from './components/ConnectionStatus'
 import OfflineQueue from './components/OfflineQueue'
+import PageTransition from './components/PageTransition'
 
 const App = () => {
   const { authUser,checkAuth,isCheckingAuth,onlineUsers,socket } = useAuthStore();
@@ -80,7 +81,8 @@ const App = () => {
   return (
     <div data-theme={theme}>
       <Navbar />    
-      <Routes>
+      <PageTransition>
+        <Routes>
         <Route path="/" element={authUser ? <Home /> : <Navigate to="/login" />} />
         <Route path="/signup" element={!authUser ? <SignUp /> : <Navigate to="/" />} />
         <Route path="/login" element={!authUser ? <Login /> : <Navigate to="/" />} />
@@ -90,7 +92,8 @@ const App = () => {
         <Route path="/rooms" element={authUser ? <Rooms /> : <Navigate to="/login" />} />
         <Route path="/room/:id" element={authUser ? <RoomView /> : <Navigate to="/login" />} />
         <Route path="/random-chat" element={authUser ? <RandomChat /> : <Navigate to="/login" />} />
-      </Routes> 
+        </Routes>
+      </PageTransition>
 
       <Toaster />
       <ConnectionStatus />
