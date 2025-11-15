@@ -99,6 +99,14 @@ const CallModal = () => {
                 console.log('After play - paused:', remoteVideoRef.current.paused);
                 console.log('After play - muted:', remoteVideoRef.current.muted);
                 console.log('After play - volume:', remoteVideoRef.current.volume);
+                
+                // Test if audio is actually playing
+                const audioTracks = remoteVideoRef.current.srcObject.getAudioTracks();
+                console.log('🔊 Audio tracks in element:', audioTracks.length);
+                audioTracks.forEach(track => {
+                  console.log('🔊 Track:', track.label, 'enabled:', track.enabled, 'muted:', track.muted, 'readyState:', track.readyState);
+                });
+                
                 setAudioInitialized(true);
               }).catch(err => {
                 console.error('❌ Failed to play remote stream:', err.name, err.message);
