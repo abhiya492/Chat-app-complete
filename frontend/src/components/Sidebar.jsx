@@ -53,24 +53,28 @@ const Sidebar = () => {
           <button
             onClick={() => setShowInviteModal(true)}
             className="btn btn-xs sm:btn-xs md:btn-sm btn-circle btn-primary shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/50 hover:scale-110 hover:rotate-12 transition-all"
-            title="Invite Friends"
+            aria-label="Invite Friends"
           >
-            <UserPlus className="size-3 md:size-4" />
+            <UserPlus className="size-3 md:size-4" aria-hidden="true" />
           </button>
         </div>
         <div className="mt-2 sm:mt-3 flex gap-1 sm:gap-2 justify-center sm:justify-center lg:justify-start">
           <button
             onClick={() => setActiveTab("chats")}
             className={`btn btn-xs sm:btn-xs lg:btn-sm ${activeTab === "chats" ? "btn-primary" : "btn-ghost"}`}
+            aria-label="Chats tab"
+            aria-pressed={activeTab === "chats"}
           >
-            <Users className="size-3 lg:size-4" />
+            <Users className="size-3 lg:size-4" aria-hidden="true" />
             <span className="hidden sm:hidden lg:inline">{t('chats')}</span>
           </button>
           <button
             onClick={() => setActiveTab("calls")}
             className={`btn btn-xs sm:btn-xs lg:btn-sm ${activeTab === "calls" ? "btn-primary" : "btn-ghost"}`}
+            aria-label="Calls tab"
+            aria-pressed={activeTab === "calls"}
           >
-            <Phone className="size-3 lg:size-4" />
+            <Phone className="size-3 lg:size-4" aria-hidden="true" />
             <span className="hidden sm:hidden lg:inline">{t('calls')}</span>
           </button>
         </div>
@@ -82,6 +86,7 @@ const Sidebar = () => {
               checked={showOnlineOnly}
               onChange={(e) => setShowOnlineOnly(e.target.checked)}
               className="checkbox checkbox-xs sm:checkbox-sm checkbox-primary"
+              aria-label="Show online users only"
             />
             <span className="text-xs sm:text-sm font-medium hidden sm:inline">{t('online')}</span>
             <span className="text-xs font-medium sm:hidden">Online</span>
@@ -93,7 +98,7 @@ const Sidebar = () => {
 
       {activeTab === "chats" && <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />}
 
-      <div className="overflow-y-auto w-full py-1 md:py-2 flex-1">
+      <div className="overflow-y-auto w-full py-1 md:py-2 flex-1" role="list" aria-label="User list">
         {activeTab === "calls" ? (
           <div className="hidden lg:block">
             <CallHistory />
@@ -116,6 +121,9 @@ const Sidebar = () => {
               hover:bg-primary/10 hover:shadow-md hover:scale-[1.02] transition-all duration-200 group
               ${selectedUser?._id === user._id ? "bg-gradient-to-r from-primary/20 via-primary/15 to-primary/10 shadow-lg border-l-4 sm:border-l-0 lg:border-l-4 border-primary scale-[1.02]" : ""}
             `}
+            role="listitem"
+            aria-label={`Chat with ${user.fullName}, ${onlineUsers.includes(user._id) ? 'online' : 'offline'}`}
+            aria-current={selectedUser?._id === user._id ? 'true' : 'false'}
           >
             <div className="relative flex-shrink-0">
               <img

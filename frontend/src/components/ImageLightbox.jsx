@@ -1,8 +1,18 @@
 import { X, Download, ZoomIn, ZoomOut } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useFocusTrap } from "../hooks/useFocusTrap";
 
 const ImageLightbox = ({ src, alt, onClose }) => {
   const [zoom, setZoom] = useState(1);
+  const containerRef = useFocusTrap(true);
+
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [onClose]);
 
   const handleDownload = async () => {
     const response = await fetch(src);
@@ -16,20 +26,20 @@ const ImageLightbox = ({ src, alt, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[10000] bg-black/90 flex items-center justify-center" onClick={onClose}>
-      <button onClick={onClose} className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full transition">
-        <X size={24} className="text-white" />
+    <div ref={containerRef} className="fixed inset-0 z-[10000] bg-black/90 flex items-center justify-center" onClick={onClose} role="dialog" aria-modal="true" aria-label="Image viewer">
+      <button onClick={onClose} className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full transition" aria-label="Close image viewer">
+        <X size={24} className="text-white" aria-hidden="true" />
       </button>
       
       <div className="absolute top-4 left-4 flex gap-2">
-        <button onClick={(e) => { e.stopPropagation(); setZoom(Math.min(zoom + 0.5, 3)); }} className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition">
-          <ZoomIn size={20} className="text-white" />
+        <button onClick={(e) => { e.stopPropagation(); setZoom(Math.min(zoom + 0.5, 3)); }} className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition" aria-label="Zoom in">
+          <ZoomIn size={20} className="text-white" aria-hidden="true" />
         </button>
-        <button onClick={(e) => { e.stopPropagation(); setZoom(Math.max(zoom - 0.5, 0.5)); }} className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition">
-          <ZoomOut size={20} className="text-white" />
+        <button onClick={(e) => { e.stopPropagation(); setZoom(Math.max(zoom - 0.5, 0.5)); }} className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition" aria-label="Zoom out">
+          <ZoomOut size={20} className="text-white" aria-hidden="true" />
         </button>
-        <button onClick={(e) => { e.stopPropagation(); handleDownload(); }} className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition">
-          <Download size={20} className="text-white" />
+        <button onClick={(e) => { e.stopPropagation(); handleDownload(); }} className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition" aria-label="Download image">
+          <Download size={20} className="text-white" aria-hidden="true" />
         </button>
       </div>
 
