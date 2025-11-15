@@ -18,13 +18,20 @@ const Home = () => {
         <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-accent/15 rounded-full blur-3xl float" style={{ animationDelay: '0.7s' }}></div>
       </div>
       
-      <div className="flex items-center justify-center pt-16 md:pt-20 px-2 md:px-4 relative z-10">
-        <div className="glass-effect rounded-2xl md:rounded-3xl shadow-2xl w-full max-w-7xl h-[calc(100vh-5rem)] md:h-[calc(100vh-8rem)] animate-fade-in border border-white/10">
-          <div className="flex flex-col h-full rounded-2xl md:rounded-3xl overflow-hidden">
-            <StoryBar />
-            <div className="flex flex-1 overflow-hidden">
-              <Sidebar />
-              {!selectedUser ? <NoChatSelected /> : <ChatContainer />}
+      <div className="flex items-center justify-center pt-14 sm:pt-16 md:pt-20 px-1 sm:px-2 md:px-4 pb-1 sm:pb-2 relative z-10 h-full">
+        <div className="glass-effect rounded-lg sm:rounded-2xl md:rounded-3xl shadow-2xl w-full max-w-7xl h-full animate-fade-in border border-white/10">
+          <div className="flex flex-col h-full rounded-lg sm:rounded-2xl md:rounded-3xl overflow-hidden">
+            <div className="hidden sm:block">
+              <StoryBar />
+            </div>
+            <div className="flex flex-1 overflow-hidden relative">
+              {/* Mobile: Show sidebar OR chat, not both */}
+              <div className={`${selectedUser ? 'hidden sm:flex' : 'flex'} flex-shrink-0`}>
+                <Sidebar />
+              </div>
+              <div className={`${selectedUser ? 'flex' : 'hidden sm:flex'} flex-1 overflow-hidden`}>
+                {!selectedUser ? <NoChatSelected /> : <ChatContainer />}
+              </div>
             </div>
           </div>
         </div>

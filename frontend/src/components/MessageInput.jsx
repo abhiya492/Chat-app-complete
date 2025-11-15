@@ -202,7 +202,7 @@ const MessageInput = () => {
 
   return (
     <div 
-      className="p-4 w-full relative"
+      className="p-2 sm:p-4 w-full relative"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -213,80 +213,80 @@ const MessageInput = () => {
         </div>
       )}
       {replyingTo && (
-        <div className="mb-2 p-3 bg-base-200 rounded-lg flex items-center justify-between border-l-4 border-primary animate-in slide-in-from-bottom-2 duration-200">
-          <div className="text-sm flex-1">
+        <div className="mb-2 p-2 sm:p-3 bg-base-200 rounded-lg flex items-center justify-between border-l-4 border-primary animate-in slide-in-from-bottom-2 duration-200">
+          <div className="text-xs sm:text-sm flex-1 min-w-0">
             <span className="font-semibold text-primary">Replying to</span>
-            <p className="text-base-content/70 mt-1 truncate">{replyingTo.text?.substring(0, 50)}{replyingTo.text?.length > 50 ? '...' : ''}</p>
+            <p className="text-base-content/70 mt-1 truncate">{replyingTo.text?.substring(0, 30)}{replyingTo.text?.length > 30 ? '...' : ''}</p>
           </div>
-          <button onClick={() => setReplyingTo(null)} className="btn btn-ghost btn-sm btn-circle">
-            <X className="size-4" />
+          <button onClick={() => setReplyingTo(null)} className="btn btn-ghost btn-xs sm:btn-sm btn-circle flex-shrink-0">
+            <X className="size-3 sm:size-4" />
           </button>
         </div>
       )}
       
       {editingMessage && (
-        <div className="mb-2 p-3 bg-warning/10 rounded-lg flex items-center justify-between border-l-4 border-warning animate-in slide-in-from-bottom-2 duration-200">
+        <div className="mb-2 p-2 sm:p-3 bg-warning/10 rounded-lg flex items-center justify-between border-l-4 border-warning animate-in slide-in-from-bottom-2 duration-200">
           <div className="flex items-center gap-2">
-            <Edit2 className="size-4 text-warning" />
-            <span className="text-sm font-semibold">Editing message</span>
+            <Edit2 className="size-3 sm:size-4 text-warning" />
+            <span className="text-xs sm:text-sm font-semibold">Editing message</span>
           </div>
-          <button onClick={() => { setEditingMessage(null); setText(""); }} className="btn btn-ghost btn-sm btn-circle">
-            <X className="size-4" />
+          <button onClick={() => { setEditingMessage(null); setText(""); }} className="btn btn-ghost btn-xs sm:btn-sm btn-circle">
+            <X className="size-3 sm:size-4" />
           </button>
         </div>
       )}
 
       {imagePreview && (
-        <div className="mb-3 animate-in fade-in slide-in-from-bottom-2 duration-200">
+        <div className="mb-2 sm:mb-3 animate-in fade-in slide-in-from-bottom-2 duration-200">
           <div className="relative inline-block">
             <img
               src={imagePreview}
               alt="Preview"
-              className="w-20 h-20 object-cover rounded-lg border-2 border-base-300 shadow-md"
+              className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-lg border-2 border-base-300 shadow-md"
             />
             <button
               onClick={removeImage}
-              className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-error text-error-content hover:scale-110 transition-transform flex items-center justify-center shadow-lg"
+              className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-error text-error-content hover:scale-110 transition-transform flex items-center justify-center shadow-lg"
               type="button"
             >
-              <X className="size-3" />
+              <X className="size-2.5 sm:size-3" />
             </button>
           </div>
         </div>
       )}
 
       {videoPreview && (
-        <div className="mb-3 p-3 bg-base-200 rounded-lg flex items-center justify-between border border-base-300 animate-in slide-in-from-bottom-2 duration-200">
+        <div className="mb-2 sm:mb-3 p-2 sm:p-3 bg-base-200 rounded-lg flex items-center justify-between border border-base-300 animate-in slide-in-from-bottom-2 duration-200">
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            <Video className="size-4 flex-shrink-0" />
-            <span className="text-sm truncate">{videoPreview.name}</span>
+            <Video className="size-3 sm:size-4 flex-shrink-0" />
+            <span className="text-xs sm:text-sm truncate">{videoPreview.name}</span>
           </div>
-          <button onClick={removeVideo} className="btn btn-ghost btn-sm btn-circle flex-shrink-0">
-            <X className="size-4" />
+          <button onClick={removeVideo} className="btn btn-ghost btn-xs sm:btn-sm btn-circle flex-shrink-0">
+            <X className="size-3 sm:size-4" />
           </button>
         </div>
       )}
 
       {filePreview && (
-        <div className="mb-3 p-3 bg-base-200 rounded-lg flex items-center justify-between border border-base-300 animate-in slide-in-from-bottom-2 duration-200">
+        <div className="mb-2 sm:mb-3 p-2 sm:p-3 bg-base-200 rounded-lg flex items-center justify-between border border-base-300 animate-in slide-in-from-bottom-2 duration-200">
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            <Paperclip className="size-4 flex-shrink-0" />
-            <span className="text-sm truncate">{filePreview.name}</span>
+            <Paperclip className="size-3 sm:size-4 flex-shrink-0" />
+            <span className="text-xs sm:text-sm truncate">{filePreview.name}</span>
           </div>
-          <button onClick={removeFile} className="btn btn-ghost btn-sm btn-circle flex-shrink-0">
-            <X className="size-4" />
+          <button onClick={removeFile} className="btn btn-ghost btn-xs sm:btn-sm btn-circle flex-shrink-0">
+            <X className="size-3 sm:size-4" />
           </button>
         </div>
       )}
 
       {voiceData && (
-        <div className="mb-3 p-3 bg-base-200 rounded-lg flex items-center justify-between border border-base-300 animate-in slide-in-from-bottom-2 duration-200">
+        <div className="mb-2 sm:mb-3 p-2 sm:p-3 bg-base-200 rounded-lg flex items-center justify-between border border-base-300 animate-in slide-in-from-bottom-2 duration-200">
           <div className="flex items-center gap-2">
-            <Mic className="size-4" />
-            <span className="text-sm">Voice message ({voiceData.duration}s)</span>
+            <Mic className="size-3 sm:size-4" />
+            <span className="text-xs sm:text-sm">Voice message ({voiceData.duration}s)</span>
           </div>
-          <button onClick={() => setVoiceData(null)} className="btn btn-ghost btn-sm btn-circle">
-            <X className="size-4" />
+          <button onClick={() => setVoiceData(null)} className="btn btn-ghost btn-xs sm:btn-sm btn-circle">
+            <X className="size-3 sm:size-4" />
           </button>
         </div>
       )}
@@ -306,7 +306,7 @@ const MessageInput = () => {
         onSelectReply={(reply) => setText(reply)}
       />
 
-      <div className="flex items-center gap-2 mb-2">
+      <div className="hidden sm:flex items-center gap-2 mb-2">
         <Timer size={16} className="text-base-content/60" />
         <select 
           value={disappearAfter || ""} 
@@ -323,11 +323,11 @@ const MessageInput = () => {
         </select>
       </div>
 
-      <form onSubmit={handleSendMessage} className="flex items-center gap-2">
-        <div className="flex-1 flex gap-2">
+      <form onSubmit={handleSendMessage} className="flex items-center gap-1 sm:gap-2">
+        <div className="flex-1 flex gap-1 sm:gap-2">
           <input
             type="text"
-            className="w-full input input-bordered rounded-lg input-sm sm:input-md focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+            className="w-full input input-bordered rounded-lg input-sm sm:input-md focus:outline-none focus:ring-2 focus:ring-primary transition-all text-sm sm:text-base"
             placeholder="Type a message..."
             value={text}
             onChange={handleTextChange}
@@ -353,55 +353,69 @@ const MessageInput = () => {
             onChange={handleFileChange}
           />
 
+          {/* Mobile attachment menu */}
+          <div className="dropdown dropdown-top sm:hidden">
+            <button type="button" tabIndex={0} className="btn btn-ghost btn-sm btn-circle">
+              <Paperclip size={18} />
+            </button>
+            <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-40 mb-2">
+              <li><button type="button" onClick={() => fileInputRef.current?.click()} className="text-xs"><Image size={16} />Image</button></li>
+              <li><button type="button" onClick={() => videoInputRef.current?.click()} className="text-xs"><Video size={16} />Video</button></li>
+              <li><button type="button" onClick={() => docInputRef.current?.click()} className="text-xs"><Paperclip size={16} />File</button></li>
+              <li><button type="button" onClick={() => setShowVoiceRecorder(!showVoiceRecorder)} className="text-xs"><Mic size={16} />Voice</button></li>
+            </ul>
+          </div>
+          
+          {/* Desktop attachment buttons */}
           <button
             type="button"
-            className={`hidden sm:flex btn btn-circle transition-all duration-200 ${
+            className={`hidden sm:flex btn btn-sm btn-circle transition-all duration-200 ${
               imagePreview ? "btn-success" : "btn-ghost"
             }`}
             onClick={() => fileInputRef.current?.click()}
             title="Attach image"
           >
-            <Image size={20} />
+            <Image size={18} />
           </button>
           <button
             type="button"
-            className={`hidden sm:flex btn btn-circle transition-all duration-200 ${
+            className={`hidden sm:flex btn btn-sm btn-circle transition-all duration-200 ${
               videoPreview ? "btn-success" : "btn-ghost"
             }`}
             onClick={() => videoInputRef.current?.click()}
             title="Attach video"
           >
-            <Video size={20} />
+            <Video size={18} />
           </button>
           <button
             type="button"
-            className={`hidden sm:flex btn btn-circle transition-all duration-200 ${
+            className={`hidden sm:flex btn btn-sm btn-circle transition-all duration-200 ${
               filePreview ? "btn-success" : "btn-ghost"
             }`}
             onClick={() => docInputRef.current?.click()}
             title="Attach file"
           >
-            <Paperclip size={20} />
+            <Paperclip size={18} />
           </button>
           <button
             type="button"
-            className={`hidden sm:flex btn btn-circle transition-all duration-200 ${
+            className={`hidden sm:flex btn btn-sm btn-circle transition-all duration-200 ${
               voiceData ? "btn-success" : "btn-ghost"
             }`}
             onClick={() => setShowVoiceRecorder(!showVoiceRecorder)}
             title="Voice message"
           >
-            <Mic size={20} />
+            <Mic size={18} />
           </button>
         </div>
         <motion.button
           type="submit"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          className="btn btn-sm btn-circle btn-primary btn-ripple"
+          className="btn btn-sm btn-circle btn-primary btn-ripple flex-shrink-0"
           disabled={!text.trim() && !imagePreview && !filePreview && !videoPreview && !voiceData}
         >
-          <Send size={22} />
+          <Send size={18} className="sm:w-5 sm:h-5" />
         </motion.button>
       </form>
     </div>

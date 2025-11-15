@@ -117,8 +117,8 @@ const ChatContainer = () => {
   }
 
   return (
-    <div className="flex h-full">
-      <div className="flex-1 flex flex-col overflow-auto max-w-4xl mx-auto">
+    <div className="flex h-full w-full">
+      <div className="flex-1 flex flex-col overflow-auto w-full">
       <ChatHeader 
         onSearchClick={() => setShowSearch(true)}
         onPinnedClick={() => {
@@ -133,7 +133,7 @@ const ChatContainer = () => {
       <div 
         ref={messagesContainerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto p-4 space-y-4"
+        className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-2 sm:space-y-4"
       >
         {isLoadingMore && (
           <div className="flex justify-center py-2">
@@ -154,7 +154,7 @@ const ChatContainer = () => {
               ref={messageEndRef}
             >
               <div className="chat-image avatar">
-                <div className="size-10 rounded-full border">
+                <div className="size-8 sm:size-10 rounded-full border">
                   <img
                     src={
                       isOwnMessage
@@ -183,14 +183,14 @@ const ChatContainer = () => {
                     <img
                       src={message.image}
                       alt="Attachment"
-                      className="sm:max-w-[200px] rounded-md mb-2 cursor-pointer hover:opacity-90 transition-opacity"
+                      className="max-w-[150px] sm:max-w-[200px] rounded-md mb-2 cursor-pointer hover:opacity-90 transition-opacity"
                     />
                   )}
                   {message.video && (
                     <video
                       src={message.video.url}
                       controls
-                      className="sm:max-w-[300px] rounded-md mb-2"
+                      className="max-w-[200px] sm:max-w-[300px] rounded-md mb-2"
                     />
                   )}
                   {message.voice && (
@@ -237,30 +237,30 @@ const ChatContainer = () => {
                 )}
 
                 {!message.isDeleted && (
-                  <div className={`absolute top-0 ${isOwnMessage ? 'left-0 -translate-x-full' : 'right-0 translate-x-full'} opacity-0 group-hover:opacity-100 transition-all duration-300 flex gap-1 px-2`}>
+                  <div className={`absolute top-0 ${isOwnMessage ? 'left-0 -translate-x-full' : 'right-0 translate-x-full'} opacity-0 group-hover:opacity-100 transition-all duration-300 flex gap-0.5 sm:gap-1 px-1 sm:px-2`}>
                     <motion.button
                       whileHover={{ scale: 1.2, rotate: 10, y: -2 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={() => setShowEmojiPicker(showEmojiPicker === message._id ? null : message._id)}
-                      className="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-500 hover:to-orange-500 flex items-center justify-center shadow-lg transition-all duration-200"
+                      className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-500 hover:to-orange-500 flex items-center justify-center shadow-lg transition-all duration-200"
                       title="React"
                     >
-                      <Smile size={14} className="text-white" />
+                      <Smile size={12} className="sm:w-3.5 sm:h-3.5 text-white" />
                     </motion.button>
                     <motion.button
                       whileHover={{ scale: 1.2, y: -2 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={() => setReplyingTo(message)}
-                      className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-400 to-cyan-400 hover:from-blue-500 hover:to-cyan-500 flex items-center justify-center shadow-lg transition-all duration-200"
+                      className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-blue-400 to-cyan-400 hover:from-blue-500 hover:to-cyan-500 flex items-center justify-center shadow-lg transition-all duration-200"
                       title="Reply"
                     >
-                      <Reply size={14} className="text-white" />
+                      <Reply size={12} className="sm:w-3.5 sm:h-3.5 text-white" />
                     </motion.button>
                     <motion.button
                       whileHover={{ scale: 1.2, y: -2 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={() => pinMessage(message._id)}
-                      className={`w-8 h-8 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${
+                      className={`hidden sm:flex w-8 h-8 rounded-full items-center justify-center shadow-lg transition-all duration-200 ${
                         message.isPinned 
                           ? 'bg-gradient-to-r from-red-400 to-pink-400 hover:from-red-500 hover:to-pink-500' 
                           : 'bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600'
@@ -273,7 +273,7 @@ const ChatContainer = () => {
                       whileHover={{ scale: 1.2, y: -2 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={() => setForwardingMessage(message)}
-                      className="w-8 h-8 rounded-full bg-gradient-to-r from-green-400 to-emerald-400 hover:from-green-500 hover:to-emerald-500 flex items-center justify-center shadow-lg transition-all duration-200"
+                      className="hidden sm:flex w-8 h-8 rounded-full bg-gradient-to-r from-green-400 to-emerald-400 hover:from-green-500 hover:to-emerald-500 items-center justify-center shadow-lg transition-all duration-200"
                       title="Forward"
                     >
                       <Forward size={14} className="text-white" />
@@ -284,7 +284,7 @@ const ChatContainer = () => {
                           whileHover={{ scale: 1.2, y: -2 }}
                           whileTap={{ scale: 0.9 }}
                           onClick={() => setEditingMessage(message)}
-                          className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-400 to-indigo-400 hover:from-purple-500 hover:to-indigo-500 flex items-center justify-center shadow-lg transition-all duration-200"
+                          className="hidden sm:flex w-8 h-8 rounded-full bg-gradient-to-r from-purple-400 to-indigo-400 hover:from-purple-500 hover:to-indigo-500 items-center justify-center shadow-lg transition-all duration-200"
                           title="Edit"
                         >
                           <Edit2 size={14} className="text-white" />
@@ -293,10 +293,10 @@ const ChatContainer = () => {
                           whileHover={{ scale: 1.2, y: -2 }}
                           whileTap={{ scale: 0.9 }}
                           onClick={() => deleteMessage(message._id)}
-                          className="w-8 h-8 rounded-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 flex items-center justify-center shadow-lg transition-all duration-200"
+                          className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 flex items-center justify-center shadow-lg transition-all duration-200"
                           title="Delete"
                         >
-                          <Trash2 size={14} className="text-white" />
+                          <Trash2 size={12} className="sm:w-3.5 sm:h-3.5 text-white" />
                         </motion.button>
                       </>
                     )}
@@ -391,7 +391,9 @@ const ChatContainer = () => {
       <MessageInput />
       </div>
       
-      <SharedExperiencePanel />
+      <div className="hidden lg:block">
+        <SharedExperiencePanel />
+      </div>
     </div>
   );
 };
