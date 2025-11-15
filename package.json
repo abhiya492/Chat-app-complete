@@ -4,7 +4,7 @@
   "description": "Real-time chat application",
   "main": "backend/src/index.js",
   "scripts": {
-    "build": "cd frontend && npm install --production=false && npm run build && cd ../backend && npm install",
+    "build": "cd frontend && npm install --production=false && npm run build && cd ../backend && npm install --include=optional",
     "start": "cd backend && npm start",
     "dev": "concurrently \"cd backend && npm run dev\" \"cd frontend && npm run dev\"",
     "docker:build": "docker-compose build",
