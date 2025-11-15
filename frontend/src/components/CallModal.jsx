@@ -172,7 +172,7 @@ const CallModal = () => {
   if (!isCallActive || !authUser) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-gradient-to-br from-base-300 via-base-200 to-base-300 flex flex-col">
+    <div className="fixed inset-0 z-50 bg-gradient-to-br from-base-300 via-base-200 to-base-300 flex flex-col overflow-hidden">
       {/* Top Bar */}
       <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/50 to-transparent p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -197,17 +197,17 @@ const CallModal = () => {
       </div>
 
       {/* Video/Audio Display */}
-      <div className="flex-1 relative">
+      <div className="flex-1 relative overflow-hidden">
         {isVideo ? (
           <>
             {/* Remote video with overlay effects */}
-            <div className="relative w-full h-full">
+            <div className="relative w-full h-full flex items-center justify-center bg-black">
               <video
                 ref={remoteVideoRef}
                 autoPlay
                 playsInline
                 muted={false}
-                className="w-full h-full object-cover"
+                className="max-w-full max-h-full object-contain"
               />
               
               {/* Audio level indicator for video calls */}
@@ -226,22 +226,22 @@ const CallModal = () => {
             
             {/* Local video preview */}
             {!isVideoOff ? (
-              <div className="absolute bottom-20 right-4 group">
+              <div className="absolute bottom-24 sm:bottom-20 right-2 sm:right-4 group">
                 <video
                   ref={localVideoRef}
                   autoPlay
                   playsInline
                   muted
-                  className="w-40 h-32 rounded-2xl border-4 border-white/20 object-cover shadow-2xl group-hover:scale-110 group-hover:border-primary/50 transition-all cursor-pointer"
+                  className="w-24 h-20 sm:w-40 sm:h-32 rounded-lg sm:rounded-2xl border-2 sm:border-4 border-white/20 object-cover shadow-2xl group-hover:scale-110 group-hover:border-primary/50 transition-all cursor-pointer"
                 />
-                <div className="absolute top-2 right-2 bg-black/50 backdrop-blur-sm px-2 py-1 rounded-full text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="absolute top-1 sm:top-2 right-1 sm:right-2 bg-black/50 backdrop-blur-sm px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity">
                   You
                 </div>
               </div>
             ) : (
-              <div className="absolute bottom-20 right-4 w-40 h-32 rounded-2xl border-4 border-white/20 bg-gradient-to-br from-base-300 to-base-200 flex flex-col items-center justify-center shadow-2xl">
-                <VideoOff size={40} className="text-base-content/50 mb-2" />
-                <span className="text-xs text-base-content/50">Camera Off</span>
+              <div className="absolute bottom-24 sm:bottom-20 right-2 sm:right-4 w-24 h-20 sm:w-40 sm:h-32 rounded-lg sm:rounded-2xl border-2 sm:border-4 border-white/20 bg-gradient-to-br from-base-300 to-base-200 flex flex-col items-center justify-center shadow-2xl">
+                <VideoOff size={24} className="sm:w-10 sm:h-10 text-base-content/50 mb-1 sm:mb-2" />
+                <span className="text-[10px] sm:text-xs text-base-content/50">Camera Off</span>
               </div>
             )}
           </>
@@ -334,19 +334,19 @@ const CallModal = () => {
       </div>
 
       {/* Control Bar */}
-      <div className="p-6 bg-gradient-to-t from-black/70 via-black/50 to-transparent backdrop-blur-md">
-        <div className="flex justify-center items-center gap-6">
+      <div className="p-3 sm:p-6 bg-gradient-to-t from-black/70 via-black/50 to-transparent backdrop-blur-md">
+        <div className="flex justify-center items-center gap-3 sm:gap-6">
           {/* Mute Button */}
           <div className="relative group">
             <button
               onClick={toggleMute}
-              className={`btn btn-circle btn-lg shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 ${
+              className={`btn btn-circle btn-md sm:btn-lg shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 ${
                 isMuted 
                   ? "btn-error animate-pulse" 
                   : "bg-white/20 hover:bg-white/30 border-white/30 text-white"
               }`}
             >
-              {isMuted ? <MicOff size={28} /> : <Mic size={28} />}
+              {isMuted ? <MicOff size={20} className="sm:w-7 sm:h-7" /> : <Mic size={20} className="sm:w-7 sm:h-7" />}
             </button>
             <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-black/80 text-white px-3 py-1.5 rounded-lg text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
               {isMuted ? "Unmute" : "Mute"}
@@ -361,13 +361,13 @@ const CallModal = () => {
             <div className="relative group">
               <button
                 onClick={toggleVideo}
-                className={`btn btn-circle btn-lg shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 ${
+                className={`btn btn-circle btn-md sm:btn-lg shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 ${
                   isVideoOff 
                     ? "btn-error animate-pulse" 
                     : "bg-white/20 hover:bg-white/30 border-white/30 text-white"
                 }`}
               >
-                {isVideoOff ? <VideoOff size={28} /> : <Video size={28} />}
+                {isVideoOff ? <VideoOff size={20} className="sm:w-7 sm:h-7" /> : <Video size={20} className="sm:w-7 sm:h-7" />}
               </button>
               <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-black/80 text-white px-3 py-1.5 rounded-lg text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                 {isVideoOff ? "Turn on camera" : "Turn off camera"}
@@ -382,9 +382,9 @@ const CallModal = () => {
           <div className="relative group">
             <button
               onClick={handleEndCall}
-              className="btn btn-circle btn-lg btn-error shadow-2xl hover:scale-110 hover:rotate-12 active:scale-95 transition-all duration-200"
+              className="btn btn-circle btn-md sm:btn-lg btn-error shadow-2xl hover:scale-110 hover:rotate-12 active:scale-95 transition-all duration-200"
             >
-              <PhoneOff size={28} />
+              <PhoneOff size={20} className="sm:w-7 sm:h-7" />
             </button>
             <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-black/80 text-white px-3 py-1.5 rounded-lg text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
               End call
@@ -393,7 +393,7 @@ const CallModal = () => {
         </div>
         
         {/* Call stats */}
-        <div className="mt-4 flex justify-center gap-4 text-white/60 text-xs">
+        <div className="mt-2 sm:mt-4 flex justify-center gap-2 sm:gap-4 text-white/60 text-[10px] sm:text-xs">
           <div className="flex items-center gap-1">
             <span className={`w-2 h-2 rounded-full ${
               remoteStreamReady ? 'bg-success animate-pulse' : 'bg-error'
