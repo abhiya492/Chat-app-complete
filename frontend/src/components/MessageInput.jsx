@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
-import { Image, Send, X, Paperclip, Mic, Video, Timer } from "lucide-react";
+import { Image, Send, X, Paperclip, Mic, Video, Timer, Edit2, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 import VoiceRecorder from "./VoiceRecorder";
 import SmartReplies from "./SmartReplies";
@@ -20,7 +20,7 @@ const MessageInput = () => {
   const videoInputRef = useRef(null);
   const docInputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
-  const { sendMessage, replyingTo, setReplyingTo, editingMessage, setEditingMessage, emitTyping, emitStopTyping, messages } = useChatStore();
+  const { sendMessage, replyingTo, setReplyingTo, editingMessage, setEditingMessage, emitTyping, emitStopTyping, messages, isSendingMessage } = useChatStore();
   const { authUser } = useAuthStore();
   
   const lastReceivedMessage = messages.filter(m => m.senderId !== authUser._id).slice(-1)[0];
@@ -413,9 +413,9 @@ const MessageInput = () => {
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           className="btn btn-sm btn-circle btn-primary btn-ripple flex-shrink-0"
-          disabled={!text.trim() && !imagePreview && !filePreview && !videoPreview && !voiceData}
+          disabled={(!text.trim() && !imagePreview && !filePreview && !videoPreview && !voiceData) || isSendingMessage}
         >
-          <Send size={18} className="sm:w-5 sm:h-5" />
+          {isSendingMessage ? <Loader2 size={18} className="sm:w-5 sm:h-5 animate-spin" /> : <Send size={18} className="sm:w-5 sm:h-5" />}
         </motion.button>
       </form>
     </div>

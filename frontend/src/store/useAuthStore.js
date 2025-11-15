@@ -11,6 +11,7 @@ export const useAuthStore = create((set, get) => ({
   isLoggingIn: false,
   isUpdatingProfile: false,
   isCheckingAuth: true,
+  isLoggingOut: false,
   onlineUsers: [],
   socket: null,
 
@@ -56,14 +57,14 @@ export const useAuthStore = create((set, get) => ({
   },
 
   logout: async () => {
+    set({ isLoggingOut: true });
     try {
       await axiosInstance.post("/auth/logout");
     } catch (error) {
       // Ignore logout errors
     } finally {
-      set({ authUser: null, onlineUsers: [] });
+      set({ authUser: null, onlineUsers: [], isLoggingOut: false });
       get().disconnectSocket();
-      // Clear all local storage and session storage
       localStorage.clear();
       sessionStorage.clear();
       toast.success("Logged out successfully");

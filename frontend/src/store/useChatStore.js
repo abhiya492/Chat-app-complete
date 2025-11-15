@@ -10,6 +10,7 @@ export const useChatStore = create((set,get) => ({
   selectedUser: null,
   isUsersLoading: false,
   isMessagesLoading: false,
+  isSendingMessage: false,
   hasMoreMessages: true,
   currentPage: 1,
   replyingTo: null,
@@ -63,6 +64,7 @@ export const useChatStore = create((set,get) => ({
   },
   sendMessage: async (messageData) => {
     const { selectedUser, messages, replyingTo } = get();
+    set({ isSendingMessage: true });
     try {
       const payload = { ...messageData };
       if (replyingTo) payload.replyTo = replyingTo._id;
@@ -70,7 +72,6 @@ export const useChatStore = create((set,get) => ({
       const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, payload);
       set({ messages: [...messages, res.data], replyingTo: null });
       
-      // Track message sent
       if (window.analytics) {
         window.analytics.track('message_sent', { 
           hasImage: !!messageData.image,
@@ -80,6 +81,8 @@ export const useChatStore = create((set,get) => ({
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to send message");
+    } finally {
+      set({ isSendingMessage: false });
     }
   },
 

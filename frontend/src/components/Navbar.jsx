@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
-import { LogOut, MessageSquare, Settings, User, Radio, Shuffle, Menu, X } from "lucide-react";
+import { LogOut, MessageSquare, Settings, User, Radio, Shuffle, Menu, X, Loader2 } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import LanguageSelector from "./LanguageSelector";
 import { useState } from "react";
 
 const Navbar = () => {
-  const { logout, authUser } = useAuthStore();
+  const { logout, authUser, isLoggingOut } = useAuthStore();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   return (
@@ -53,9 +53,9 @@ const Navbar = () => {
                   <User className="w-4 h-4" />
                   <span className="hidden lg:inline font-medium text-sm">Profile</span>
                 </Link>
-                <button className="btn btn-sm gap-2 btn-ghost hover:bg-error/10 hover:text-error transition-all hover:scale-105 hover:shadow-md" onClick={logout}>
-                  <LogOut className="w-4 h-4 hover:-rotate-12 transition-transform" />
-                  <span className="hidden lg:inline font-medium text-sm">Logout</span>
+                <button className="btn btn-sm gap-2 btn-ghost hover:bg-error/10 hover:text-error transition-all hover:scale-105 hover:shadow-md" onClick={logout} disabled={isLoggingOut}>
+                  {isLoggingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4 hover:-rotate-12 transition-transform" />}
+                  <span className="hidden lg:inline font-medium text-sm">{isLoggingOut ? "Logging out..." : "Logout"}</span>
                 </button>
               </>
             )}
@@ -91,8 +91,8 @@ const Navbar = () => {
                   <Link to="/profile" className="btn btn-sm gap-2 btn-ghost justify-start" onClick={() => setShowMobileMenu(false)}>
                     <User className="w-4 h-4" /><span>Profile</span>
                   </Link>
-                  <button className="btn btn-sm gap-2 btn-ghost justify-start text-error hover:bg-error/10" onClick={() => { logout(); setShowMobileMenu(false); }}>
-                    <LogOut className="w-4 h-4" /><span>Logout</span>
+                  <button className="btn btn-sm gap-2 btn-ghost justify-start text-error hover:bg-error/10" onClick={() => { logout(); setShowMobileMenu(false); }} disabled={isLoggingOut}>
+                    {isLoggingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}<span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
                   </button>
                 </>
               )}
