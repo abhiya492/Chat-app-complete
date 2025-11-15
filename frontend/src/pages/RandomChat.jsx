@@ -49,8 +49,11 @@ const RandomChat = () => {
   useEffect(() => {
     if (!socket || !webrtcService || !partner) return;
     
+    console.log('🔧 Setting up WebRTC handlers for partner:', partner._id);
+    
     // Handle WebRTC offer (for receiver)
     const handleOffer = async ({ offer, from, callId }) => {
+      console.log('📥 Received offer from:', from, 'expected:', partner._id);
       if (from === partner._id) {
         await webrtcService.setRemoteDescription(offer);
         const answer = await webrtcService.createAnswer();
@@ -65,18 +68,29 @@ const RandomChat = () => {
     
     // Handle WebRTC answer (for caller)
     const handleAnswer = async ({ answer, from }) => {
+      console.log('📥 Received answer from:', from, 'expected:', partner._id);
       if (from === partner._id) {
         await webrtcService.setRemoteDescription(answer);
         console.log('✅ Answer received and set');
       }
     };
     
+    // Handle ICE candidates
+    const handleIceCandidate = ({ candidate, from }) => {
+      console.log('🧊 Received ICE candidate from:', from);
+      if (from === partner._id) {
+        webrtcService.addIceCandidate(candidate);
+      }
+    };
+    
     socket.on("call:offer", handleOffer);
     socket.on("call:answer", handleAnswer);
+    socket.on("call:ice-candidate", handleIceCandidate);
     
     return () => {
       socket.off("call:offer", handleOffer);
       socket.off("call:answer", handleAnswer);
+      socket.off("call:ice-candidate", handleIceCandidate);
     };
   }, [socket, webrtcService, partner]);
 
