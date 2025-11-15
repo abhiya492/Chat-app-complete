@@ -61,8 +61,11 @@ export const useAuthStore = create((set, get) => ({
     } catch (error) {
       // Ignore logout errors
     } finally {
-      set({ authUser: null });
+      set({ authUser: null, onlineUsers: [] });
       get().disconnectSocket();
+      // Clear all local storage and session storage
+      localStorage.clear();
+      sessionStorage.clear();
       toast.success("Logged out successfully");
     }
   },

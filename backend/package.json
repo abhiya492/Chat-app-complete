@@ -12,7 +12,7 @@
   "license": "ISC",
   "description": "",
   "engines": {
-    "node": "18.x"
+    "node": ">=18.x"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -24,6 +24,9 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.0",
     "nodemailer": "^7.0.9",
+    "passport": "^0.7.0",
+    "passport-github2": "^0.1.12",
+    "passport-google-oauth20": "^2.0.0",
     "socket.io": "^4.8.1"
   },
   "devDependencies": {

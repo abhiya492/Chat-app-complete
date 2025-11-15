@@ -36,6 +36,19 @@ const App = () => {
     checkAuth();
   }, [checkAuth]);
 
+  // Handle browser back/forward cache (bfcache)
+  useEffect(() => {
+    const handlePageShow = (event) => {
+      if (event.persisted) {
+        // Page was restored from bfcache, re-check auth
+        checkAuth();
+      }
+    };
+    
+    window.addEventListener('pageshow', handlePageShow);
+    return () => window.removeEventListener('pageshow', handlePageShow);
+  }, [checkAuth]);
+
   useEffect(() => {
     trackPageView(window.location.pathname);
   }, []);

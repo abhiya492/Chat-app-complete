@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import AuthImagePattern from "../components/AuthImagePattern";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare } from "lucide-react";
+import GoogleAuthButton from "../components/GoogleAuthButton";
+import GitHubAuthButton from "../components/GitHubAuthButton";
+import toast from "react-hot-toast";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -11,6 +14,16 @@ const Login = () => {
     password: "",
   });
   const { login, isLoggingIn } = useAuthStore();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const error = searchParams.get('error');
+    if (error === 'auth_failed') {
+      toast.error('Google authentication failed. Please try again.');
+    } else if (error === 'server_error') {
+      toast.error('Server error. Please try again later.');
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -44,6 +57,14 @@ const Login = () => {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6 backdrop-blur-sm bg-base-100/50 p-8 rounded-2xl shadow-xl border border-base-300/50 hover:border-primary/30 transition-all duration-300">
+            {/* OAuth Buttons */}
+            <div className="space-y-3">
+              <GoogleAuthButton />
+              <GitHubAuthButton />
+            </div>
+
+            {/* Divider */}
+            <div className="divider text-sm text-base-content/60">OR</div>
             <div className="form-control">
               <label className="label">
                 <span className="label-text font-semibold text-sm">Email Address</span>

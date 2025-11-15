@@ -15,6 +15,7 @@ Welcome to the **Real-Time Chat App** - A feature-rich, production-ready chat ap
 - **MongoDB** - NoSQL database
 - **Socket.io** - Real-time bidirectional communication
 - **JWT** - Authentication & authorization
+- **Passport.js** - OAuth authentication
 - **Cloudinary** - Media storage
 - **Nodemailer** - Email service
 
@@ -45,11 +46,13 @@ Welcome to the **Real-Time Chat App** - A feature-rich, production-ready chat ap
 
 ### 🔐 Authentication & Security
 - ✅ JWT-based authentication
+- ✅ **Google OAuth 2.0** - Sign in with Google
 - ✅ Password hashing with bcrypt
 - ✅ Email verification with OTP
 - ✅ Forgot password functionality
 - ✅ Session management
 - ✅ Protected routes
+- ✅ Multi-provider authentication
 
 ### 💬 Core Messaging Features
 - ✅ Real-time messaging with Socket.io
@@ -187,6 +190,12 @@ Welcome to the **Real-Time Chat App** - A feature-rich, production-ready chat ap
    
    # Groq AI (Optional)
    GROQ_API_KEY=your_groq_api_key
+   
+   # Google OAuth (Optional)
+   GOOGLE_CLIENT_ID=your_google_client_id
+   GOOGLE_CLIENT_SECRET=your_google_client_secret
+   GOOGLE_CALLBACK_URL=http://localhost:5001/api/auth/google/callback
+   CLIENT_URL=http://localhost:5173
    ```
 
 4. **Run the application**
@@ -234,6 +243,7 @@ Welcome to the **Real-Time Chat App** - A feature-rich, production-ready chat ap
 ### Setup & Configuration
 - ⚙️ [QUICK_START.md](./QUICK_START.md) - Quick start guide
 - ⚙️ [QUICK_REFERENCE.md](./QUICK_REFERENCE.md) - Quick reference
+- 🔐 [GOOGLE_OAUTH_SETUP.md](./GOOGLE_OAUTH_SETUP.md) - Google OAuth setup
 - 📧 [EMAIL_SETUP_GUIDE.md](./EMAIL_SETUP_GUIDE.md) - Email configuration
 - 📞 [SETUP_CALLS.md](./SETUP_CALLS.md) - WebRTC setup
 - 💾 [STORAGE_OPTIONS.md](./STORAGE_OPTIONS.md) - Storage configuration
@@ -340,6 +350,12 @@ EMAIL_PASS=your_app_password
 
 # Groq AI (Optional)
 GROQ_API_KEY=your_groq_api_key
+
+# Google OAuth (Optional)
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_CALLBACK_URL=http://localhost:5001/api/auth/google/callback
+CLIENT_URL=http://localhost:5173
 ```
 
 ---

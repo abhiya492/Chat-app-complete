@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.route.js';
+import oauthRoutes from './routes/oauth.route.js';
 import messageRoutes from './routes/message.route.js';
 import invitationRoutes from './routes/invitation.route.js';
 import callRoutes from './routes/call.route.js';
@@ -11,6 +12,7 @@ import streakRoutes from './routes/streak.route.js';
 import roomRoutes from './routes/room.route.js';
 import sharedExperienceRoutes from './routes/sharedExperience.route.js';
 import cors from 'cors';
+import passportConfig from './lib/passport.js';
 
 import path from 'path';
 
@@ -31,6 +33,7 @@ app.use(cors({
     origin: "http://localhost:5173",
     credentials:true
 }));
+app.use(passportConfig.initialize());
 
 // Health check endpoint for Kubernetes
 app.get("/health", (req, res) => {
@@ -38,6 +41,7 @@ app.get("/health", (req, res) => {
 });
 
 app.use("/api/auth",authRoutes);
+app.use("/api/auth",oauthRoutes);
 app.use("/api/messages",messageRoutes);
 app.use("/api/invitations",invitationRoutes);
 app.use("/api/calls",callRoutes);

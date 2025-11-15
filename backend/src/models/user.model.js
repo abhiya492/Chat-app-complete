@@ -13,8 +13,23 @@ const userSchema = new mongoose.Schema(
     },
     password: { 
         type: String, 
-        required: true,
+        required: false,
         minlength: 6,
+    },
+    googleId: {
+        type: String,
+        unique: true,
+        sparse: true,
+    },
+    githubId: {
+        type: String,
+        unique: true,
+        sparse: true,
+    },
+    authProvider: {
+        type: String,
+        enum: ['local', 'google', 'github'],
+        default: 'local',
     },
     profilePic: { 
         type: String,
@@ -44,6 +59,10 @@ const userSchema = new mongoose.Schema(
     },
     resetPasswordExpires: {
         type: Date,
+    },
+    isEmailVerified: {
+        type: Boolean,
+        default: false,
     },
 },
     { timestamps: true }
