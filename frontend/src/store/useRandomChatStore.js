@@ -21,23 +21,28 @@ export const useRandomChatStore = create((set, get) => ({
     console.log("Matched with:", partner);
     set({ isMatched: true, isSearching: false, partner, sessionId });
     
-    // Initialize WebRTC
-    const webrtcService = new WebRTCService();
-    await webrtcService.initializePeerConnection(socket, partner._id);
-    const stream = await webrtcService.getLocalStream(true); // video call
-    webrtcService.addLocalStreamToPeer();
-    
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    const offer = await webrtcService.createOffer();
-    socket.emit("call:offer", {
-      offer,
-      to: partner._id,
-      callId: sessionId,
-      type: "video",
-    });
-    
-    set({ webrtcService, localStream: stream });
+    try {
+      // Initialize WebRTC
+      const webrtcService = new WebRTCService();
+      await webrtcService.initializePeerConnection(socket, partner._id);
+      const stream = await webrtcService.getLocalStream(true);
+      webrtcService.addLocalStreamToPeer();
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      const offer = await webrtcService.createOffer();
+      socket.emit("call:offer", {
+        offer,
+        to: partner._id,
+        callId: sessionId,
+        type: "video",
+      });
+      
+      set({ webrtcService, localStream: stream });
+      console.log('✅ WebRTC initialized and offer sent');
+    } catch (error) {
+      console.error('❌ Error setting up WebRTC:', error);
+    }
   },
 
   skipPartner: (socket) => {

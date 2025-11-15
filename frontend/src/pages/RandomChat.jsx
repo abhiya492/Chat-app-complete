@@ -38,12 +38,23 @@ const RandomChat = () => {
     setupRandomChatListeners(socket);
     setupCallListeners(socket);
     
+    // Handle WebRTC answer for random chat
+    const handleAnswer = async ({ answer, from }) => {
+      if (webrtcService && partner && from === partner._id) {
+        await webrtcService.setRemoteDescription(answer);
+        console.log('✅ Answer received and set');
+      }
+    };
+    
+    socket.on("call:answer", handleAnswer);
+    
     return () => {
+      socket.off("call:answer", handleAnswer);
       cleanupRandomChatListeners(socket);
       cleanupCallListeners(socket);
       leaveRandomChat(socket);
     };
-  }, [socket]);
+  }, [socket, webrtcService, partner]);
 
   useEffect(() => {
     if (webrtcService) {
@@ -137,7 +148,8 @@ const RandomChat = () => {
           ref={remoteVideoRef}
           autoPlay
           playsInline
-          className="w-full h-full object-cover"
+          muted={false}
+          className="w-full h-full object-cover bg-black"
         />
         
         {/* Local Video */}
@@ -146,7 +158,7 @@ const RandomChat = () => {
           autoPlay
           playsInline
           muted
-          className="absolute bottom-4 right-4 w-48 h-36 rounded-xl border-4 border-white/20 object-cover shadow-2xl"
+          className="absolute bottom-4 right-4 w-48 h-36 rounded-xl border-4 border-white/20 object-cover shadow-2xl bg-gray-800"
         />
 
         {/* Controls */}
