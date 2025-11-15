@@ -40,6 +40,7 @@ app.get("/health", (req, res) => {
     res.status(200).json({ status: "ok" });
 });
 
+// API routes MUST come before static files
 app.use("/api/auth",authRoutes);
 app.use("/api/auth",oauthRoutes);
 app.use("/api/messages",messageRoutes);
@@ -56,6 +57,7 @@ if (process.env.NODE_ENV === "production") {
     const frontendPath = path.join(__dirname, "../frontend/dist");
     app.use(express.static(frontendPath));
   
+    // Catch-all route MUST be last
     app.get("*", (req, res) => {
       res.sendFile(path.join(frontendPath, "index.html"));
     });
