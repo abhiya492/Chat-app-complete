@@ -58,14 +58,8 @@ export const login = async (req, res) => {
         return res.status(400).json({ message: "Invalid credentials" });
       }
 
-      // If user has no password (OAuth only), ask them to use OAuth
       if (!user.password) {
-        if (user.authProvider === 'google') {
-          return res.status(400).json({ message: "This account uses Google login. Please use 'Continue with Google' button or reset your password to set one." });
-        }
-        if (user.authProvider === 'github') {
-          return res.status(400).json({ message: "This account uses GitHub login. Please use 'Continue with GitHub' button or reset your password to set one." });
-        }
+        return res.status(400).json({ message: "Invalid credentials" });
       }
   
       const isPasswordCorrect = await bcrypt.compare(password, user.password);
