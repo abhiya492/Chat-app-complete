@@ -77,6 +77,8 @@ export class WebRTCService {
           echoCancellation: true,
           noiseSuppression: true,
           autoGainControl: true,
+          sampleRate: 48000,
+          channelCount: 1
         },
         video: isVideo ? {
           width: { ideal: 1280 },
@@ -87,12 +89,22 @@ export class WebRTCService {
       
       console.log('🎤 Requesting media with constraints:', constraints);
       this.localStream = await navigator.mediaDevices.getUserMedia(constraints);
-      console.log('✅ Media stream obtained');
+      console.log('✅ Media stream obtained with', this.localStream.getTracks().length, 'tracks');
       
-      // Ensure tracks are enabled by default
+      // Ensure tracks are enabled and verify settings
       this.localStream.getAudioTracks().forEach(track => {
         track.enabled = true;
-        console.log('🎤 Audio track enabled:', track.label, 'Settings:', track.getSettings());
+        const settings = track.getSettings();
+        console.log('🎤 Audio track:', track.label);
+        console.log('  - Enabled:', track.enabled);
+        console.log('  - Muted:', track.muted);
+        console.log('  - ReadyState:', track.readyState);
+        console.log('  - Settings:', settings);
+        
+        // Test audio level
+        track.onmute = () => console.warn('⚠️ Audio track muted!');
+        track.onunmute = () => console.log('✅ Audio track unmuted');
+        track.onended = () => console.warn('⚠️ Audio track ended!');
       });
       
       if (isVideo) {
@@ -113,18 +125,46 @@ export class WebRTCService {
     if (this.localStream && this.peerConnection) {
       const senders = [];
       this.localStream.getTracks().forEach((track) => {
+        // Ensure track is enabled before adding
+        track.enabled = true;
+        
         const sender = this.peerConnection.addTrack(track, this.localStream);
         senders.push(sender);
-        console.log(`✅ Added ${track.kind} track to peer connection, enabled: ${track.enabled}`);
+        console.log(`✅ Added ${track.kind} track to peer connection`);
+        console.log(`  - Track enabled: ${track.enabled}`);
+        console.log(`  - Track muted: ${track.muted}`);
+        console.log(`  - Track readyState: ${track.readyState}`);
         
-        // Log sender parameters for debugging
+        // Log and verify sender parameters
         if (track.kind === 'audio') {
-          console.log('🎤 Audio sender parameters:', sender.getParameters());
+          const params = sender.getParameters();
+          console.log('🎤 Audio sender parameters:', params);
+          console.log('  - Encodings:', params.encodings);
+          
+          // Ensure audio is not degraded
+          if (params.encodings && params.encodings.length > 0) {
+            params.encodings[0].maxBitrate = 128000; // 128 kbps
+            params.encodings[0].priority = 'high';
+            sender.setParameters(params).then(() => {
+              console.log('✅ Audio parameters updated for better quality');
+            }).catch(err => {
+              console.warn('⚠️ Could not update audio parameters:', err);
+            });
+          }
         }
       });
       
-      // Verify senders
+      // Verify all senders
       console.log('📡 Total senders added:', senders.length);
+      console.log('📡 Peer connection senders:', this.peerConnection.getSenders().length);
+      
+      // Verify transceivers
+      const transceivers = this.peerConnection.getTransceivers();
+      console.log('🔄 Transceivers:', transceivers.length);
+      transceivers.forEach(t => {
+        console.log(`  - ${t.sender.track?.kind}: direction=${t.direction}, currentDirection=${t.currentDirection}`);
+      });
+      
       return senders;
     }
   }
