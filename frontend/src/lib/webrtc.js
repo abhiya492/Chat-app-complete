@@ -2,7 +2,9 @@ const ICE_SERVERS = {
   iceServers: [
     { urls: "stun:stun.l.google.com:19302" },
     { urls: "stun:stun1.l.google.com:19302" },
+    { urls: "stun:stun2.l.google.com:19302" },
   ],
+  iceCandidatePoolSize: 10,
 };
 
 export class WebRTCService {
@@ -18,6 +20,7 @@ export class WebRTCService {
 
     this.peerConnection.onicecandidate = (event) => {
       if (event.candidate) {
+        console.log('🧊 ICE candidate generated');
         socket.emit("call:ice-candidate", {
           candidate: event.candidate,
           to: userId,
@@ -26,11 +29,23 @@ export class WebRTCService {
     };
 
     this.peerConnection.ontrack = (event) => {
-      console.log('📹 Remote track received:', event.track.kind);
+      console.log('📹 Remote track received:', event.track.kind, 'readyState:', event.track.readyState);
       this.remoteStream = event.streams[0];
+      
+      // Log all tracks in the stream
+      console.log('🎵 Remote stream tracks:', this.remoteStream.getTracks().map(t => `${t.kind}: ${t.enabled}`));
+      
       if (this.onRemoteStreamCallback) {
         this.onRemoteStreamCallback(this.remoteStream);
       }
+    };
+
+    this.peerConnection.onconnectionstatechange = () => {
+      console.log('🔌 Connection state:', this.peerConnection.connectionState);
+    };
+
+    this.peerConnection.oniceconnectionstatechange = () => {
+      console.log('🧊 ICE connection state:', this.peerConnection.iceConnectionState);
     };
 
     return this.peerConnection;
@@ -38,27 +53,39 @@ export class WebRTCService {
 
   async getLocalStream(isVideo = true) {
     try {
-      this.localStream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: isVideo,
-      });
+      const constraints = {
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+        video: isVideo ? {
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          facingMode: "user"
+        } : false,
+      };
+      
+      console.log('🎤 Requesting media with constraints:', constraints);
+      this.localStream = await navigator.mediaDevices.getUserMedia(constraints);
+      console.log('✅ Media stream obtained');
       
       // Ensure tracks are enabled by default
       this.localStream.getAudioTracks().forEach(track => {
         track.enabled = true;
-        console.log('🎤 Audio track enabled');
+        console.log('🎤 Audio track enabled:', track.label, 'Settings:', track.getSettings());
       });
       
       if (isVideo) {
         this.localStream.getVideoTracks().forEach(track => {
           track.enabled = true;
-          console.log('📹 Video track enabled');
+          console.log('📹 Video track enabled:', track.label);
         });
       }
       
       return this.localStream;
     } catch (error) {
-      console.error("Error accessing media devices:", error);
+      console.error("❌ Error accessing media devices:", error);
       throw error;
     }
   }
@@ -66,22 +93,34 @@ export class WebRTCService {
   addLocalStreamToPeer() {
     if (this.localStream && this.peerConnection) {
       this.localStream.getTracks().forEach((track) => {
-        this.peerConnection.addTrack(track, this.localStream);
+        const sender = this.peerConnection.addTrack(track, this.localStream);
+        console.log(`✅ Added ${track.kind} track to peer connection`);
+        
+        // Log sender parameters for debugging
+        if (track.kind === 'audio') {
+          console.log('🎤 Audio sender parameters:', sender.getParameters());
+        }
       });
     }
   }
 
   async createOffer() {
-    const offer = await this.peerConnection.createOffer();
+    const offer = await this.peerConnection.createOffer({
+      offerToReceiveAudio: true,
+      offerToReceiveVideo: true,
+    });
     await this.peerConnection.setLocalDescription(offer);
-    console.log('📤 Offer created');
+    console.log('📤 Offer created with audio/video');
     return offer;
   }
 
   async createAnswer() {
-    const answer = await this.peerConnection.createAnswer();
+    const answer = await this.peerConnection.createAnswer({
+      offerToReceiveAudio: true,
+      offerToReceiveVideo: true,
+    });
     await this.peerConnection.setLocalDescription(answer);
-    console.log('📤 Answer created');
+    console.log('📤 Answer created with audio/video');
     return answer;
   }
 
