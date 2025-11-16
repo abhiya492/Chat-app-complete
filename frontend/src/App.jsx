@@ -43,11 +43,19 @@ const App = () => {
     checkAuth();
   }, [checkAuth]);
 
+  // Handle OAuth redirect
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('oauth') === 'success') {
+      window.history.replaceState({}, '', '/');
+      checkAuth();
+    }
+  }, [checkAuth]);
+
   // Handle browser back/forward cache (bfcache)
   useEffect(() => {
     const handlePageShow = (event) => {
       if (event.persisted) {
-        // Page was restored from bfcache, re-check auth
         checkAuth();
       }
     };
