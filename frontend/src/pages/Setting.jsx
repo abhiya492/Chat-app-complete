@@ -1,6 +1,8 @@
 import { THEMES } from "../constants";
 import { useThemeStore } from "../store/useThemeStore";
-import { Send } from "lucide-react";
+import { Send, Shield, Key } from "lucide-react";
+import { hasKeys, getStoredKeys } from "../lib/encryption";
+import { useState } from "react";
 
 const PREVIEW_MESSAGES = [
   { id: 1, content: "Hey! How's it going?", isSent: false },
@@ -9,6 +11,8 @@ const PREVIEW_MESSAGES = [
 
 const Setting = () => {
   const { theme, setTheme } = useThemeStore();
+  const [encryptionEnabled] = useState(hasKeys());
+  const keys = getStoredKeys();
 
   return (
     <div className="min-h-screen container mx-auto px-2 sm:px-4 pt-16 sm:pt-20 max-w-5xl bg-gradient-to-br from-base-200 via-base-100 to-base-200 relative overflow-hidden">
@@ -50,6 +54,39 @@ const Setting = () => {
                 </span>
               </button>
             ))}
+          </div>
+        </div>
+
+        <div className="glass-effect rounded-2xl sm:rounded-3xl p-3 sm:p-6 shadow-2xl animate-slide-up">
+          <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4 flex items-center gap-2">
+            <div className="w-1 h-4 sm:h-5 bg-gradient-to-b from-primary to-secondary rounded-full"></div>
+            Encryption
+          </h3>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 p-3 bg-base-200/50 rounded-lg">
+              <Shield className={`size-5 ${encryptionEnabled ? 'text-green-500' : 'text-base-content/50'}`} />
+              <div className="flex-1">
+                <p className="font-medium text-sm">End-to-End Encryption</p>
+                <p className="text-xs text-base-content/60">
+                  {encryptionEnabled ? 'Your messages are encrypted' : 'Encryption not set up'}
+                </p>
+              </div>
+              <div className={`badge ${encryptionEnabled ? 'badge-success' : 'badge-ghost'}`}>
+                {encryptionEnabled ? 'Active' : 'Inactive'}
+              </div>
+            </div>
+            {encryptionEnabled && (
+              <div className="p-3 bg-base-200/50 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Key className="size-4" />
+                  <p className="font-medium text-sm">Your Public Key</p>
+                </div>
+                <p className="text-xs text-base-content/60 break-all font-mono bg-base-300/50 p-2 rounded">
+                  {keys.publicKey?.substring(0, 60)}...
+                </p>
+                <p className="text-xs text-warning mt-2">⚠️ Never share your private key with anyone</p>
+              </div>
+            )}
           </div>
         </div>
 

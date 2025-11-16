@@ -19,6 +19,7 @@ import path from 'path';
 import {connectDB} from './lib/db.js';
 import cookieParser from 'cookie-parser';
 import { app,server } from './lib/socket.js';
+import { startMessageScheduler } from './lib/scheduler.js';
 
 dotenv.config();
 
@@ -67,4 +68,6 @@ if (process.env.NODE_ENV === "production") {
 server.listen(PORT, () => {
     console.log("Server isrunning on port:" + PORT);
     connectDB();
+    startMessageScheduler();
+    console.log("Message scheduler started");
 });

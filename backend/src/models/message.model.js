@@ -15,6 +15,10 @@ const messageSchema = new mongoose.Schema(
     text: {
       type: String,
     },
+    isEncrypted: {
+      type: Boolean,
+      default: false,
+    },
     image: {
       type: String,
     },
@@ -73,6 +77,15 @@ const messageSchema = new mongoose.Schema(
     expiresAt: {
       type: Date,
       index: true,
+    },
+    scheduledFor: {
+      type: Date,
+      default: null,
+      index: true,
+    },
+    isSent: {
+      type: Boolean,
+      default: true,
     },
   },
   { timestamps: true }

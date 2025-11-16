@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { motion } from 'framer-motion';
 import { useReducedMotion } from '../hooks/useReducedMotion';
-import { Smile, Reply, Edit2, Trash2, Download, Pin, Forward, Check, CheckCheck, Play, Pause } from 'lucide-react';
+import { Smile, Reply, Edit2, Trash2, Download, Pin, Forward, Check, CheckCheck, Play, Pause, Shield } from 'lucide-react';
 import { formatMessageTime } from '../lib/utils';
 import LazyImage from './LazyImage';
 import LazyVideo from './LazyVideo';
@@ -53,6 +53,7 @@ const Message = memo(({
         <time className="text-xs opacity-50 ml-1">
           {formatMessageTime(message.createdAt)}
           {message.isEdited && <span className="ml-1 text-xs opacity-50">(edited)</span>}
+          {message.isEncrypted && <Shield size={10} className="inline ml-1 text-green-500" title="Encrypted" />}
         </time>
       </div>
       <div className="relative">

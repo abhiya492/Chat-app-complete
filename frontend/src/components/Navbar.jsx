@@ -1,12 +1,15 @@
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
-import { LogOut, MessageSquare, Settings, User, Radio, Shuffle, Menu, X, Loader2 } from "lucide-react";
+import { useChatStore } from "../store/useChatStore";
+import { LogOut, MessageSquare, Settings, User, Radio, Shuffle, Menu, X, Loader2, Clock } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import LanguageSelector from "./LanguageSelector";
 import { useState } from "react";
+import ScheduledMessages from "./ScheduledMessages";
 
 const Navbar = () => {
   const { logout, authUser, isLoggingOut } = useAuthStore();
+  const { setShowScheduled } = useChatStore();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   return (
@@ -31,6 +34,10 @@ const Navbar = () => {
             
             {authUser && (
               <>
+                <button onClick={() => setShowScheduled(true)} className="btn btn-sm gap-2 btn-ghost hover:bg-primary/10 hover:text-primary transition-all hover:scale-105 hover:shadow-md">
+                  <Clock className="w-4 h-4" />
+                  <span className="hidden lg:inline font-medium text-sm">Scheduled</span>
+                </button>
                 <Link to="/rooms" className="btn btn-sm gap-2 btn-ghost hover:bg-primary/10 hover:text-primary transition-all hover:scale-105 hover:shadow-md">
                   <Radio className="w-4 h-4" />
                   <span className="hidden lg:inline font-medium text-sm">Rooms</span>
@@ -75,6 +82,9 @@ const Navbar = () => {
               <div className="px-3 py-2"><LanguageSelector /></div>
               {authUser && (
                 <>
+                  <button onClick={() => { setShowScheduled(true); setShowMobileMenu(false); }} className="btn btn-sm gap-2 btn-ghost justify-start">
+                    <Clock className="w-4 h-4" /><span>Scheduled Messages</span>
+                  </button>
                   <Link to="/rooms" className="btn btn-sm gap-2 btn-ghost justify-start" onClick={() => setShowMobileMenu(false)}>
                     <Radio className="w-4 h-4" /><span>Voice Rooms</span>
                   </Link>
@@ -100,6 +110,7 @@ const Navbar = () => {
           </div>
         )}
       </div>
+      <ScheduledMessages />
     </header>
   );
 };

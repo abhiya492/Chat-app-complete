@@ -4,6 +4,7 @@ import { axiosInstance } from "../lib/axios";
 import { useAuthStore } from "./useAuthStore";
 import { showNotification } from "../lib/notifications";
 import { handleApiError } from "../lib/errorHandler";
+import { encryptMessage, decryptMessage, getStoredKeys } from "../lib/encryption";
 
 export const useChatStore = create((set,get) => ({
   messages: [],
@@ -22,6 +23,8 @@ export const useChatStore = create((set,get) => ({
   pinnedMessages: [],
   showPinned: false,
   forwardingMessage: null,
+  scheduledMessages: [],
+  showScheduled: false,
 
   getUsers: async () => {
     set({ isUsersLoading: true });
@@ -40,6 +43,16 @@ export const useChatStore = create((set,get) => ({
     try {
       const res = await axiosInstance.get(`/messages/${userId}?page=${page}&limit=50`);
       const { messages: newMessages, hasMore } = res.data;
+      
+      // Decrypt encrypted messages
+      const keys = getStoredKeys();
+      if (keys.privateKey) {
+        for (const msg of newMessages) {
+          if (msg.isEncrypted && msg.text) {
+            msg.text = await decryptMessage(msg.text, keys.privateKey);
+          }
+        }
+      }
       
       if (page === 1) {
         set({ messages: newMessages, hasMoreMessages: hasMore, currentPage: 1 });
@@ -67,8 +80,19 @@ export const useChatStore = create((set,get) => ({
     const { selectedUser, messages, replyingTo } = get();
     const { authUser } = useAuthStore.getState();
     
-    // Optimistic update
-    const optimisticMessage = {
+    // Encrypt text if user has encryption enabled
+    let encryptedText = messageData.text;
+    let isEncrypted = false;
+    if (messageData.text && selectedUser.publicKey) {
+      const encrypted = await encryptMessage(messageData.text, selectedUser.publicKey);
+      if (encrypted) {
+        encryptedText = encrypted;
+        isEncrypted = true;
+      }
+    }
+    
+    // Only show optimistic update if not scheduled
+    const optimisticMessage = !messageData.scheduledFor ? {
       _id: `temp-${Date.now()}`,
       senderId: authUser._id,
       text: messageData.text,
@@ -78,21 +102,29 @@ export const useChatStore = create((set,get) => ({
       voice: messageData.voice,
       createdAt: new Date().toISOString(),
       isOptimistic: true,
-    };
+    } : null;
     
-    set({ messages: [...messages, optimisticMessage], isSendingMessage: true });
+    if (optimisticMessage) {
+      set({ messages: [...messages, optimisticMessage], isSendingMessage: true });
+    } else {
+      set({ isSendingMessage: true });
+    }
     
     try {
-      const payload = { ...messageData };
+      const payload = { ...messageData, text: encryptedText, isEncrypted };
       if (replyingTo) payload.replyTo = replyingTo._id;
       
       const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, payload);
       
-      // Replace optimistic message with real one
-      set({ 
-        messages: messages.map(m => m._id === optimisticMessage._id ? res.data : m).concat(res.data._id === optimisticMessage._id ? [] : [res.data]),
-        replyingTo: null 
-      });
+      // Replace optimistic message with real one (only if not scheduled)
+      if (optimisticMessage) {
+        set({ 
+          messages: messages.map(m => m._id === optimisticMessage._id ? res.data : m).concat(res.data._id === optimisticMessage._id ? [] : [res.data]),
+          replyingTo: null 
+        });
+      } else {
+        set({ replyingTo: null });
+      }
       
       if (window.analytics) {
         window.analytics.track('message_sent', { 
@@ -102,7 +134,9 @@ export const useChatStore = create((set,get) => ({
         });
       }
     } catch (error) {
-      set({ messages: messages.filter(m => m._id !== optimisticMessage._id) });
+      if (optimisticMessage) {
+        set({ messages: messages.filter(m => m._id !== optimisticMessage._id) });
+      }
       
       if (!navigator.onLine) {
         const queue = JSON.parse(localStorage.getItem('offlineQueue') || '[]');
@@ -230,8 +264,28 @@ export const useChatStore = create((set,get) => ({
     }
   },
 
+  getScheduledMessages: async () => {
+    try {
+      const res = await axiosInstance.get('/messages/scheduled');
+      set({ scheduledMessages: res.data });
+    } catch (error) {
+      handleApiError(error, 'Failed to load scheduled messages');
+    }
+  },
+
+  cancelScheduledMessage: async (messageId) => {
+    try {
+      await axiosInstance.delete(`/messages/scheduled/${messageId}`);
+      set({ scheduledMessages: get().scheduledMessages.filter(m => m._id !== messageId) });
+      toast.success('Scheduled message cancelled');
+    } catch (error) {
+      handleApiError(error, 'Failed to cancel scheduled message');
+    }
+  },
+
   setForwardingMessage: (message) => set({ forwardingMessage: message }),
   setShowPinned: (show) => set({ showPinned: show }),
+  setShowScheduled: (show) => set({ showScheduled: show }),
   clearSearch: () => set({ searchQuery: "", searchResults: [] }),
 
   setReplyingTo: (message) => set({ replyingTo: message }),
@@ -259,9 +313,17 @@ export const useChatStore = create((set,get) => ({
 
     const socket = useAuthStore.getState().socket;
 
-    socket.on("newMessage", (newMessage) => {
+    socket.on("newMessage", async (newMessage) => {
       const isMessageSentFromSelectedUser = newMessage.senderId === selectedUser._id;
       if (!isMessageSentFromSelectedUser) return;
+      
+      // Decrypt if encrypted
+      if (newMessage.isEncrypted && newMessage.text) {
+        const keys = getStoredKeys();
+        if (keys.privateKey) {
+          newMessage.text = await decryptMessage(newMessage.text, keys.privateKey);
+        }
+      }
       
       set({ messages: [...get().messages, newMessage] });
       

@@ -61,7 +61,7 @@ export const getMessages = async (req, res) => {
 
 export const sendMessage = async (req, res) => {
   try {
-    const { text, image, file, replyTo, video, voice, disappearAfter } = req.body;
+    const { text, image, file, replyTo, video, voice, disappearAfter, scheduledFor } = req.body;
     const { id: receiverId } = req.params;
     const senderId = req.user._id;
     
@@ -193,6 +193,8 @@ export const sendMessage = async (req, res) => {
       file: fileData,
       replyTo: replyTo || null,
       disappearAfter: disappearAfter || null,
+      scheduledFor: scheduledFor ? new Date(scheduledFor) : null,
+      isSent: !scheduledFor,
     };
     
     console.log('💾 Saving message:', {
@@ -206,16 +208,19 @@ export const sendMessage = async (req, res) => {
     await newMessage.save();
     await newMessage.populate('replyTo');
 
-    // Update streak
-    const streak = await updateStreak(senderId, receiverId);
+    // Only send immediately if not scheduled
+    if (!scheduledFor) {
+      // Update streak
+      const streak = await updateStreak(senderId, receiverId);
 
-    const receiverSocketId = getReceiverSocketId(receiverId);
-     if (receiverSocketId) {
+      const receiverSocketId = getReceiverSocketId(receiverId);
+      if (receiverSocketId) {
         io.to(receiverSocketId).emit("newMessage", newMessage);
         if (streak) {
           io.to(receiverSocketId).emit("streakUpdated", streak);
         }
-     }
+      }
+    }
 
     res.status(201).json(newMessage);
   } catch (error) {

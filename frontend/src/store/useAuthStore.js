@@ -154,4 +154,12 @@ export const useAuthStore = create((set, get) => ({
       toast.error(error.response?.data?.message || "Failed to unblock user");
     }
   },
+
+  updatePublicKey: async (publicKey) => {
+    try {
+      await axiosInstance.put("/auth/update-public-key", { publicKey });
+    } catch (error) {
+      console.error("Failed to update public key:", error);
+    }
+  },
 }));

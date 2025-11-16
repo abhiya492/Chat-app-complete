@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
-import { Image, Send, X, Paperclip, Mic, Video, Timer, Edit2, Loader2 } from "lucide-react";
+import { Image, Send, X, Paperclip, Mic, Video, Timer, Edit2, Loader2, Clock } from "lucide-react";
 import toast from "react-hot-toast";
 import VoiceRecorder from "./VoiceRecorder";
 import SmartReplies from "./SmartReplies";
@@ -16,6 +16,8 @@ const MessageInput = () => {
   const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [disappearAfter, setDisappearAfter] = useState(null);
+  const [scheduledFor, setScheduledFor] = useState("");
+  const [showSchedule, setShowSchedule] = useState(false);
   const fileInputRef = useRef(null);
   const videoInputRef = useRef(null);
   const docInputRef = useRef(null);
@@ -171,6 +173,11 @@ const MessageInput = () => {
     e.preventDefault();
     if (!text.trim() && !imagePreview && !filePreview && !videoPreview && !voiceData) return;
 
+    if (scheduledFor && new Date(scheduledFor) <= new Date()) {
+      toast.error("Scheduled time must be in the future");
+      return;
+    }
+
     try {
       if (editingMessage) {
         await useChatStore.getState().editMessage(editingMessage._id, text.trim());
@@ -182,7 +189,11 @@ const MessageInput = () => {
           video: videoPreview,
           voice: voiceData,
           disappearAfter,
+          scheduledFor: scheduledFor || null,
         });
+        if (scheduledFor) {
+          toast.success(`Message scheduled for ${new Date(scheduledFor).toLocaleString()}`);
+        }
       }
 
       emitStopTyping();
@@ -192,6 +203,8 @@ const MessageInput = () => {
       setFilePreview(null);
       setVoiceData(null);
       setDisappearAfter(null);
+      setScheduledFor("");
+      setShowSchedule(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
       if (videoInputRef.current) videoInputRef.current.value = "";
       if (docInputRef.current) docInputRef.current.value = "";
@@ -306,23 +319,54 @@ const MessageInput = () => {
         onSelectReply={(reply) => setText(reply)}
       />
 
-      <div className="flex items-center gap-2 mb-2">
-        <Timer size={14} className="sm:w-4 sm:h-4 text-base-content/60" />
-        <select 
-          value={disappearAfter || ""} 
-          onChange={(e) => setDisappearAfter(e.target.value ? parseInt(e.target.value) : null)}
-          className="select select-xs sm:select-sm select-bordered text-xs sm:text-sm"
-          aria-label="Message disappear timer"
+      <div className="flex items-center gap-2 mb-2 flex-wrap">
+        <div className="flex items-center gap-2">
+          <Timer size={14} className="sm:w-4 sm:h-4 text-base-content/60" />
+          <select 
+            value={disappearAfter || ""} 
+            onChange={(e) => setDisappearAfter(e.target.value ? parseInt(e.target.value) : null)}
+            className="select select-xs sm:select-sm select-bordered text-xs sm:text-sm"
+            aria-label="Message disappear timer"
+          >
+            <option value="">Don't disappear</option>
+            <option value="10">10 sec</option>
+            <option value="30">30 sec</option>
+            <option value="60">1 min</option>
+            <option value="300">5 min</option>
+            <option value="3600">1 hr</option>
+            <option value="86400">24 hrs</option>
+          </select>
+        </div>
+        <button
+          type="button"
+          onClick={() => setShowSchedule(!showSchedule)}
+          className={`btn btn-xs sm:btn-sm btn-ghost gap-1 ${scheduledFor ? 'btn-success' : ''}`}
         >
-          <option value="">Don't disappear</option>
-          <option value="10">10 sec</option>
-          <option value="30">30 sec</option>
-          <option value="60">1 min</option>
-          <option value="300">5 min</option>
-          <option value="3600">1 hr</option>
-          <option value="86400">24 hrs</option>
-        </select>
+          <Clock size={14} className="sm:w-4 sm:h-4" />
+          {scheduledFor ? 'Scheduled' : 'Schedule'}
+        </button>
       </div>
+
+      {showSchedule && (
+        <div className="mb-2 p-2 sm:p-3 bg-base-200 rounded-lg animate-in slide-in-from-bottom-2 duration-200">
+          <div className="flex items-center gap-2">
+            <input
+              type="datetime-local"
+              value={scheduledFor}
+              onChange={(e) => setScheduledFor(e.target.value)}
+              min={new Date().toISOString().slice(0, 16)}
+              className="input input-xs sm:input-sm input-bordered flex-1 text-xs sm:text-sm"
+            />
+            <button
+              type="button"
+              onClick={() => { setScheduledFor(""); setShowSchedule(false); }}
+              className="btn btn-ghost btn-xs sm:btn-sm btn-circle"
+            >
+              <X className="size-3 sm:size-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSendMessage} className="flex items-center gap-1 sm:gap-2">
         <div className="flex-1 flex gap-1 sm:gap-2">

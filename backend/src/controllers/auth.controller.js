@@ -224,3 +224,16 @@ export const login = async (req, res) => {
       res.status(500).json({ message: "Internal Server Error" });
     }
   };
+
+  export const updatePublicKey = async (req, res) => {
+    try {
+      const { publicKey } = req.body;
+      const userId = req.user._id;
+
+      await User.findByIdAndUpdate(userId, { publicKey });
+      res.status(200).json({ message: "Public key updated" });
+    } catch (error) {
+      console.error("Error updating public key:", error.message);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  };

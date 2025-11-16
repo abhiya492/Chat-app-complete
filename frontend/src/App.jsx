@@ -28,6 +28,7 @@ import ConnectionStatus from './components/ConnectionStatus'
 import OfflineQueue from './components/OfflineQueue'
 import PageTransition from './components/PageTransition'
 import OnboardingTour from './components/OnboardingTour'
+import EncryptionSetup from './components/EncryptionSetup'
 
 const App = () => {
   const { authUser,checkAuth,isCheckingAuth,onlineUsers,socket } = useAuthStore();
@@ -100,6 +101,7 @@ const App = () => {
       <ConnectionStatus />
       <OfflineQueue />
       <OfflineBanner />
+      {authUser && <EncryptionSetup />}
       {authUser && <OnboardingTour />}
       {authUser && <NotificationPrompt />}
       {authUser && <ChatbotButton />}
