@@ -1,5 +1,6 @@
 import { X, Search, Pin, Phone, Video, MoreVertical, UserX, Info, Trash2 } from "lucide-react";
 import UserInfoModal from "./UserInfoModal";
+import CallQualityIndicator from "./CallQualityIndicator";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
 import { useCallStore } from "../store/useCallStore";
@@ -12,13 +13,22 @@ const ChatHeader = ({ onSearchClick, onPinnedClick }) => {
   const { initiateCall } = useCallStore();
   const [showMenu, setShowMenu] = useState(false);
   const [showUserInfo, setShowUserInfo] = useState(false);
+  const [showQualityCheck, setShowQualityCheck] = useState(false);
+  const [pendingCallType, setPendingCallType] = useState(null);
 
-  const handleCall = async (type) => {
+  const handleCall = (type) => {
+    setPendingCallType(type);
+    setShowQualityCheck(true);
+  };
+
+  const proceedWithCall = async () => {
+    setShowQualityCheck(false);
     try {
-      await initiateCall(selectedUser._id, type, socket);
+      await initiateCall(selectedUser._id, pendingCallType, socket);
     } catch (error) {
       console.error("Failed to initiate call:", error);
     }
+    setPendingCallType(null);
   };
 
   const handleBlock = async () => {
@@ -165,6 +175,12 @@ const ChatHeader = ({ onSearchClick, onPinnedClick }) => {
       </div>
       {showUserInfo && (
         <UserInfoModal user={selectedUser} onClose={() => setShowUserInfo(false)} />
+      )}
+      {showQualityCheck && (
+        <CallQualityIndicator 
+          onProceed={proceedWithCall} 
+          onCancel={() => { setShowQualityCheck(false); setPendingCallType(null); }} 
+        />
       )}
     </div>
   );

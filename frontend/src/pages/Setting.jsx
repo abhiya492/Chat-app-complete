@@ -1,8 +1,8 @@
 import { THEMES } from "../constants";
 import { useThemeStore } from "../store/useThemeStore";
-import { Send, Shield, Key } from "lucide-react";
+import { Send, Shield, Key, Bell } from "lucide-react";
 import { hasKeys, getStoredKeys } from "../lib/encryption";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const PREVIEW_MESSAGES = [
   { id: 1, content: "Hey! How's it going?", isSent: false },
@@ -13,6 +13,25 @@ const Setting = () => {
   const { theme, setTheme } = useThemeStore();
   const [encryptionEnabled] = useState(hasKeys());
   const keys = getStoredKeys();
+  
+  const [notificationPrefs, setNotificationPrefs] = useState(() => {
+    const saved = localStorage.getItem('notificationPrefs');
+    return saved ? JSON.parse(saved) : {
+      notifyAll: false,
+      notifyMentions: true,
+      notifyQuestions: true,
+      notifyKeywords: true,
+      notifyMedia: true,
+    };
+  });
+
+  useEffect(() => {
+    localStorage.setItem('notificationPrefs', JSON.stringify(notificationPrefs));
+  }, [notificationPrefs]);
+
+  const togglePref = (key) => {
+    setNotificationPrefs(prev => ({ ...prev, [key]: !prev[key] }));
+  };
 
   return (
     <div className="min-h-screen container mx-auto px-2 sm:px-4 pt-16 sm:pt-20 max-w-5xl bg-gradient-to-br from-base-200 via-base-100 to-base-200 relative overflow-hidden">
@@ -54,6 +73,38 @@ const Setting = () => {
                 </span>
               </button>
             ))}
+          </div>
+        </div>
+
+        <div className="glass-effect rounded-2xl sm:rounded-3xl p-3 sm:p-6 shadow-2xl animate-slide-up">
+          <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4 flex items-center gap-2">
+            <div className="w-1 h-4 sm:h-5 bg-gradient-to-b from-primary to-secondary rounded-full"></div>
+            Smart Notifications
+          </h3>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between p-3 bg-base-200/50 rounded-lg">
+              <div className="flex items-center gap-2">
+                <Bell className="size-4" />
+                <span className="text-sm">Notify for all messages</span>
+              </div>
+              <input type="checkbox" className="toggle toggle-sm" checked={notificationPrefs.notifyAll} onChange={() => togglePref('notifyAll')} />
+            </div>
+            <div className="flex items-center justify-between p-3 bg-base-200/50 rounded-lg">
+              <span className="text-sm">Notify for @mentions</span>
+              <input type="checkbox" className="toggle toggle-sm" checked={notificationPrefs.notifyMentions} onChange={() => togglePref('notifyMentions')} disabled={notificationPrefs.notifyAll} />
+            </div>
+            <div className="flex items-center justify-between p-3 bg-base-200/50 rounded-lg">
+              <span className="text-sm">Notify for questions</span>
+              <input type="checkbox" className="toggle toggle-sm" checked={notificationPrefs.notifyQuestions} onChange={() => togglePref('notifyQuestions')} disabled={notificationPrefs.notifyAll} />
+            </div>
+            <div className="flex items-center justify-between p-3 bg-base-200/50 rounded-lg">
+              <span className="text-sm">Notify for important keywords</span>
+              <input type="checkbox" className="toggle toggle-sm" checked={notificationPrefs.notifyKeywords} onChange={() => togglePref('notifyKeywords')} disabled={notificationPrefs.notifyAll} />
+            </div>
+            <div className="flex items-center justify-between p-3 bg-base-200/50 rounded-lg">
+              <span className="text-sm">Notify for media messages</span>
+              <input type="checkbox" className="toggle toggle-sm" checked={notificationPrefs.notifyMedia} onChange={() => togglePref('notifyMedia')} disabled={notificationPrefs.notifyAll} />
+            </div>
           </div>
         </div>
 

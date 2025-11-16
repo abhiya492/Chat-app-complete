@@ -4,6 +4,7 @@ import { useAuthStore } from "../store/useAuthStore";
 import { useCallStore } from "../store/useCallStore";
 import { Shuffle, SkipForward, X, Send, Mic, MicOff, Video, VideoOff, Globe, Smile, Image as ImageIcon, Volume2, VolumeX, BarChart3, Zap, Copy, Trash2, Pin, MoreVertical, Check, CheckCheck, Clock, Gamepad2, Sparkles, Languages, Settings, Maximize2, Sun, Contrast, Droplet, User, Monitor, MonitorOff, PictureInPicture2, Maximize, Minimize, Star, Award, TrendingUp, AlertTriangle, Shield, Ban, Heart, History, Music, Play, Pause, SkipBack, SkipForward as SkipNext, Lightbulb, Pencil, HelpCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import CallQualityIndicator from "../components/CallQualityIndicator";
 
 const RandomChat = () => {
   const {
@@ -477,7 +478,14 @@ const RandomChat = () => {
     }
   }, [remoteStream, avatarMode]);
 
+  const [showQualityCheck, setShowQualityCheck] = useState(false);
+
   const handleStart = async () => {
+    setShowQualityCheck(true);
+  };
+
+  const proceedWithStart = () => {
+    setShowQualityCheck(false);
     const audioConstraints = {
       echoCancellation: echoCancellation,
       noiseSuppression: noiseReduction,
@@ -1537,6 +1545,12 @@ const RandomChat = () => {
               <Shuffle size={24} />
               Start Chatting
             </button>
+            {showQualityCheck && (
+              <CallQualityIndicator 
+                onProceed={proceedWithStart} 
+                onCancel={() => setShowQualityCheck(false)} 
+              />
+            )}
             <button onClick={loadChatHistory} className="btn btn-outline btn-lg gap-2 w-full">
               <History size={24} />
               Chat History ({JSON.parse(localStorage.getItem('chatHistory') || '[]').length})

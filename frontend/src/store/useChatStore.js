@@ -5,6 +5,7 @@ import { useAuthStore } from "./useAuthStore";
 import { showNotification } from "../lib/notifications";
 import { handleApiError } from "../lib/errorHandler";
 import { encryptMessage, decryptMessage, getStoredKeys } from "../lib/encryption";
+import { isImportantMessage } from "../lib/smartNotifications";
 
 export const useChatStore = create((set,get) => ({
   messages: [],
@@ -327,12 +328,16 @@ export const useChatStore = create((set,get) => ({
       
       set({ messages: [...get().messages, newMessage] });
       
+      // Smart notifications - only notify for important messages
       if (document.hidden) {
-        const sender = selectedUser;
-        showNotification(`New message from ${sender.fullName}`, {
-          body: newMessage.text || 'Sent an attachment',
-          tag: 'new-message'
-        });
+        const prefs = JSON.parse(localStorage.getItem('notificationPrefs') || '{}');
+        if (isImportantMessage(newMessage, prefs)) {
+          const sender = selectedUser;
+          showNotification(`New message from ${sender.fullName}`, {
+            body: newMessage.text || 'Sent an attachment',
+            tag: 'new-message'
+          });
+        }
       }
     });
 
