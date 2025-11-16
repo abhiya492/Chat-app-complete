@@ -19,7 +19,7 @@ const NotificationPrompt = () => {
   if (!show) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 bg-base-100 rounded-lg shadow-xl border border-base-300 p-4 max-w-sm animate-in slide-in-from-bottom">
+    <div className="fixed bottom-4 right-4 z-[60] bg-base-100 rounded-lg shadow-xl border border-base-300 p-4 max-w-sm animate-in slide-in-from-bottom">
       <button
         onClick={() => setShow(false)}
         className="absolute top-2 right-2 btn btn-ghost btn-xs btn-circle"

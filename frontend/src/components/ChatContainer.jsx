@@ -127,9 +127,19 @@ const ChatContainer = () => {
 
   if (!isMessagesLoading && messages.length === 0) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-4">
-        <p className="text-base-content/60 mb-4">Failed to load messages</p>
-        <RetryButton onRetry={() => getMessages(selectedUser._id)} />
+      <div className="flex h-full w-full">
+        <div className="flex-1 flex flex-col overflow-auto w-full">
+          <ChatHeader onSearchClick={() => {}} onPinnedClick={() => {}} />
+          <div className="flex-1 flex flex-col items-center justify-center p-4">
+            <div className="text-center">
+              <div className="text-6xl mb-4">💬</div>
+              <p className="text-lg font-semibold mb-2">No messages yet</p>
+              <p className="text-sm text-base-content/60">Start the conversation by sending a message!</p>
+            </div>
+          </div>
+          <MessageInput />
+        </div>
+        <SharedExperiencePanel />
       </div>
     );
   }
