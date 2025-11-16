@@ -110,7 +110,6 @@ const Navbar = () => {
           </div>
         )}
       </div>
-      <ScheduledMessages />
     </header>
   );
 };

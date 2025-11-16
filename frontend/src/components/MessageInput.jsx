@@ -348,22 +348,52 @@ const MessageInput = () => {
       </div>
 
       {showSchedule && (
-        <div className="mb-2 p-2 sm:p-3 bg-base-200 rounded-lg animate-in slide-in-from-bottom-2 duration-200">
-          <div className="flex items-center gap-2">
-            <input
-              type="datetime-local"
-              value={scheduledFor}
-              onChange={(e) => setScheduledFor(e.target.value)}
-              min={new Date().toISOString().slice(0, 16)}
-              className="input input-xs sm:input-sm input-bordered flex-1 text-xs sm:text-sm"
-            />
-            <button
-              type="button"
-              onClick={() => { setScheduledFor(""); setShowSchedule(false); }}
-              className="btn btn-ghost btn-xs sm:btn-sm btn-circle"
-            >
-              <X className="size-3 sm:size-4" />
-            </button>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4">
+          <div className="bg-base-100 rounded-2xl p-6 max-w-sm w-full shadow-2xl relative z-[10000]">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Clock className="size-5 text-primary" />
+                <h3 className="font-bold text-lg">Schedule Message</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => { setScheduledFor(""); setShowSchedule(false); }}
+                className="btn btn-ghost btn-sm btn-circle"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="label">
+                  <span className="label-text">Select date and time</span>
+                </label>
+                <input
+                  type="datetime-local"
+                  value={scheduledFor}
+                  onChange={(e) => setScheduledFor(e.target.value)}
+                  min={new Date().toISOString().slice(0, 16)}
+                  className="input input-bordered w-full"
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => { setScheduledFor(""); setShowSchedule(false); }}
+                  className="btn btn-ghost flex-1"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowSchedule(false)}
+                  disabled={!scheduledFor}
+                  className="btn btn-primary flex-1"
+                >
+                  Confirm
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

@@ -29,6 +29,7 @@ import OfflineQueue from './components/OfflineQueue'
 import PageTransition from './components/PageTransition'
 import OnboardingTour from './components/OnboardingTour'
 import EncryptionSetup from './components/EncryptionSetup'
+import ScheduledMessages from './components/ScheduledMessages'
 
 const App = () => {
   const { authUser,checkAuth,isCheckingAuth,onlineUsers,socket } = useAuthStore();
@@ -105,6 +106,7 @@ const App = () => {
       {authUser && <OnboardingTour />}
       {authUser && <NotificationPrompt />}
       {authUser && <ChatbotButton />}
+      {authUser && <ScheduledMessages />}
       <CallModal />
       <IncomingCallModal />
     </div>
