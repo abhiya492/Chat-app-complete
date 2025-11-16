@@ -76,7 +76,6 @@ const messageSchema = new mongoose.Schema(
     },
     expiresAt: {
       type: Date,
-      index: true,
     },
     scheduledFor: {
       type: Date,
