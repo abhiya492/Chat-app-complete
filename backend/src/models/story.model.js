@@ -42,7 +42,6 @@ const storySchema = new mongoose.Schema(
     expiresAt: {
       type: Date,
       required: true,
-      index: true,
     },
     privacy: {
       type: String,
