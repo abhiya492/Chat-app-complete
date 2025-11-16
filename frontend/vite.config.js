@@ -7,24 +7,26 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['avatar.png', 'notification.mp3'],
+      includeAssets: ['chatty-icon.svg', 'avatar.png', 'notification.mp3'],
       manifest: {
-        name: 'Real-Time Chat App',
-        short_name: 'Chat App',
-        description: 'Real-time messaging with voice & video calls',
-        theme_color: '#ffffff',
-        background_color: '#ffffff',
+        name: 'Chatty - Connect Beyond Words',
+        short_name: 'Chatty',
+        description: 'Chatty: Real-time messaging with voice & video calls',
+        theme_color: '#6366f1',
+        background_color: '#6366f1',
         display: 'standalone',
         icons: [
           {
-            src: '/avatar.png',
+            src: '/chatty-icon.svg',
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/svg+xml',
+            purpose: 'any maskable'
           },
           {
-            src: '/avatar.png',
+            src: '/chatty-icon.svg',
             sizes: '512x512',
-            type: 'image/png'
+            type: 'image/svg+xml',
+            purpose: 'any maskable'
           }
         ]
       },

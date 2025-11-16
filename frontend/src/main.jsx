@@ -7,10 +7,14 @@ import './i18n/config'
 import { analytics } from './lib/analytics'
 import { errorLogger } from './lib/errorLogger'
 import ErrorBoundary from './components/ErrorBoundary'
+import { initAnimatedFavicon } from './utils/animatedFavicon'
 
 // Initialize analytics and error logging
 window.analytics = analytics;
 window.errorLogger = errorLogger;
+
+// Initialize animated favicon
+initAnimatedFavicon();
 
 
 
