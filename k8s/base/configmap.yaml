@@ -9,6 +9,8 @@ data:
   PORT: "5001"
   MONGODB_URI: "mongodb://mongodb-service:27017/chat_db"
   REDIS_URL: "redis://redis-service:6379"
+  CLIENT_URL: "http://chat-app.local"
+  FRONTEND_URL: "http://chat-app.local"
 ---
 apiVersion: v1
 kind: ConfigMap

@@ -24,3 +24,5 @@ dist-ssr
 *.sw?
 
 .env
+k8s/base/secrets.yaml
+k8s/helm/chat-app/values.yaml

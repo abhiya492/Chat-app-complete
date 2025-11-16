@@ -1,21 +1,39 @@
 # ☸️ Kubernetes Deployment Guide
 
 ## Prerequisites
-```bash
-# Install kubectl
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/darwin/amd64/kubectl"
-chmod +x kubectl && sudo mv kubectl /usr/local/bin/
 
-# Install minikube (for local testing)
-brew install minikube
+### Required Software
+- Docker Desktop (must be running)
+- kubectl: `brew install kubectl`
+- minikube: `brew install minikube`
 
-# Start local cluster
-minikube start --driver=docker --cpus=4 --memory=8192
-```
-
-## Quick Deployment
+### Quick Check
 ```bash
 cd k8s
+./preflight-check.sh
+```
+
+## 🚀 One-Command Deployment
+```bash
+cd k8s
+./full-deploy.sh
+```
+This will:
+1. Start minikube cluster
+2. Build Docker images
+3. Deploy all components
+4. Show access URLs
+
+## Step-by-Step Deployment
+
+### 1. Start Kubernetes
+```bash
+cd k8s
+./start-k8s.sh
+```
+
+### 2. Deploy Application
+```bash
 ./deploy.sh
 ```
 

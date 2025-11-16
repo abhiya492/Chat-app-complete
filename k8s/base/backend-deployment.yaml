@@ -74,6 +74,46 @@ spec:
             secretKeyRef:
               name: chat-app-secrets
               key: EMAIL_PASS
+        - name: GROQ_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: chat-app-secrets
+              key: GROQ_API_KEY
+        - name: GOOGLE_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: chat-app-secrets
+              key: GOOGLE_CLIENT_ID
+        - name: GOOGLE_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: chat-app-secrets
+              key: GOOGLE_CLIENT_SECRET
+        - name: GOOGLE_CALLBACK_URL
+          valueFrom:
+            secretKeyRef:
+              name: chat-app-secrets
+              key: GOOGLE_CALLBACK_URL
+        - name: GITHUB_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: chat-app-secrets
+              key: GITHUB_CLIENT_ID
+        - name: GITHUB_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: chat-app-secrets
+              key: GITHUB_CLIENT_SECRET
+        - name: GITHUB_CALLBACK_URL
+          valueFrom:
+            secretKeyRef:
+              name: chat-app-secrets
+              key: GITHUB_CALLBACK_URL
+        - name: CLIENT_URL
+          valueFrom:
+            configMapKeyRef:
+              name: chat-app-config
+              key: CLIENT_URL
         resources:
           requests:
             memory: "256Mi"
