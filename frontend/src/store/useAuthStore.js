@@ -159,7 +159,7 @@ export const useAuthStore = create((set, get) => ({
     try {
       await axiosInstance.put("/auth/update-public-key", { publicKey });
     } catch (error) {
-      console.error("Failed to update public key:", error);
+      // Silent fail - no user notification needed
     }
   },
 }));
