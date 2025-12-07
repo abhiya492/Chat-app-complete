@@ -13,17 +13,7 @@ const FILTERS = [
 ];
 
 const CallModal = () => {
-  const {
-    activeCall,
-    isCallActive,
-    isMuted,
-    isVideoOff,
-    toggleMute,
-    toggleVideo,
-    endCall,
-    webrtcService,
-    callStartTime,
-  } = useCallStore();
+  const { activeCall, isCallActive, isMuted, isVideoOff, toggleMute, toggleVideo, endCall, webrtcService, callStartTime } = useCallStore();
   const { socket, authUser } = useAuthStore();
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
@@ -39,10 +29,7 @@ const CallModal = () => {
   const [showControls, setShowControls] = useState(false);
 
   const isVideo = activeCall?.type === "video";
-  const otherUser =
-    activeCall?.callerId?._id === authUser?._id
-      ? activeCall?.receiverId
-      : activeCall?.callerId;
+  const otherUser = activeCall?.callerId?._id === authUser?._id ? activeCall?.receiverId : activeCall?.callerId;
 
   useEffect(() => {
     if (!isCallActive || !webrtcService) return;
@@ -68,17 +55,10 @@ const CallModal = () => {
         remoteVideoRef.current.muted = false;
         remoteVideoRef.current.autoplay = true;
         remoteVideoRef.current.playsInline = true;
-        
         stream.getAudioTracks().forEach(track => track.enabled = true);
         setRemoteStreamReady(true);
-        
-        if (remoteVideoRef.current.setSinkId) {
-          remoteVideoRef.current.setSinkId('').catch(console.error);
-        }
-        
-        remoteVideoRef.current.play()
-          .then(() => setAudioInitialized(true))
-          .catch(() => document.addEventListener('click', () => remoteVideoRef.current?.play(), { once: true }));
+        if (remoteVideoRef.current.setSinkId) remoteVideoRef.current.setSinkId('').catch(console.error);
+        remoteVideoRef.current.play().then(() => setAudioInitialized(true)).catch(() => document.addEventListener('click', () => remoteVideoRef.current?.play(), { once: true }));
       }
     });
 
@@ -99,9 +79,7 @@ const CallModal = () => {
 
   useEffect(() => {
     if (!callStartTime) return;
-    const interval = setInterval(() => {
-      setCallDuration(Math.floor((Date.now() - callStartTime) / 1000));
-    }, 1000);
+    const interval = setInterval(() => setCallDuration(Math.floor((Date.now() - callStartTime) / 1000)), 1000);
     return () => clearInterval(interval);
   }, [callStartTime]);
 
@@ -109,13 +87,6 @@ const CallModal = () => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-  };
-
-  const handleFlip = () => setIsFlipped(!isFlipped);
-  const handleRotate = () => setRotation((rotation + 90) % 360);
-  const handleFilter = (filterValue) => {
-    setFilter(filterValue);
-    setShowControls(false);
   };
 
   if (!isCallActive || !authUser) return null;
@@ -142,7 +113,7 @@ const CallModal = () => {
         )}
       </div>
 
-      <div className="flex-1 relative overflow-hidden">
+      <div className="flex-1 relative overflow-hidden group">
         {isVideo ? (
           <>
             <div className="relative w-full h-full flex items-center justify-center bg-black">
@@ -152,62 +123,47 @@ const CallModal = () => {
                 playsInline
                 muted={false}
                 className="max-w-full max-h-full object-contain"
+                style={{ transform: `scaleX(${isFlipped ? -1 : 1}) rotate(${rotation}deg)`, filter: filter }}
               />
+              
+              {audioInitialized && (
+                <div className="absolute bottom-24 left-4 flex items-center gap-2 bg-black/50 backdrop-blur-sm px-3 py-2 rounded-full">
+                  <Mic size={16} className="text-white" />
+                  <div className="w-20 h-1.5 bg-white/20 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-green-400 to-green-600 transition-all duration-100" style={{ width: `${audioLevel}%` }}></div>
+                  </div>
+                </div>
+              )}
+
+              <div className="absolute top-16 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button onClick={() => setIsFlipped(!isFlipped)} className="btn btn-sm btn-circle bg-black/70 border-none text-white hover:bg-black/90" title="Flip video">
+                  <FlipHorizontal size={16} />
+                </button>
+                <button onClick={() => setRotation((rotation + 90) % 360)} className="btn btn-sm btn-circle bg-black/70 border-none text-white hover:bg-black/90" title="Rotate video">
+                  <RotateCw size={16} />
+                </button>
+                <button onClick={() => setShowControls(!showControls)} className="btn btn-sm btn-circle bg-black/70 border-none text-white hover:bg-black/90" title="Filters">
+                  <Sparkles size={16} />
+                </button>
+              </div>
+
+              {showControls && (
+                <div className="absolute top-28 right-4 bg-base-100 rounded-lg shadow-xl p-2 min-w-[140px] z-20">
+                  {FILTERS.map((f) => (
+                    <button key={f.name} onClick={() => { setFilter(f.value); setShowControls(false); }} className={`btn btn-sm btn-ghost w-full justify-start ${filter === f.value ? 'btn-active' : ''}`}>
+                      {f.name}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
             
             {!isVideoOff ? (
               <div className="absolute bottom-24 sm:bottom-20 right-2 sm:right-4 group">
-                <video
-                  ref={localVideoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  className="w-24 h-20 sm:w-40 sm:h-32 rounded-lg sm:rounded-2xl border-2 sm:border-4 border-white/20 object-cover shadow-2xl transition-all"
-                  style={{
-                    transform: `scaleX(${isFlipped ? -1 : 1}) rotate(${rotation}deg)`,
-                    filter: filter
-                  }}
-                />
-                
-                {/* Camera Controls */}
-                <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={handleFlip}
-                    className="btn btn-xs btn-circle bg-black/50 border-none text-white hover:bg-black/70"
-                    title="Flip camera"
-                  >
-                    <FlipHorizontal size={12} />
-                  </button>
-                  <button
-                    onClick={handleRotate}
-                    className="btn btn-xs btn-circle bg-black/50 border-none text-white hover:bg-black/70"
-                    title="Rotate camera"
-                  >
-                    <RotateCw size={12} />
-                  </button>
-                  <button
-                    onClick={() => setShowControls(!showControls)}
-                    className="btn btn-xs btn-circle bg-black/50 border-none text-white hover:bg-black/70"
-                    title="Filters"
-                  >
-                    <Sparkles size={12} />
-                  </button>
+                <video ref={localVideoRef} autoPlay playsInline muted className="w-24 h-20 sm:w-40 sm:h-32 rounded-lg sm:rounded-2xl border-2 sm:border-4 border-white/20 object-cover shadow-2xl group-hover:scale-110 group-hover:border-primary/50 transition-all cursor-pointer" />
+                <div className="absolute top-1 sm:top-2 right-1 sm:right-2 bg-black/50 backdrop-blur-sm px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                  You
                 </div>
-
-                {/* Filter Menu */}
-                {showControls && (
-                  <div className="absolute top-8 right-0 bg-base-100 rounded-lg shadow-xl p-2 min-w-[120px] z-20">
-                    {FILTERS.map((f) => (
-                      <button
-                        key={f.name}
-                        onClick={() => handleFilter(f.value)}
-                        className={`btn btn-sm btn-ghost w-full justify-start ${filter === f.value ? 'btn-active' : ''}`}
-                      >
-                        {f.name}
-                      </button>
-                    ))}
-                  </div>
-                )}
               </div>
             ) : (
               <div className="absolute bottom-24 sm:bottom-20 right-2 sm:right-4 w-24 h-20 sm:w-40 sm:h-32 rounded-lg sm:rounded-2xl border-2 sm:border-4 border-white/20 bg-gradient-to-br from-base-300 to-base-200 flex flex-col items-center justify-center shadow-2xl">
@@ -222,9 +178,7 @@ const CallModal = () => {
             <div className="absolute inset-0 flex items-center justify-center gap-2">
               {[...Array(20)].map((_, i) => {
                 const barHeight = Math.max(10, audioLevel * (0.5 + Math.random() * 0.5));
-                return (
-                  <div key={i} className="w-2 bg-gradient-to-t from-primary to-secondary rounded-full transition-all duration-100" style={{ height: `${barHeight}%`, opacity: audioInitialized ? 0.7 : 0.2, transform: `scaleY(${audioInitialized ? 1 : 0.3})` }}></div>
-                );
+                return <div key={i} className="w-2 bg-gradient-to-t from-primary to-secondary rounded-full transition-all duration-100" style={{ height: `${barHeight}%`, opacity: audioInitialized ? 0.7 : 0.2, transform: `scaleY(${audioInitialized ? 1 : 0.3})` }}></div>;
               })}
             </div>
             <div className="text-center z-10">
@@ -238,6 +192,20 @@ const CallModal = () => {
               </div>
               <h2 className="text-3xl font-bold mb-2">{otherUser?.fullName}</h2>
               <p className="text-lg text-base-content/70 mb-4">{formatDuration(callDuration)}</p>
+              {audioInitialized && (
+                <div className="mt-4 space-y-2">
+                  <div className="flex items-center justify-center gap-2 text-success">
+                    <span className="w-3 h-3 bg-success rounded-full animate-pulse"></span>
+                    <span className="text-sm font-medium">Audio Connected</span>
+                  </div>
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-xs text-base-content/50">Volume:</span>
+                    <div className="w-32 h-2 bg-base-300 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-success to-primary transition-all duration-100" style={{ width: `${audioLevel}%` }}></div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             <audio ref={remoteVideoRef} autoPlay playsInline className="hidden" />
           </div>
@@ -253,6 +221,7 @@ const CallModal = () => {
             <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-black/80 text-white px-3 py-1.5 rounded-lg text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
               {isMuted ? "Unmute" : "Mute"}
             </div>
+            {isMuted && <div className="absolute -top-1 -right-1 w-3 h-3 bg-error rounded-full animate-ping"></div>}
           </div>
 
           {isVideo && (
@@ -263,6 +232,7 @@ const CallModal = () => {
               <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-black/80 text-white px-3 py-1.5 rounded-lg text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                 {isVideoOff ? "Turn on camera" : "Turn off camera"}
               </div>
+              {isVideoOff && <div className="absolute -top-1 -right-1 w-3 h-3 bg-error rounded-full animate-ping"></div>}
             </div>
           )}
 
@@ -274,6 +244,25 @@ const CallModal = () => {
               End call
             </div>
           </div>
+        </div>
+        
+        <div className="mt-2 sm:mt-4 flex justify-center gap-2 sm:gap-4 text-white/60 text-[10px] sm:text-xs">
+          <div className="flex items-center gap-1">
+            <span className={`w-2 h-2 rounded-full ${remoteStreamReady ? 'bg-success animate-pulse' : 'bg-error'}`}></span>
+            <span>{remoteStreamReady ? 'Connected' : 'Connecting...'}</span>
+          </div>
+          {webrtcService?.localStream?.getAudioTracks().length > 0 && (
+            <div className="flex items-center gap-1">
+              <Mic size={12} className={isMuted ? 'text-error' : 'text-success'} />
+              <span>Mic: {isMuted ? 'Off' : 'On'}</span>
+            </div>
+          )}
+          {audioInitialized && (
+            <div className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-success animate-pulse"></span>
+              <span>Receiving audio</span>
+            </div>
+          )}
         </div>
       </div>
     </div>
