@@ -27,6 +27,11 @@ dotenv.config();
 const PORT=process.env.PORT;
 const __dirname = path.resolve();
 
+// Trust proxy for production (Render, Heroku, etc.)
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 //allows us to extract json data from the request body
 app.use(express.json({ limit: '30mb' }));
 app.use(express.urlencoded({ limit: '30mb', extended: true }));  
