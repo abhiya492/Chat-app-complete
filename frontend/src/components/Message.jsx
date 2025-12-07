@@ -95,14 +95,19 @@ const Message = memo(({
             </a>
           )}
           {message.text && <p className={message.isDeleted ? "italic opacity-50" : ""}>{message.text}</p>}
-          {isOwnMessage && message.readBy && message.readBy.length > 0 && (
-            <div className="flex justify-end mt-1">
-              <CheckCheck size={14} className="text-primary" />
-            </div>
-          )}
-          {isOwnMessage && (!message.readBy || message.readBy.length === 0) && (
-            <div className="flex justify-end mt-1">
-              <Check size={14} className="opacity-50" />
+          {isOwnMessage && (
+            <div className="flex justify-end mt-1" title={
+              message.readBy && message.readBy.length > 0 ? "Read" :
+              message.deliveredTo && message.deliveredTo.length > 0 ? "Delivered" :
+              "Sent"
+            }>
+              {message.readBy && message.readBy.length > 0 ? (
+                <CheckCheck size={14} className="text-blue-500" />
+              ) : message.deliveredTo && message.deliveredTo.length > 0 ? (
+                <CheckCheck size={14} className="opacity-50" />
+              ) : (
+                <Check size={14} className="opacity-50" />
+              )}
             </div>
           )}
         </div>
@@ -167,6 +172,7 @@ const Message = memo(({
     prevProps.message._id === nextProps.message._id &&
     prevProps.message.text === nextProps.message.text &&
     prevProps.message.reactions?.length === nextProps.message.reactions?.length &&
+    prevProps.message.deliveredTo?.length === nextProps.message.deliveredTo?.length &&
     prevProps.message.readBy?.length === nextProps.message.readBy?.length &&
     prevProps.message.isPinned === nextProps.message.isPinned &&
     prevProps.showEmojiPicker === nextProps.showEmojiPicker &&

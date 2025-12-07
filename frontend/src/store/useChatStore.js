@@ -7,7 +7,7 @@ import { handleApiError } from "../lib/errorHandler";
 import { encryptMessage, decryptMessage, getStoredKeys } from "../lib/encryption";
 import { isImportantMessage } from "../lib/smartNotifications";
 
-export const useChatStore = create((set,get) => ({
+export const useChatStore = create((set, get) => ({
   messages: [],
   users: [],
   selectedUser: null,
@@ -27,6 +27,69 @@ export const useChatStore = create((set,get) => ({
   scheduledMessages: [],
   showScheduled: false,
 
+  // Helper function to decrypt a single message
+  _decryptSingleMessage: async (message) => {
+    // Skip if not encrypted or no text
+    if (!message?.isEncrypted || !message.text) {
+      return message;
+    }
+
+    const keys = getStoredKeys();
+    
+    // Check for private key
+    if (!keys?.privateKey) {
+      console.warn("No private key available for decryption");
+      return message; // Return encrypted message as-is
+    }
+
+    try {
+      const decryptedText = await decryptMessage(message.text, keys.privateKey);
+      
+      // Check if decryption actually succeeded
+      if (decryptedText && decryptedText !== '[Decryption failed]') {
+        return { 
+          ...message, 
+          text: decryptedText, 
+          _decrypted: true // Mark as successfully decrypted
+        };
+      }
+      
+      console.error("Decryption failed for message:", message._id);
+      return message; // Return encrypted message if decryption failed
+    } catch (error) {
+      console.error("Decryption error:", error);
+      return message; // Return encrypted message on error
+    }
+  },
+
+  // Helper function to decrypt messages in bulk
+  _decryptMessages: async (messages) => {
+    if (!messages?.length) return messages;
+
+    const keys = getStoredKeys();
+    if (!keys?.privateKey) {
+      console.warn("No private key available for bulk decryption");
+      return messages;
+    }
+
+    // Decrypt all messages in parallel
+    const decryptPromises = messages.map(async (msg) => {
+      if (msg.isEncrypted && msg.text) {
+        try {
+          const decryptedText = await decryptMessage(msg.text, keys.privateKey);
+          if (decryptedText && decryptedText !== '[Decryption failed]') {
+            return { ...msg, text: decryptedText, _decrypted: true };
+          }
+        } catch (error) {
+          console.error("Failed to decrypt message:", msg._id, error);
+        }
+      }
+      return msg;
+    });
+
+    return await Promise.all(decryptPromises);
+  },
+
   getUsers: async () => {
     set({ isUsersLoading: true });
     try {
@@ -45,21 +108,14 @@ export const useChatStore = create((set,get) => ({
       const res = await axiosInstance.get(`/messages/${userId}?page=${page}&limit=50`);
       const { messages: newMessages, hasMore } = res.data;
       
-      // Decrypt encrypted messages
-      const keys = getStoredKeys();
-      if (keys.privateKey) {
-        for (const msg of newMessages) {
-          if (msg.isEncrypted && msg.text) {
-            msg.text = await decryptMessage(msg.text, keys.privateKey);
-          }
-        }
-      }
+      // Decrypt all messages
+      const decryptedMessages = await get()._decryptMessages(newMessages);
       
       if (page === 1) {
-        set({ messages: newMessages, hasMoreMessages: hasMore, currentPage: 1 });
+        set({ messages: decryptedMessages, hasMoreMessages: hasMore, currentPage: 1 });
       } else {
         set({ 
-          messages: [...newMessages, ...get().messages],
+          messages: [...decryptedMessages, ...get().messages],
           hasMoreMessages: hasMore,
           currentPage: page
         });
@@ -77,32 +133,42 @@ export const useChatStore = create((set,get) => ({
     
     await get().getMessages(selectedUser._id, currentPage + 1);
   },
+
   sendMessage: async (messageData) => {
     const { selectedUser, messages, replyingTo } = get();
     const { authUser } = useAuthStore.getState();
     
-    // Encrypt text if user has encryption enabled
+    if (!selectedUser) {
+      toast.error("No user selected");
+      return;
+    }
+    
+    const originalText = messageData.text;
     let encryptedText = messageData.text;
     let isEncrypted = false;
+    
+    // Encrypt with recipient's public key
     if (messageData.text && selectedUser.publicKey) {
       const encrypted = await encryptMessage(messageData.text, selectedUser.publicKey);
       if (encrypted) {
         encryptedText = encrypted;
         isEncrypted = true;
+        console.log('📤 Sending encrypted message to server');
       }
     }
     
-    // Only show optimistic update if not scheduled
+    // Optimistic update for non-scheduled messages
     const optimisticMessage = !messageData.scheduledFor ? {
       _id: `temp-${Date.now()}`,
       senderId: authUser._id,
-      text: messageData.text,
+      text: originalText, // Show unencrypted text immediately
       image: messageData.image,
       video: messageData.video,
       file: messageData.file,
       voice: messageData.voice,
       createdAt: new Date().toISOString(),
       isOptimistic: true,
+      _decrypted: true, // Mark as decrypted so it displays correctly
     } : null;
     
     if (optimisticMessage) {
@@ -117,10 +183,29 @@ export const useChatStore = create((set,get) => ({
       
       const res = await axiosInstance.post(`/messages/send/${selectedUser._id}`, payload);
       
-      // Replace optimistic message with real one (only if not scheduled)
+      console.log('📥 Server response:', { 
+        isEncrypted: res.data.isEncrypted, 
+        hasOriginalText: !!originalText,
+        textPreview: res.data.text?.substring(0, 50)
+      });
+      
+      // For sent messages, keep the original plaintext (we encrypted it, so we know the plaintext)
+      const serverMessage = { ...res.data };
+      if (serverMessage.isEncrypted && originalText) {
+        serverMessage.text = originalText;
+        serverMessage._decrypted = true;
+        console.log('📝 Using original plaintext for sent message:', originalText);
+      } else {
+        console.log('⚠️ Not replacing text:', { isEncrypted: serverMessage.isEncrypted, hasOriginal: !!originalText });
+      }
+      const decryptedMessage = serverMessage;
+      
+      // Replace optimistic message with real one
       if (optimisticMessage) {
         set({ 
-          messages: messages.map(m => m._id === optimisticMessage._id ? res.data : m).concat(res.data._id === optimisticMessage._id ? [] : [res.data]),
+          messages: messages
+            .filter(m => m._id !== optimisticMessage._id)
+            .concat(decryptedMessage),
           replyingTo: null 
         });
       } else {
@@ -131,7 +216,8 @@ export const useChatStore = create((set,get) => ({
         window.analytics.track('message_sent', { 
           hasImage: !!messageData.image,
           hasFile: !!messageData.file,
-          isReply: !!replyingTo
+          isReply: !!replyingTo,
+          isEncrypted
         });
       }
     } catch (error) {
@@ -155,8 +241,9 @@ export const useChatStore = create((set,get) => ({
   addReaction: async (messageId, emoji) => {
     try {
       const res = await axiosInstance.post(`/messages/react/${messageId}`, { emoji });
+      const decryptedMessage = await get()._decryptSingleMessage(res.data);
       set({
-        messages: get().messages.map(m => m._id === messageId ? res.data : m)
+        messages: get().messages.map(m => m._id === messageId ? decryptedMessage : m)
       });
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to add reaction");
@@ -166,8 +253,9 @@ export const useChatStore = create((set,get) => ({
   removeReaction: async (messageId) => {
     try {
       const res = await axiosInstance.delete(`/messages/react/${messageId}`);
+      const decryptedMessage = await get()._decryptSingleMessage(res.data);
       set({
-        messages: get().messages.map(m => m._id === messageId ? res.data : m)
+        messages: get().messages.map(m => m._id === messageId ? decryptedMessage : m)
       });
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to remove reaction");
@@ -175,10 +263,34 @@ export const useChatStore = create((set,get) => ({
   },
 
   editMessage: async (messageId, text) => {
+    const { selectedUser } = get();
+    
+    let encryptedText = text;
+    let isEncrypted = false;
+    
+    if (text && selectedUser?.publicKey) {
+      const encrypted = await encryptMessage(text, selectedUser.publicKey);
+      if (encrypted) {
+        encryptedText = encrypted;
+        isEncrypted = true;
+      }
+    }
+    
+    const originalText = text;
+    
     try {
-      const res = await axiosInstance.put(`/messages/edit/${messageId}`, { text });
+      const res = await axiosInstance.put(`/messages/edit/${messageId}`, { 
+        text: encryptedText,
+        isEncrypted 
+      });
+      // Use original plaintext for edited message
+      const updatedMessage = { ...res.data };
+      if (updatedMessage.isEncrypted && originalText) {
+        updatedMessage.text = originalText;
+        updatedMessage._decrypted = true;
+      }
       set({
-        messages: get().messages.map(m => m._id === messageId ? res.data : m),
+        messages: get().messages.map(m => m._id === messageId ? updatedMessage : m),
         editingMessage: null
       });
     } catch (error) {
@@ -189,8 +301,9 @@ export const useChatStore = create((set,get) => ({
   deleteMessage: async (messageId) => {
     try {
       const res = await axiosInstance.delete(`/messages/${messageId}`);
+      const decryptedMessage = await get()._decryptSingleMessage(res.data);
       set({
-        messages: get().messages.map(m => m._id === messageId ? res.data : m)
+        messages: get().messages.map(m => m._id === messageId ? decryptedMessage : m)
       });
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to delete message");
@@ -200,10 +313,11 @@ export const useChatStore = create((set,get) => ({
   markAsRead: async (messageId) => {
     try {
       await axiosInstance.post(`/messages/read/${messageId}`);
+      const { authUser } = useAuthStore.getState();
       set({
         messages: get().messages.map(m => 
           m._id === messageId 
-            ? { ...m, readBy: [...(m.readBy || []), { userId: useAuthStore.getState().authUser._id, readAt: new Date() }] }
+            ? { ...m, readBy: [...(m.readBy || []), { userId: authUser._id, readAt: new Date() }] }
             : m
         )
       });
@@ -215,10 +329,11 @@ export const useChatStore = create((set,get) => ({
   pinMessage: async (messageId) => {
     try {
       const res = await axiosInstance.post(`/messages/pin/${messageId}`);
+      const decryptedMessage = await get()._decryptSingleMessage(res.data);
       set({
-        messages: get().messages.map(m => m._id === messageId ? res.data : m)
+        messages: get().messages.map(m => m._id === messageId ? decryptedMessage : m)
       });
-      toast.success(res.data.isPinned ? "Message pinned" : "Message unpinned");
+      toast.success(decryptedMessage.isPinned ? "Message pinned" : "Message unpinned");
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to pin message");
     }
@@ -236,8 +351,9 @@ export const useChatStore = create((set,get) => ({
 
   searchMessages: async (query) => {
     try {
-      const res = await axiosInstance.get(`/messages/search?query=${query}`);
-      set({ searchResults: res.data, searchQuery: query });
+      const res = await axiosInstance.get(`/messages/search?query=${encodeURIComponent(query)}`);
+      const decryptedResults = await get()._decryptMessages(res.data);
+      set({ searchResults: decryptedResults, searchQuery: query });
     } catch (error) {
       toast.error(error.response?.data?.message || "Search failed");
     }
@@ -246,7 +362,8 @@ export const useChatStore = create((set,get) => ({
   getPinnedMessages: async (userId) => {
     try {
       const res = await axiosInstance.get(`/messages/pinned/${userId}`);
-      set({ pinnedMessages: res.data });
+      const decryptedPinned = await get()._decryptMessages(res.data);
+      set({ pinnedMessages: decryptedPinned });
     } catch (error) {
       console.error("Failed to get pinned messages:", error);
     }
@@ -268,7 +385,8 @@ export const useChatStore = create((set,get) => ({
   getScheduledMessages: async () => {
     try {
       const res = await axiosInstance.get('/messages/scheduled');
-      set({ scheduledMessages: res.data });
+      const decryptedScheduled = await get()._decryptMessages(res.data);
+      set({ scheduledMessages: decryptedScheduled });
     } catch (error) {
       handleApiError(error, 'Failed to load scheduled messages');
     }
@@ -288,7 +406,6 @@ export const useChatStore = create((set,get) => ({
   setShowPinned: (show) => set({ showPinned: show }),
   setShowScheduled: (show) => set({ showScheduled: show }),
   clearSearch: () => set({ searchQuery: "", searchResults: [] }),
-
   setReplyingTo: (message) => set({ replyingTo: message }),
   setEditingMessage: (message) => set({ editingMessage: message }),
   
@@ -313,49 +430,47 @@ export const useChatStore = create((set,get) => ({
     if (!selectedUser) return;
 
     const socket = useAuthStore.getState().socket;
+    if (!socket) return;
 
     socket.on("newMessage", async (newMessage) => {
       const isMessageSentFromSelectedUser = newMessage.senderId === selectedUser._id;
       if (!isMessageSentFromSelectedUser) return;
       
-      // Decrypt if encrypted
-      if (newMessage.isEncrypted && newMessage.text) {
-        const keys = getStoredKeys();
-        if (keys.privateKey) {
-          newMessage.text = await decryptMessage(newMessage.text, keys.privateKey);
-        }
-      }
+      // Decrypt incoming message
+      const decryptedMessage = await get()._decryptSingleMessage(newMessage);
       
-      set({ messages: [...get().messages, newMessage] });
+      set({ messages: [...get().messages, decryptedMessage] });
       
       // Smart notifications - only notify for important messages
       if (document.hidden) {
         const prefs = JSON.parse(localStorage.getItem('notificationPrefs') || '{}');
-        if (isImportantMessage(newMessage, prefs)) {
-          const sender = selectedUser;
-          showNotification(`New message from ${sender.fullName}`, {
-            body: newMessage.text || 'Sent an attachment',
+        if (isImportantMessage(decryptedMessage, prefs)) {
+          showNotification(`New message from ${selectedUser.fullName}`, {
+            body: decryptedMessage.text || 'Sent an attachment',
             tag: 'new-message'
           });
         }
       }
     });
 
-    socket.on("messageReaction", (updatedMessage) => {
+    socket.on("messageReaction", async (updatedMessage) => {
+      const decryptedMessage = await get()._decryptSingleMessage(updatedMessage);
       set({
-        messages: get().messages.map(m => m._id === updatedMessage._id ? updatedMessage : m)
+        messages: get().messages.map(m => m._id === decryptedMessage._id ? decryptedMessage : m)
       });
     });
 
-    socket.on("messageEdited", (updatedMessage) => {
+    socket.on("messageEdited", async (updatedMessage) => {
+      const decryptedMessage = await get()._decryptSingleMessage(updatedMessage);
       set({
-        messages: get().messages.map(m => m._id === updatedMessage._id ? updatedMessage : m)
+        messages: get().messages.map(m => m._id === decryptedMessage._id ? decryptedMessage : m)
       });
     });
 
-    socket.on("messageDeleted", (updatedMessage) => {
+    socket.on("messageDeleted", async (updatedMessage) => {
+      const decryptedMessage = await get()._decryptSingleMessage(updatedMessage);
       set({
-        messages: get().messages.map(m => m._id === updatedMessage._id ? updatedMessage : m)
+        messages: get().messages.map(m => m._id === decryptedMessage._id ? decryptedMessage : m)
       });
     });
 
@@ -381,15 +496,18 @@ export const useChatStore = create((set,get) => ({
       });
     });
 
-    socket.on("messagePinned", (updatedMessage) => {
+    socket.on("messagePinned", async (updatedMessage) => {
+      const decryptedMessage = await get()._decryptSingleMessage(updatedMessage);
       set({
-        messages: get().messages.map(m => m._id === updatedMessage._id ? updatedMessage : m)
+        messages: get().messages.map(m => m._id === decryptedMessage._id ? decryptedMessage : m)
       });
     });
   },
 
   unsubscribeFromMessages: () => {
     const socket = useAuthStore.getState().socket;
+    if (!socket) return;
+    
     socket.off("newMessage");
     socket.off("messageReaction");
     socket.off("messageEdited");
@@ -400,5 +518,10 @@ export const useChatStore = create((set,get) => ({
     socket.off("messagePinned");
   },
 
-  setSelectedUser: (selectedUser) => set({ selectedUser, messages: [], currentPage: 1, hasMoreMessages: true }),
+  setSelectedUser: (selectedUser) => set({ 
+    selectedUser, 
+    messages: [], 
+    currentPage: 1, 
+    hasMoreMessages: true 
+  }),
 }));

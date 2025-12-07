@@ -8,6 +8,7 @@ import {
   removeReaction,
   editMessage,
   deleteMessage,
+  markAsDelivered,
   markAsRead,
   pinMessage,
   forwardMessage,
@@ -26,6 +27,7 @@ router.get("/pinned/:id", protectRoute, getPinnedMessages);
 router.get("/:id", protectRoute, getMessages);
 router.post("/send/:id", protectRoute, sendMessage);
 router.post("/react/:messageId", protectRoute, addReaction);
+router.post("/delivered/:messageId", protectRoute, markAsDelivered);
 router.post("/read/:messageId", protectRoute, markAsRead);
 router.post("/pin/:messageId", protectRoute, pinMessage);
 router.post("/forward/:messageId", protectRoute, forwardMessage);

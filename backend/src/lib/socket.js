@@ -116,6 +116,13 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("markAsDelivered", ({ messageId, senderId }) => {
+    const senderSocketId = getReceiverSocketId(senderId);
+    if (senderSocketId) {
+      io.to(senderSocketId).emit("messageDelivered", { messageId, userId });
+    }
+  });
+
   socket.on("markAsRead", ({ messageId, senderId }) => {
     const senderSocketId = getReceiverSocketId(senderId);
     if (senderSocketId) {

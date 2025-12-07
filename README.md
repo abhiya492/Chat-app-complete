@@ -64,6 +64,7 @@ Welcome to the **Real-Time Chat App** - A feature-rich, production-ready chat ap
 - ✅ Pin messages
 - ✅ Message search
 - ✅ Typing indicators
+- ✅ Message delivery status (sent/delivered/read)
 - ✅ Read receipts (double check marks)
 - ✅ Online/offline status
 - ✅ Last seen timestamp

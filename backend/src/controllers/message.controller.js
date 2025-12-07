@@ -61,12 +61,13 @@ export const getMessages = async (req, res) => {
 
 export const sendMessage = async (req, res) => {
   try {
-    const { text, image, file, replyTo, video, voice, disappearAfter, scheduledFor } = req.body;
+    const { text, image, file, replyTo, video, voice, disappearAfter, scheduledFor, isEncrypted } = req.body;
     const { id: receiverId } = req.params;
     const senderId = req.user._id;
     
     console.log('📨 Received:', { 
       hasText: !!text, 
+      isEncrypted: isEncrypted,
       hasImage: !!image, 
       hasFile: !!file, 
       fileType: typeof file,
@@ -187,6 +188,7 @@ export const sendMessage = async (req, res) => {
       senderId,
       receiverId,
       text,
+      isEncrypted: isEncrypted || false,
       image: imageUrl,
       video: videoData,
       voice: voiceData,
@@ -198,6 +200,7 @@ export const sendMessage = async (req, res) => {
     };
     
     console.log('💾 Saving message:', {
+      isEncrypted: messagePayload.isEncrypted,
       hasImage: !!imageUrl,
       hasFile: !!fileData,
       fileData: fileData ? JSON.stringify(fileData) : null
@@ -299,7 +302,7 @@ export const removeReaction = async (req, res) => {
 export const editMessage = async (req, res) => {
   try {
     const { messageId } = req.params;
-    const { text } = req.body;
+    const { text, isEncrypted } = req.body;
     const userId = req.user._id;
 
     const message = await Message.findById(messageId);
@@ -312,6 +315,7 @@ export const editMessage = async (req, res) => {
     }
 
     message.text = text;
+    message.isEncrypted = isEncrypted || false;
     message.isEdited = true;
     await message.save();
 
@@ -357,6 +361,37 @@ export const deleteMessage = async (req, res) => {
     res.status(200).json(message);
   } catch (error) {
     console.log("Error in deleteMessage controller: ", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const markAsDelivered = async (req, res) => {
+  try {
+    const { messageId } = req.params;
+    const userId = req.user._id;
+
+    const message = await Message.findById(messageId);
+    if (!message) {
+      return res.status(404).json({ error: "Message not found" });
+    }
+
+    const alreadyDelivered = message.deliveredTo.some(
+      (d) => d.userId.toString() === userId.toString()
+    );
+
+    if (!alreadyDelivered) {
+      message.deliveredTo.push({ userId, deliveredAt: new Date() });
+      await message.save();
+
+      const senderSocketId = getReceiverSocketId(message.senderId.toString());
+      if (senderSocketId) {
+        io.to(senderSocketId).emit("messageDelivered", { messageId, userId });
+      }
+    }
+
+    res.status(200).json(message);
+  } catch (error) {
+    console.log("Error in markAsDelivered controller: ", error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };

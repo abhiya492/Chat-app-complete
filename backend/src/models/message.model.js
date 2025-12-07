@@ -60,6 +60,16 @@ const messageSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    deliveredTo: [{
+      userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+      deliveredAt: {
+        type: Date,
+        default: Date.now,
+      },
+    }],
     readBy: [{
       userId: {
         type: mongoose.Schema.Types.ObjectId,
