@@ -13,6 +13,7 @@ import roomRoutes from './routes/room.route.js';
 import sharedExperienceRoutes from './routes/sharedExperience.route.js';
 import cors from 'cors';
 import passportConfig from './lib/passport.js';
+import { apiLimiter } from './middleware/rateLimiter.middleware.js';
 
 import path from 'path';
 
@@ -35,6 +36,9 @@ app.use(cors({
     credentials:true
 }));
 app.use(passportConfig.initialize());
+
+// Apply general rate limiting to all API routes
+app.use('/api/', apiLimiter);
 
 // Health check endpoint
 app.get("/health", (req, res) => {

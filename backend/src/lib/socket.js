@@ -2,6 +2,7 @@ import { Server } from "socket.io";
 import http from "http";
 import express from "express";
 import User from "../models/user.model.js";
+import { socketRateLimiter, SOCKET_LIMITS } from "../middleware/socketRateLimiter.middleware.js";
 
 const app = express();
 const server = http.createServer(app);
@@ -103,6 +104,9 @@ io.on("connection", (socket) => {
   io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
   socket.on("typing", ({ receiverId }) => {
+    if (!socketRateLimiter.checkLimit(userId, 'typing', SOCKET_LIMITS['typing'].max, SOCKET_LIMITS['typing'].window)) {
+      return;
+    }
     const receiverSocketId = getReceiverSocketId(receiverId);
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("userTyping", { userId });
@@ -132,6 +136,9 @@ io.on("connection", (socket) => {
 
   // WebRTC signaling
   socket.on("call:offer", ({ offer, to, callId, type }) => {
+    if (!socketRateLimiter.checkLimit(userId, 'call:offer', SOCKET_LIMITS['call:offer'].max, SOCKET_LIMITS['call:offer'].window)) {
+      return socket.emit("error", { message: "Too many call attempts" });
+    }
     const receiverSocketId = getReceiverSocketId(to);
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("call:offer", { offer, from: userId, callId, type });
@@ -161,6 +168,9 @@ io.on("connection", (socket) => {
 
   // Voice Room Events
   socket.on("room:join", async ({ roomId }) => {
+    if (!socketRateLimiter.checkLimit(userId, 'room:join', SOCKET_LIMITS['room:join'].max, SOCKET_LIMITS['room:join'].window)) {
+      return socket.emit("room:error", { message: "Too many join attempts" });
+    }
     if (!activeRooms.has(roomId)) {
       activeRooms.set(roomId, {
         participants: new Map(),
@@ -277,6 +287,9 @@ io.on("connection", (socket) => {
 
   // ========== TIC-TAC-TOE GAME (FIXED) ==========
   socket.on("game:invite", ({ chatId, gameId, hostId, hostName, invitedUserId }) => {
+    if (!socketRateLimiter.checkLimit(userId, 'game:invite', SOCKET_LIMITS['game:invite'].max, SOCKET_LIMITS['game:invite'].window)) {
+      return socket.emit("error", { message: "Too many game invites" });
+    }
     const invitedSocket = getReceiverSocketId(invitedUserId);
     if (invitedSocket) {
       io.to(invitedSocket).emit("game:invite", {
@@ -334,6 +347,9 @@ io.on("connection", (socket) => {
   });
 
   socket.on("game:move", ({ gameId, position, playerId }) => {
+    if (!socketRateLimiter.checkLimit(userId, 'game:move', SOCKET_LIMITS['game:move'].max, SOCKET_LIMITS['game:move'].window)) {
+      return socket.emit("game:error", { message: "Too many moves" });
+    }
     const game = activeGames.get(gameId);
     
     if (!game) {
@@ -636,6 +652,9 @@ io.on("connection", (socket) => {
   });
 
   socket.on("cursor:move", ({ chatId, userId, x, y, username }) => {
+    if (!socketRateLimiter.checkLimit(userId, 'cursor:move', SOCKET_LIMITS['cursor:move'].max, SOCKET_LIMITS['cursor:move'].window)) {
+      return;
+    }
     socket.to(`cursor:${chatId}`).emit("cursor:move", { userId, x, y, username });
   });
 
@@ -733,6 +752,9 @@ io.on("connection", (socket) => {
   });
 
   socket.on("random:message", ({ sessionId, message }) => {
+    if (!socketRateLimiter.checkLimit(userId, 'random:message', SOCKET_LIMITS['random:message'].max, SOCKET_LIMITS['random:message'].window)) {
+      return socket.emit("error", { message: "Too many messages" });
+    }
     const session = activeRandomChats.get(sessionId);
     if (session) {
       const partnerId = session.user1 === userId ? session.user2 : session.user1;

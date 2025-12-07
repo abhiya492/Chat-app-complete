@@ -53,6 +53,8 @@ Welcome to the **Real-Time Chat App** - A feature-rich, production-ready chat ap
 - ✅ Session management
 - ✅ Protected routes
 - ✅ Multi-provider authentication
+- ✅ **Rate Limiting** - Prevent brute force & DDoS attacks
+- ✅ **Socket Rate Limiting** - Prevent event flooding
 
 ### 💬 Core Messaging Features
 - ✅ Real-time messaging with Socket.io
@@ -221,44 +223,51 @@ Welcome to the **Real-Time Chat App** - A feature-rich, production-ready chat ap
 
 ## 📖 Documentation
 
+All documentation has been organized in the [`docs/`](./docs/) folder.
+
 ### Core Features
-- 📝 [MESSAGING_FEATURES.md](./MESSAGING_FEATURES.md) - Complete messaging guide
-- 📞 [WEBRTC_FEATURES.md](./WEBRTC_FEATURES.md) - Voice & video calling setup
-- 👤 [USER_PROFILE_FEATURES.md](./USER_PROFILE_FEATURES.md) - Profile & customization
-- 🎨 [UX_ENHANCEMENTS.md](./UX_ENHANCEMENTS.md) - PWA, notifications, themes
+- 📝 [Messaging Features](./docs/MESSAGING_FEATURES.md) - Complete messaging guide
+- 📞 [WebRTC Features](./docs/WEBRTC_FEATURES.md) - Voice & video calling setup
+- 👤 [User Profile Features](./docs/USER_PROFILE_FEATURES.md) - Profile & customization
+- 🎨 [UX Enhancements](./docs/UX_ENHANCEMENTS.md) - PWA, notifications, themes
 
 ### Advanced Features
-- 🎮 [SHARED_EXPERIENCES.md](./SHARED_EXPERIENCES.md) - Games implementation guide
-- 🎮 [SHARED_EXPERIENCES_INTEGRATION.md](./SHARED_EXPERIENCES_INTEGRATION.md) - Quick setup
-- 🎙️ [VOICE_ROOMS_QUICKSTART.md](./VOICE_ROOMS_QUICKSTART.md) - Voice rooms setup
-- 🎙️ [VOICE_ROOMS_ARCHITECTURE.md](./VOICE_ROOMS_ARCHITECTURE.md) - Technical architecture
-- 🎙️ [VOICE_ROOMS_IMPLEMENTATION.md](./VOICE_ROOMS_IMPLEMENTATION.md) - Implementation details
-- 🎙️ [VOICE_ROOMS_TESTING.md](./VOICE_ROOMS_TESTING.md) - Testing guide
+- 🎮 [Shared Experiences](./docs/SHARED_EXPERIENCES.md) - Games implementation guide
+- 🎮 [Shared Experiences Integration](./docs/SHARED_EXPERIENCES_INTEGRATION.md) - Quick setup
+- 🎙️ [Voice Rooms Quickstart](./docs/VOICE_ROOMS_QUICKSTART.md) - Voice rooms setup
+- 🎙️ [Voice Rooms Architecture](./docs/VOICE_ROOMS_ARCHITECTURE.md) - Technical architecture
+- 🎙️ [Voice Rooms Implementation](./docs/VOICE_ROOMS_IMPLEMENTATION.md) - Implementation details
+- 🎙️ [Voice Rooms Testing](./docs/VOICE_ROOMS_TESTING.md) - Testing guide
 
 ### AI Features
-- 🤖 [AI_FEATURES.md](./AI_FEATURES.md) - AI chatbot features
-- 🤖 [AI_UPGRADE.md](./AI_UPGRADE.md) - AI upgrade guide
-- 🤖 [GROQ_SETUP.md](./GROQ_SETUP.md) - Groq API setup
-- 🧪 [TEST_AI_FEATURES.md](./TEST_AI_FEATURES.md) - Testing AI features
+- 🤖 [AI Features](./docs/AI_FEATURES.md) - AI chatbot features
+- 🤖 [AI Upgrade](./docs/AI_UPGRADE.md) - AI upgrade guide
+- 🤖 [Groq Setup](./docs/GROQ_SETUP.md) - Groq API setup
+- 🧪 [Test AI Features](./docs/TEST_AI_FEATURES.md) - Testing AI features
 
 ### Setup & Configuration
-- ⚙️ [QUICK_START.md](./QUICK_START.md) - Quick start guide
-- ⚙️ [QUICK_REFERENCE.md](./QUICK_REFERENCE.md) - Quick reference
-- 🔐 [GOOGLE_OAUTH_SETUP.md](./GOOGLE_OAUTH_SETUP.md) - Google OAuth setup
-- 📧 [EMAIL_SETUP_GUIDE.md](./EMAIL_SETUP_GUIDE.md) - Email configuration
-- 📞 [SETUP_CALLS.md](./SETUP_CALLS.md) - WebRTC setup
-- 💾 [STORAGE_OPTIONS.md](./STORAGE_OPTIONS.md) - Storage configuration
+- ⚙️ [Quick Start](./docs/QUICK_START.md) - Quick start guide
+- ⚙️ [Quick Reference](./docs/QUICK_REFERENCE.md) - Quick reference
+- 🔐 [Google OAuth Setup](./docs/GOOGLE_OAUTH_SETUP.md) - Google OAuth setup
+- 📧 [Email Setup Guide](./docs/EMAIL_SETUP_GUIDE.md) - Email configuration
+- 📞 [Setup Calls](./docs/SETUP_CALLS.md) - WebRTC setup
+- 💾 [Storage Options](./docs/STORAGE_OPTIONS.md) - Storage configuration
+- 🛡️ [Rate Limiting](./docs/RATE_LIMITING.md) - Rate limiting guide
+- 🛡️ [Rate Limiting Summary](./docs/RATE_LIMITING_SUMMARY.md) - Quick summary
+- 🏛️ [Rate Limiting Architecture](./docs/RATE_LIMITING_ARCHITECTURE.md) - Architecture details
 
 ### DevOps & Deployment
-- 🐳 [DOCKER.md](./DOCKER.md) - Docker containerization
-- ☸️ [KUBERNETES.md](./KUBERNETES.md) - Kubernetes deployment
-- 🎙️ [VOICE_ROOMS_FREE_TIER.md](./VOICE_ROOMS_FREE_TIER.md) - Free tier deployment
+- 🐳 [Docker](./docs/DOCKER.md) - Docker containerization
+- ☸️ [Kubernetes](./docs/KUBERNETES.md) - Kubernetes deployment
+- 🎙️ [Voice Rooms Free Tier](./docs/VOICE_ROOMS_FREE_TIER.md) - Free tier deployment
 
 ### Summary Documents
-- 📋 [FEATURES_COMPLETE.md](./FEATURES_COMPLETE.md) - Complete feature list
-- 📋 [FEATURES_COMPLETE_SUMMARY.md](./FEATURES_COMPLETE_SUMMARY.md) - Feature summary
-- 📋 [IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md) - Implementation summary
-- 📋 [PROFILE_IMPLEMENTATION_SUMMARY.md](./PROFILE_IMPLEMENTATION_SUMMARY.md) - Profile features
+- 📋 [Features Complete](./docs/FEATURES_COMPLETE.md) - Complete feature list
+- 📋 [Features Summary](./docs/FEATURES_COMPLETE_SUMMARY.md) - Feature summary
+- 📋 [Implementation Summary](./docs/IMPLEMENTATION_SUMMARY.md) - Implementation summary
+- 📋 [Profile Implementation](./docs/PROFILE_IMPLEMENTATION_SUMMARY.md) - Profile features
+
+**📂 [Browse All Documentation](./docs/)**
 
 ---
 

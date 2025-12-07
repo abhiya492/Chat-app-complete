@@ -1,5 +1,6 @@
 import express from "express";
 import { protectRoute } from "../middleware/auth.middleware.js";
+import { messageLimiter, uploadLimiter } from "../middleware/rateLimiter.middleware.js";
 import { 
   getMessages, 
   getUsersForSidebar, 
@@ -25,12 +26,12 @@ router.get("/search", protectRoute, searchMessages);
 router.get("/scheduled", protectRoute, getScheduledMessages);
 router.get("/pinned/:id", protectRoute, getPinnedMessages);
 router.get("/:id", protectRoute, getMessages);
-router.post("/send/:id", protectRoute, sendMessage);
+router.post("/send/:id", protectRoute, messageLimiter, sendMessage);
 router.post("/react/:messageId", protectRoute, addReaction);
 router.post("/delivered/:messageId", protectRoute, markAsDelivered);
 router.post("/read/:messageId", protectRoute, markAsRead);
 router.post("/pin/:messageId", protectRoute, pinMessage);
-router.post("/forward/:messageId", protectRoute, forwardMessage);
+router.post("/forward/:messageId", protectRoute, messageLimiter, forwardMessage);
 router.delete("/react/:messageId", protectRoute, removeReaction);
 router.put("/edit/:messageId", protectRoute, editMessage);
 router.delete("/chat/:userId", protectRoute, deleteChat);
