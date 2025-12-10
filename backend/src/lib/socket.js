@@ -809,6 +809,41 @@ io.on("connection", (socket) => {
     }
   });
 
+  // RPG Challenge Game Events
+  socket.on("rpg:join", ({ gameRoomId }) => {
+    socket.join(`rpg:${gameRoomId}`);
+  });
+
+  socket.on("rpg:action", ({ gameRoomId, action, data }) => {
+    socket.to(`rpg:${gameRoomId}`).emit("rpg:action", { action, data, from: userId });
+  });
+
+  socket.on("rpg:dice-roll", ({ gameRoomId, result }) => {
+    io.to(`rpg:${gameRoomId}`).emit("rpg:dice-roll", { result, from: userId });
+  });
+
+  socket.on("rpg:turn-end", ({ gameRoomId }) => {
+    socket.to(`rpg:${gameRoomId}`).emit("rpg:turn-start");
+  });
+
+  socket.on("rpg:leave", ({ gameRoomId }) => {
+    socket.to(`rpg:${gameRoomId}`).emit("rpg:opponent-left");
+    socket.leave(`rpg:${gameRoomId}`);
+  });
+
+  // Battle Royale Game Events
+  socket.on("battleRoyale:move", ({ playerId, position, isMoving }) => {
+    socket.broadcast.emit("battleRoyale:playerMove", { playerId, position, isMoving });
+  });
+
+  socket.on("battleRoyale:shoot", ({ playerId, bulletId, targetId, start, end, damage }) => {
+    socket.broadcast.emit("battleRoyale:playerShoot", { playerId, bulletId, targetId, start, end, damage });
+  });
+
+  socket.on("battleRoyale:hit", ({ playerId, health }) => {
+    socket.broadcast.emit("battleRoyale:playerHit", { playerId, health });
+  });
+
   // Location Sharing
   socket.on("request-location", ({ to }) => {
     const targetSocket = getReceiverSocketId(to);
@@ -874,6 +909,9 @@ io.on("connection", (socket) => {
         setTimeout(() => cleanupGame(gameId), 30000);
       }
     });
+    
+    // Notify battle royale players of disconnection
+    socket.broadcast.emit("battleRoyale:playerDisconnected", { playerId: userId });
   });
 });
 

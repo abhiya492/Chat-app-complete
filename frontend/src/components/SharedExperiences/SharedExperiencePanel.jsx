@@ -8,6 +8,7 @@ import SimpleCursor from "./SimpleCursor";
 import RockPaperScissors from "./RockPaperScissors";
 import Chess from "./Chess";
 
+
 const SharedExperiencePanel = () => {
   const [activeTab, setActiveTab] = useState("games");
   const [isExpanded, setIsExpanded] = useState(false);

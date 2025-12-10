@@ -30,7 +30,7 @@ export const aiLimiter = rateLimit({
 // Rate limiter for message sending (prevent spam)
 export const messageLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
-  max: 30, // 30 messages per minute
+  max: 100, // 100 messages per minute
   message: { message: 'Too many messages, please slow down' },
   standardHeaders: true,
   legacyHeaders: false,
@@ -39,7 +39,7 @@ export const messageLimiter = rateLimit({
 // Rate limiter for file uploads (prevent abuse)
 export const uploadLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
-  max: 10, // 10 uploads per minute
+  max: 30, // 30 uploads per minute
   message: { message: 'Too many uploads, please wait a moment' },
   standardHeaders: true,
   legacyHeaders: false,
@@ -48,7 +48,7 @@ export const uploadLimiter = rateLimit({
 // General API rate limiter
 export const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // 100 requests per window
+  max: 500, // 500 requests per window
   message: { message: 'Too many requests, please try again later' },
   standardHeaders: true,
   legacyHeaders: false,

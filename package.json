@@ -7,6 +7,7 @@
     "build": "cd frontend && npm install --production=false && npm run build && cd ../backend && npm install --include=optional",
     "start": "cd backend && npm start",
     "dev": "concurrently \"cd backend && npm run dev\" \"cd frontend && npm run dev\"",
+    "setup-models": "node setup-models.js",
     "docker:build": "docker-compose build",
     "docker:up": "docker-compose up",
     "docker:down": "docker-compose down"

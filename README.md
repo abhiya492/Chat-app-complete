@@ -109,6 +109,18 @@ Welcome to the **Real-Time Chat App** - A feature-rich, production-ready chat ap
 - ✅ Winner detection
 - ✅ Score tracking
 
+### ⚔️ Challenge Arena (Multiplayer RPG Games)
+- ✅ **Challenge Button** - Green button with crossed swords icon
+- ✅ **6 Game Modes** - Fantasy, Mystery, Sci-Fi, Debate, Trivia, Story
+- ✅ **Online Players List** - See all available players with stats
+- ✅ **Player Statistics** - Level, XP, wins, losses tracking
+- ✅ **Real-time Challenges** - Instant challenge notifications
+- ✅ **Turn-based RPG Combat** - Attack, Defend, Cast Spell actions
+- ✅ **Dice Rolling System** - Random event generation
+- ✅ **Game Stats** - Health, Mana, Power tracking
+- ✅ **Level & XP System** - Progress through gameplay
+- ✅ **Game History** - Track all played games
+
 ### 🤖 AI Chatbot
 - ✅ Groq API integration
 - ✅ LLaMA 3 model
@@ -234,6 +246,7 @@ All documentation has been organized in the [`docs/`](./docs/) folder.
 ### Advanced Features
 - 🎮 [Shared Experiences](./docs/SHARED_EXPERIENCES.md) - Games implementation guide
 - 🎮 [Shared Experiences Integration](./docs/SHARED_EXPERIENCES_INTEGRATION.md) - Quick setup
+- ⚔️ [Challenge Feature](./docs/CHALLENGE_FEATURE.md) - Multiplayer RPG games guide
 - 🎙️ [Voice Rooms Quickstart](./docs/VOICE_ROOMS_QUICKSTART.md) - Voice rooms setup
 - 🎙️ [Voice Rooms Architecture](./docs/VOICE_ROOMS_ARCHITECTURE.md) - Technical architecture
 - 🎙️ [Voice Rooms Implementation](./docs/VOICE_ROOMS_IMPLEMENTATION.md) - Implementation details

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
-import { LogOut, MessageSquare, Settings, User, Radio, Shuffle, Menu, X, Loader2, Clock } from "lucide-react";
+import { LogOut, MessageSquare, Settings, User, Radio, Shuffle, Menu, X, Loader2, Clock, Swords } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import LanguageSelector from "./LanguageSelector";
 import { useState } from "react";
@@ -45,6 +45,10 @@ const Navbar = () => {
                 <Link to="/random-chat" className="btn btn-sm gap-2 btn-primary hover:scale-105 hover:shadow-md transition-all">
                   <Shuffle className="w-4 h-4" />
                   <span className="hidden lg:inline font-medium text-sm">Random</span>
+                </Link>
+                <Link to="/challenge" className="btn btn-sm gap-2 btn-success hover:scale-105 hover:shadow-md transition-all">
+                  <Swords className="w-4 h-4" />
+                  <span className="hidden lg:inline font-medium text-sm">Challenge</span>
                 </Link>
               </>
             )}
@@ -90,6 +94,9 @@ const Navbar = () => {
                   </Link>
                   <Link to="/random-chat" className="btn btn-sm gap-2 btn-ghost justify-start" onClick={() => setShowMobileMenu(false)}>
                     <Shuffle className="w-4 h-4" /><span>Random Chat</span>
+                  </Link>
+                  <Link to="/challenge" className="btn btn-sm gap-2 btn-ghost justify-start" onClick={() => setShowMobileMenu(false)}>
+                    <Swords className="w-4 h-4" /><span>Challenge</span>
                   </Link>
                 </>
               )}

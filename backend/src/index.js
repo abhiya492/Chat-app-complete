@@ -11,6 +11,8 @@ import storyRoutes from './routes/story.route.js';
 import streakRoutes from './routes/streak.route.js';
 import roomRoutes from './routes/room.route.js';
 import sharedExperienceRoutes from './routes/sharedExperience.route.js';
+import challengeRoutes from './routes/challenge.route.js';
+import gameProgressRoutes from './routes/gameProgress.route.js';
 import cors from 'cors';
 import passportConfig from './lib/passport.js';
 import { apiLimiter } from './middleware/rateLimiter.middleware.js';
@@ -62,6 +64,8 @@ app.use("/api/stories",storyRoutes);
 app.use("/api/streaks",streakRoutes);
 app.use("/api/rooms",roomRoutes);
 app.use("/api/shared",sharedExperienceRoutes);
+app.use("/api/challenges",challengeRoutes);
+app.use("/api/game-progress",gameProgressRoutes);
 
 if (process.env.NODE_ENV === "production") {
     const frontendPath = path.join(__dirname, "../frontend/dist");
