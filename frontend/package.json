@@ -12,8 +12,8 @@
   "dependencies": {
     "@react-three/drei": "^9.122.0",
     "@react-three/fiber": "^8.15.0",
-    "@react-three/postprocessing": "^3.0.4",
-    "@react-three/rapier": "^2.2.0",
+    "@react-three/postprocessing": "^2.16.3",
+    "@react-three/rapier": "^1.4.0",
     "axios": "^1.7.9",
     "framer-motion": "^12.23.24",
     "i18next": "^25.6.2",
