@@ -10,9 +10,10 @@ import ForgotPassword from './pages/ForgotPassword'
 import Rooms from './pages/Rooms'
 import RoomView from './pages/RoomView'
 import RandomChat from './pages/RandomChat'
+import Challenge from './pages/Challenge'
 import { useAuthStore } from './store/useAuthStore'
 import { useThemeStore } from './store/useThemeStore'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 import { Loader } from 'lucide-react'
 import { Toaster } from 'react-hot-toast'
@@ -30,12 +31,15 @@ import PageTransition from './components/PageTransition'
 import OnboardingTour from './components/OnboardingTour'
 import EncryptionSetup from './components/EncryptionSetup'
 import ScheduledMessages from './components/ScheduledMessages'
+import ChallengeNotification from './components/ChallengeNotification'
+import ColdStartLoader from './components/ColdStartLoader'
 
 const App = () => {
   const { authUser,checkAuth,isCheckingAuth,onlineUsers,socket } = useAuthStore();
   const { theme } = useThemeStore();
   const { setupCallListeners, cleanupCallListeners } = useCallStore();
   const { subscribeToStoryEvents, unsubscribeFromStoryEvents } = useStoryStore();
+  const [backendReady, setBackendReady] = useState(false);
 
   console.log({ onlineUsers})
 
@@ -82,6 +86,10 @@ const App = () => {
 
   console.log(authUser);
 
+  if (!backendReady) {
+    return <ColdStartLoader onReady={() => setBackendReady(true)} />;
+  }
+
   if (isCheckingAuth && !authUser)
     return (
       <div className="flex items-center justify-center h-screen">
@@ -103,6 +111,7 @@ const App = () => {
         <Route path="/rooms" element={authUser ? <Rooms /> : <Navigate to="/login" />} />
         <Route path="/room/:id" element={authUser ? <RoomView /> : <Navigate to="/login" />} />
         <Route path="/random-chat" element={authUser ? <RandomChat /> : <Navigate to="/login" />} />
+        <Route path="/challenge" element={authUser ? <Challenge /> : <Navigate to="/login" />} />
         </Routes>
       </PageTransition>
 
@@ -115,6 +124,7 @@ const App = () => {
       {authUser && <NotificationPrompt />}
       {authUser && <ChatbotButton />}
       {authUser && <ScheduledMessages />}
+      {authUser && <ChallengeNotification />}
       <CallModal />
       <IncomingCallModal />
     </div>
