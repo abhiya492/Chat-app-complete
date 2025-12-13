@@ -1,0 +1,56 @@
+name: CD - Deploy to Kubernetes
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'development'
+        type: choice
+        options:
+          - development
+          - production
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'development' }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+      
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > $HOME/.kube/config
+      
+      - name: Update image tags
+        run: |
+          cd k8s/base
+          sed -i "s|image: chat-app/backend:.*|image: ${{ env.REGISTRY }}/${{ github.repository }}/backend:${{ github.sha }}|g" backend-deployment.yaml
+          sed -i "s|image: chat-app/frontend:.*|image: ${{ env.REGISTRY }}/${{ github.repository }}/frontend:${{ github.sha }}|g" frontend-deployment.yaml
+      
+      - name: Deploy with Kustomize
+        run: |
+          kubectl apply -k k8s/overlays/${{ github.event.inputs.environment || 'development' }}
+      
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/backend -n chat-app-dev --timeout=5m
+          kubectl rollout status deployment/frontend -n chat-app-dev --timeout=5m
+      
+      - name: Verify deployment
+        run: |
+          kubectl get pods -n chat-app-dev
+          kubectl get svc -n chat-app-dev
