@@ -57,7 +57,7 @@ jobs:
     name: Build Docker Images
     needs: [test, security-scan]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' && secrets.DOCKER_USERNAME != ''
     steps:
       - uses: actions/checkout@v3
       
