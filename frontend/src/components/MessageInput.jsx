@@ -3,7 +3,8 @@ import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { useWellnessStore } from "../store/useWellnessStore";
 import { useCircadianStore } from "../store/useCircadianStore";
-import { Image, Send, X, Paperclip, Mic, Video, Timer, Edit2, Loader2, Clock } from "lucide-react";
+import { useAccessibilityStore } from "../store/useAccessibilityStore";
+import { Image, Send, X, Paperclip, Mic, Video, Timer, Edit2, Loader2, Clock, MicOff } from "lucide-react";
 import toast from "react-hot-toast";
 import VoiceRecorder from "./VoiceRecorder";
 import SmartReplies from "./SmartReplies";
@@ -20,14 +21,17 @@ const MessageInput = () => {
   const [disappearAfter, setDisappearAfter] = useState(null);
   const [scheduledFor, setScheduledFor] = useState("");
   const [showSchedule, setShowSchedule] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const fileInputRef = useRef(null);
   const videoInputRef = useRef(null);
   const docInputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+  const recognitionRef = useRef(null);
   const { sendMessage, replyingTo, setReplyingTo, editingMessage, setEditingMessage, emitTyping, emitStopTyping, messages, isSendingMessage } = useChatStore();
   const { authUser } = useAuthStore();
   const { analyzeMoodFromText, updateTypingData } = useWellnessStore();
   const { shouldShowFeature } = useCircadianStore();
+  const { voiceToText } = useAccessibilityStore();
   
   const lastReceivedMessage = messages.filter(m => m.senderId !== authUser._id).slice(-1)[0];
 
@@ -36,6 +40,52 @@ const MessageInput = () => {
       setText(editingMessage.text || "");
     }
   }, [editingMessage]);
+
+  // Voice-to-text setup
+  useEffect(() => {
+    if (!voiceToText.enabled || !('webkitSpeechRecognition' in window)) return;
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognitionRef.current = new SpeechRecognition();
+    
+    const recognition = recognitionRef.current;
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = voiceToText.language;
+
+    recognition.onresult = (event) => {
+      let finalTranscript = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript;
+        }
+      }
+      if (finalTranscript) {
+        setText(prev => prev + finalTranscript + " ");
+      }
+    };
+
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = () => {
+      setIsListening(false);
+      toast.error("Voice recognition error");
+    };
+
+    return () => {
+      if (recognition) recognition.stop();
+    };
+  }, [voiceToText.enabled, voiceToText.language]);
+
+  const toggleVoiceInput = () => {
+    if (!recognitionRef.current) return;
+    
+    if (isListening) {
+      recognitionRef.current.stop();
+    } else {
+      recognitionRef.current.start();
+      setIsListening(true);
+    }
+  };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -433,10 +483,24 @@ const MessageInput = () => {
 
       <form onSubmit={handleSendMessage} className="flex items-center gap-1 sm:gap-2">
         <div className="flex-1 flex gap-1 sm:gap-2">
+          {/* Voice Input Button */}
+          {voiceToText.enabled && (
+            <button
+              type="button"
+              onClick={toggleVoiceInput}
+              className={`btn btn-sm btn-circle transition-all duration-200 ${
+                isListening ? "btn-error" : "btn-ghost"
+              }`}
+              title={isListening ? "Stop voice input" : "Start voice input"}
+            >
+              {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+            </button>
+          )}
+          
           <input
             type="text"
             className="w-full input input-bordered rounded-lg input-sm sm:input-md focus:outline-none focus:ring-2 focus:ring-primary transition-all text-sm sm:text-base"
-            placeholder="Type a message..."
+            placeholder={isListening ? "Listening..." : "Type a message..."}
             value={text}
             onChange={handleTextChange}
             aria-label="Message input"

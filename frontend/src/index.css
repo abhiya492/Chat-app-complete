@@ -286,3 +286,175 @@ button {
     opacity: 0;
   }
 }
+
+/* ===== ACCESSIBILITY STYLES ===== */
+
+/* Dyslexia-friendly font */
+@import url('https://fonts.googleapis.com/css2?family=OpenDyslexic:wght@400;700&display=swap');
+
+/* Base accessibility variables */
+:root {
+  --base-font-size: 16px;
+  --animation-duration: 0.3s;
+}
+
+/* Apply dyslexia font when enabled */
+.dyslexia-font,
+.dyslexia-font * {
+  font-family: 'OpenDyslexic', Arial, sans-serif !important;
+}
+
+/* High contrast mode */
+.high-contrast {
+  --primary: #000000;
+  --primary-content: #ffffff;
+  --secondary: #ffffff;
+  --secondary-content: #000000;
+  --accent: #ffff00;
+  --accent-content: #000000;
+  --neutral: #000000;
+  --neutral-content: #ffffff;
+  --base-100: #ffffff;
+  --base-200: #f0f0f0;
+  --base-300: #e0e0e0;
+  --base-content: #000000;
+  --info: #0000ff;
+  --success: #008000;
+  --warning: #ff8000;
+  --error: #ff0000;
+}
+
+.high-contrast * {
+  border-color: #000000 !important;
+  text-shadow: none !important;
+  box-shadow: 0 0 0 2px #000000 !important;
+}
+
+/* Color blind friendly themes */
+.colorblind-protanopia { filter: contrast(1.2) saturate(0.8) hue-rotate(10deg); }
+.colorblind-deuteranopia { filter: contrast(1.1) saturate(0.9) hue-rotate(-10deg); }
+.colorblind-tritanopia { filter: contrast(1.3) saturate(0.7) hue-rotate(20deg); }
+
+/* One-handed mode */
+.one-handed-mode .navbar { flex-direction: row-reverse; }
+.one-handed-mode .drawer-side { right: 0; left: auto; }
+.one-handed-mode .floating-buttons { right: auto; left: 1rem; }
+
+/* Larger click targets */
+.large-targets button,
+.large-targets .btn,
+.large-targets input,
+.large-targets select,
+.large-targets textarea {
+  min-height: 48px !important;
+  min-width: 48px !important;
+  padding: 12px !important;
+  font-size: 16px !important;
+}
+
+/* Reduced motion */
+:root[style*="--animation-duration: 0s"] *,
+:root[style*="--animation-duration: 0s"] *::before,
+:root[style*="--animation-duration: 0s"] *::after {
+  animation-duration: 0s !important;
+  transition-duration: 0s !important;
+}
+
+/* Font size scaling */
+:root[style*="--base-font-size: 14px"] { font-size: 14px; }
+:root[style*="--base-font-size: 18px"] { font-size: 18px; }
+:root[style*="--base-font-size: 20px"] { font-size: 20px; }
+
+/* Focus indicators */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--primary) !important;
+  outline-offset: 2px !important;
+}
+
+/* Screen reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Voice recording indicator */
+.voice-recording-indicator {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #ff4444;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.voice-recording-indicator::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+  animation: pulse 1s infinite;
+}
+
+/* Text-to-speech highlight */
+.tts-speaking {
+  background: linear-gradient(90deg, transparent, rgba(var(--primary), 0.3), transparent);
+  background-size: 200% 100%;
+  animation: tts-highlight 2s infinite;
+}
+
+@keyframes tts-highlight {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+/* ===== Z-INDEX HIERARCHY ===== */
+/* Prevent component overlaps with proper layering */
+
+/* Base layers */
+.navbar { z-index: 40 !important; }
+.drawer-side { z-index: 35 !important; }
+
+/* Floating UI elements */
+.floating-buttons { z-index: 30 !important; }
+.wellness-widget { z-index: 20 !important; }
+.ai-chat-button { z-index: 30 !important; }
+.ai-chat-panel { z-index: 40 !important; }
+.accessibility-toggle { z-index: 25 !important; }
+
+/* Modals and overlays */
+.modal-overlay { z-index: 60 !important; }
+.dropdown-content { z-index: 50 !important; }
+.tooltip { z-index: 70 !important; }
+
+/* Notifications and alerts */
+.toast { z-index: 80 !important; }
+.alert { z-index: 45 !important; }
+
+/* Critical overlays */
+.crisis-modal { z-index: 90 !important; }
+.loading-overlay { z-index: 100 !important; }
+
+/* Position fixes for overlapping components */
+.fixed.bottom-4.right-4 { bottom: 5rem !important; } /* Move up from bottom */
+.fixed.bottom-4.left-4:has(.btn-circle) { z-index: 30 !important; }
+.fixed.bottom-20.right-4 { z-index: 20 !important; }
+
+/* Ensure proper stacking context */
+.fixed, .absolute { isolation: isolate; }

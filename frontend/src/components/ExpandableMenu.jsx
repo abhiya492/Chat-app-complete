@@ -11,10 +11,12 @@ import {
   User, 
   LogOut, 
   Loader2,
-  Globe
+  Globe,
+  Eye
 } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import LanguageSelector from "./LanguageSelector";
+import AccessibilityToggle from "./AccessibilityToggle";
 
 const ExpandableMenu = () => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -32,6 +34,12 @@ const ExpandableMenu = () => {
       icon: Sun,
       label: "Theme",
       component: <ThemeToggle />,
+      isComponent: true
+    },
+    {
+      icon: Eye,
+      label: "Accessibility",
+      component: <AccessibilityToggle />,
       isComponent: true
     },
     {

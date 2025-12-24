@@ -90,7 +90,7 @@ const AITherapistChat = () => {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 left-4 btn btn-circle btn-primary shadow-lg z-40"
+        className="fixed bottom-4 left-4 btn btn-circle btn-secondary shadow-lg z-30"
         title="AI Wellness Support"
       >
         <Brain className="w-5 h-5" />
@@ -100,7 +100,7 @@ const AITherapistChat = () => {
 
   return (
     <>
-      <div className="fixed bottom-4 left-4 w-80 h-96 bg-base-100 rounded-lg shadow-xl border z-50">
+      <div className="fixed bottom-4 left-4 w-80 h-96 bg-base-100 rounded-lg shadow-xl border z-40">
         <div className="flex items-center justify-between p-3 border-b bg-primary text-primary-content rounded-t-lg">
           <div className="flex items-center gap-2">
             <Brain className="w-5 h-5" />
@@ -165,7 +165,7 @@ const AITherapistChat = () => {
 
       {/* CBT Technique Modal */}
       {currentTechnique && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-60">
           <div className="bg-base-100 rounded-lg p-6 max-w-md mx-4">
             <h3 className="text-lg font-bold mb-3">{currentTechnique.name}</h3>
             <p className="text-sm text-base-content/80 mb-4">{currentTechnique.description}</p>
@@ -198,7 +198,7 @@ const AITherapistChat = () => {
 
       {/* Crisis Support Modal */}
       {showCrisisHelp && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-60">
           <div className="bg-base-100 rounded-lg p-6 max-w-md mx-4">
             <div className="flex items-center gap-2 mb-4">
               <AlertTriangle className="w-6 h-6 text-error" />

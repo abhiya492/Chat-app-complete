@@ -51,7 +51,7 @@ const WellnessWidget = () => {
   return (
     <>
       {/* Quick Mood Widget */}
-      <div className="fixed bottom-4 right-20 z-30">
+      <div className="fixed bottom-20 right-4 z-20">
         <div className="bg-gradient-to-br from-primary to-secondary rounded-xl p-3 text-primary-content shadow-lg">
           <div className="flex items-center gap-2 mb-2">
             <Smartphone className="w-4 h-4" />
@@ -79,7 +79,7 @@ const WellnessWidget = () => {
 
       {/* PWA Install Prompt */}
       {showInstallPrompt && (
-        <div className="fixed top-4 left-4 right-4 z-50">
+        <div className="fixed top-4 left-4 right-4 z-40">
           <div className="alert alert-info shadow-lg max-w-md mx-auto">
             <Home className="w-5 h-5" />
             <div className="flex-1">

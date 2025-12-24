@@ -1,7 +1,8 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useReducedMotion } from '../hooks/useReducedMotion';
-import { Smile, Reply, Edit2, Trash2, Download, Pin, Forward, Check, CheckCheck, Play, Pause, Shield } from 'lucide-react';
+import { useAccessibilityStore } from '../store/useAccessibilityStore';
+import { Smile, Reply, Edit2, Trash2, Download, Pin, Forward, Check, CheckCheck, Play, Pause, Shield, Volume2, VolumeX } from 'lucide-react';
 import { formatMessageTime } from '../lib/utils';
 import LazyImage from './LazyImage';
 import LazyVideo from './LazyVideo';
@@ -25,6 +26,24 @@ const Message = memo(({
   toggleVoicePlay
 }) => {
   const prefersReducedMotion = useReducedMotion();
+  const { textToSpeech } = useAccessibilityStore();
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
+  const speakMessage = () => {
+    if (!textToSpeech.enabled || !message.text) return;
+    
+    if (isSpeaking) {
+      speechSynthesis.cancel();
+      setIsSpeaking(false);
+    } else {
+      const utterance = new SpeechSynthesisUtterance(message.text);
+      utterance.rate = textToSpeech.rate;
+      utterance.volume = textToSpeech.volume;
+      utterance.onend = () => setIsSpeaking(false);
+      speechSynthesis.speak(utterance);
+      setIsSpeaking(true);
+    }
+  };
 
   const messageVariants = prefersReducedMotion ? {} : {
     initial: { opacity: 0, y: 20, scale: 0.95 },
@@ -120,6 +139,19 @@ const Message = memo(({
 
         {!message.isDeleted && (
           <div className={`absolute top-0 ${isOwnMessage ? 'left-0 -translate-x-full' : 'right-0 translate-x-full'} opacity-0 group-hover:opacity-100 transition-all duration-300 flex gap-0.5 sm:gap-1 px-1 sm:px-2`}>
+            {textToSpeech.enabled && message.text && (
+              <motion.button 
+                whileHover={{ scale: 1.2, y: -2 }} 
+                whileTap={{ scale: 0.9 }} 
+                onClick={speakMessage} 
+                className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 ${
+                  isSpeaking ? 'bg-gradient-to-r from-red-400 to-red-500' : 'bg-gradient-to-r from-teal-400 to-cyan-400 hover:from-teal-500 hover:to-cyan-500'
+                }`} 
+                title={isSpeaking ? "Stop reading" : "Read aloud"}
+              >
+                {isSpeaking ? <VolumeX size={12} className="sm:w-3.5 sm:h-3.5 text-white" /> : <Volume2 size={12} className="sm:w-3.5 sm:h-3.5 text-white" />}
+              </motion.button>
+            )}
             <motion.button whileHover={{ scale: 1.2, rotate: 10, y: -2 }} whileTap={{ scale: 0.9 }} onClick={() => setShowEmojiPicker(showEmojiPicker === message._id ? null : message._id)} className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-500 hover:to-orange-500 flex items-center justify-center shadow-lg transition-all duration-200" title="React">
               <Smile size={12} className="sm:w-3.5 sm:h-3.5 text-white" />
             </motion.button>

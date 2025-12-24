@@ -52,6 +52,7 @@ import WellnessWidget from './components/WellnessWidget'
 import AITherapistChat from './components/AITherapistChat'
 import { useWellnessSocket } from './hooks/useWellnessSocket'
 import { useWellnessWidget } from './hooks/useWellnessWidget'
+import { useAccessibilityIntegration } from './hooks/useAccessibilityIntegration'
 
 const App = () => {
   const { authUser,checkAuth,isCheckingAuth,onlineUsers,socket } = useAuthStore();
@@ -65,6 +66,9 @@ const App = () => {
   
   // Initialize wellness widget
   useWellnessWidget();
+  
+  // Initialize accessibility features
+  useAccessibilityIntegration();
 
   console.log({ onlineUsers})
 
