@@ -111,12 +111,13 @@ class AITherapistService {
     if (moodScore >= 4) responseType = 'encouragement';
 
     const baseResponse = responses[responseType][Math.floor(Math.random() * responses[responseType].length)];
+    const copingStrategies = this.getCopingStrategies('immediate');
     
     return {
       message: baseResponse,
       type: responseType,
       suggestedTechnique: this.getCBTTechniques(moodScore, stressLevel)[0],
-      copingStrategies: this.getCopingStrategies('immediate')
+      copingStrategies: copingStrategies.immediate
     };
   }
 
