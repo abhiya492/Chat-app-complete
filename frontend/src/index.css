@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Dyslexia-friendly font */
+@import url('https://fonts.googleapis.com/css2?family=OpenDyslexic:wght@400;700&display=swap');
+
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -254,6 +257,32 @@ button {
   animation: gradient-shift 3s ease infinite;
 }
 
+/* Slide in from right animation for notifications */
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slideInFromRight 0.3s ease-out;
+}
+
+/* Contact card hover effects */
+.contact-card {
+  transition: all 0.2s ease;
+}
+
+.contact-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
 /* Shake animation for notifications */
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
@@ -288,9 +317,6 @@ button {
 }
 
 /* ===== ACCESSIBILITY STYLES ===== */
-
-/* Dyslexia-friendly font */
-@import url('https://fonts.googleapis.com/css2?family=OpenDyslexic:wght@400;700&display=swap');
 
 /* Base accessibility variables */
 :root {

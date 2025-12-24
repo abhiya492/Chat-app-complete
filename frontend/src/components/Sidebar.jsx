@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
 import UserSkeleton from "./UserSkeleton";
-import { Users, UserPlus, Phone, Trash2 } from "lucide-react";
+import { Users, UserPlus, Phone, Trash2, UserCheck } from "lucide-react";
 import InviteModal from "./InviteModal";
 import SearchBar from "./SearchBar";
 import CallHistory from "./CallHistory";
+import Contacts from "./Contacts";
 import { useTranslation } from "react-i18next";
 
 const Sidebar = () => {
@@ -53,9 +54,13 @@ const Sidebar = () => {
         <div className="flex flex-row items-center justify-between gap-2 sm:flex-col lg:flex-row lg:gap-3">
           <div className="flex items-center gap-2 lg:gap-3">
             <div className="p-1.5 md:p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 shadow-md hover:shadow-lg hover:scale-105 transition-all">
-              {activeTab === "chats" ? <Users className="size-4 md:size-5 text-primary" /> : <Phone className="size-4 md:size-5 text-primary" />}
+              {activeTab === "chats" ? <Users className="size-4 md:size-5 text-primary" /> : 
+               activeTab === "contacts" ? <UserCheck className="size-4 md:size-5 text-primary" /> :
+               <Phone className="size-4 md:size-5 text-primary" />}
             </div>
-            <span className="font-bold text-sm sm:hidden lg:block lg:text-lg bg-gradient-to-r from-base-content to-base-content/70 bg-clip-text text-transparent">{activeTab === "chats" ? t('chats') : t('calls')}</span>
+            <span className="font-bold text-sm sm:hidden lg:block lg:text-lg bg-gradient-to-r from-base-content to-base-content/70 bg-clip-text text-transparent">
+              {activeTab === "chats" ? t('chats') : activeTab === "contacts" ? "Contacts" : t('calls')}
+            </span>
           </div>
           <button
             onClick={() => setShowInviteModal(true)}
@@ -74,6 +79,15 @@ const Sidebar = () => {
           >
             <Users className="size-3 lg:size-4" aria-hidden="true" />
             <span className="hidden sm:hidden lg:inline">{t('chats')}</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("contacts")}
+            className={`btn btn-xs sm:btn-xs lg:btn-sm ${activeTab === "contacts" ? "btn-primary" : "btn-ghost"}`}
+            aria-label="Contacts tab"
+            aria-pressed={activeTab === "contacts"}
+          >
+            <UserCheck className="size-3 lg:size-4" aria-hidden="true" />
+            <span className="hidden sm:hidden lg:inline">Contacts</span>
           </button>
           <button
             onClick={() => setActiveTab("calls")}
@@ -109,6 +123,10 @@ const Sidebar = () => {
         {activeTab === "calls" ? (
           <div className="hidden lg:block">
             <CallHistory />
+          </div>
+        ) : activeTab === "contacts" ? (
+          <div className="h-full">
+            <Contacts />
           </div>
         ) : filteredUsers.length === 0 ? (
           <div className="text-center text-base-content/60 py-8 sm:py-12 px-2 md:px-4 animate-fade-in">

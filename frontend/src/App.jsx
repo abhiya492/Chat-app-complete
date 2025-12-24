@@ -35,6 +35,7 @@ import OnboardingTour from './components/OnboardingTour'
 import EncryptionSetup from './components/EncryptionSetup'
 import ScheduledMessages from './components/ScheduledMessages'
 import ChallengeNotification from './components/ChallengeNotification'
+import ContactNotification from './components/ContactNotification'
 import ColdStartLoader from './components/ColdStartLoader'
 import MoodTracker from './components/MoodTracker'
 import BreakReminder from './components/BreakReminder'
@@ -157,6 +158,7 @@ const App = () => {
       {authUser && <ChatbotButton />}
       {authUser && <ScheduledMessages />}
       {authUser && <ChallengeNotification />}
+      {authUser && <ContactNotification />}
       {authUser && <MoodTracker />}
       {authUser && <BreakReminder />}
       {authUser && <StressIndicator />}

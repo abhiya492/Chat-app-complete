@@ -93,7 +93,7 @@ const CorporateWellnessDashboard = () => {
               <div className={`stat-value ${getScoreColor(organizationData?.organizationStress, 'stressLevel')}`}>
                 {organizationData?.organizationStress?.toFixed(0) || '0'}%
               </div>
-              <div className="stat-desc">Needs attention if >60%</div>
+              <div className="stat-desc">Needs attention if &gt; 60%</div>
             </div>
 
             <div className="stat bg-base-200 rounded-lg">

@@ -99,6 +99,27 @@ export const useAuthStore = create((set, get) => ({
     socket.on("getOnlineUsers", (userIds) => {
       set({ onlineUsers: userIds });
     });
+
+    // Contact events
+    socket.on("contactRequest", (requestData) => {
+      const { useContactStore } = require("./useContactStore");
+      useContactStore.getState().handleContactRequest(requestData);
+    });
+
+    socket.on("contactAccepted", (contactData) => {
+      const { useContactStore } = require("./useContactStore");
+      useContactStore.getState().handleContactAccepted(contactData);
+    });
+
+    socket.on("contactRejected", (data) => {
+      const { useContactStore } = require("./useContactStore");
+      useContactStore.getState().handleContactRejected(data);
+    });
+
+    socket.on("contactRemoved", (data) => {
+      const { useContactStore } = require("./useContactStore");
+      useContactStore.getState().handleContactRemoved(data);
+    });
   },
   disconnectSocket: () => {
     if (get().socket?.connected) get().socket.disconnect();
