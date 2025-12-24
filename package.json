@@ -17,5 +17,9 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "ioredis": "^5.8.2",
+    "node-cron": "^4.2.1"
   }
 }

@@ -6,15 +6,6 @@ import { Readable } from "stream";
 import cloudinary from "../lib/cloudinary.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
 import { updateStreak } from "./streak.controller.js";
-
-import User from "../models/user.model.js";
-import Message from "../models/message.model.js";
-import Contact from "../models/contact.model.js";
-import { Readable } from "stream";
-
-import cloudinary from "../lib/cloudinary.js";
-import { getReceiverSocketId, io } from "../lib/socket.js";
-import { updateStreak } from "./streak.controller.js";
 import queryOptimizer from "../lib/queryOptimizer.js";
 import cache from "../lib/cache.js";
 

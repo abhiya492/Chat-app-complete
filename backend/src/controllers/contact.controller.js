@@ -71,6 +71,16 @@ export const acceptContactRequest = async (req, res) => {
     await contactRequest.save();
     await contactRequest.populate(['requester', 'recipient'], 'fullName profilePic');
 
+    // Invalidate caches (optional - won't fail if Redis is down)
+    try {
+      await Promise.all([
+        cache.invalidateContacts(contactRequest.requester._id),
+        cache.invalidateContacts(contactRequest.recipient._id)
+      ]);
+    } catch (cacheError) {
+      console.warn('Cache invalidation failed:', cacheError.message);
+    }
+
     // Notify both users
     const requesterSocketId = getReceiverSocketId(contactRequest.requester._id);
     const recipientSocketId = getReceiverSocketId(contactRequest.recipient._id);
