@@ -1,8 +1,10 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import optimizationRoutes from './routes/optimization.route.js';
 import authRoutes from './routes/auth.route.js';
 import oauthRoutes from './routes/oauth.route.js';
 import messageRoutes from './routes/message.route.js';
+import contactRoutes from './routes/contact.route.js';
 import invitationRoutes from './routes/invitation.route.js';
 import callRoutes from './routes/call.route.js';
 import analyticsRoutes from './routes/analytics.route.js';
@@ -27,6 +29,8 @@ import {connectDB} from './lib/db.js';
 import cookieParser from 'cookie-parser';
 import { app,server } from './lib/socket.js';
 import { startMessageScheduler } from './lib/scheduler.js';
+import maintenanceScheduler from './lib/maintenanceScheduler.js';
+import cache from './lib/cache.js';
 
 dotenv.config();
 
@@ -57,9 +61,11 @@ app.get("/health", (req, res) => {
 });
 
 // API routes MUST come before static files
+app.use("/api/optimization",optimizationRoutes);
 app.use("/api/auth",authRoutes);
 app.use("/api/auth",oauthRoutes);
 app.use("/api/messages",messageRoutes);
+app.use("/api/contacts",contactRoutes);
 app.use("/api/invitations",invitationRoutes);
 app.use("/api/calls",callRoutes);
 app.use("/api/analytics",analyticsRoutes);
@@ -86,9 +92,22 @@ if (process.env.NODE_ENV === "production") {
   }
  
 
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
     console.log("Server isrunning on port:" + PORT);
-    connectDB();
+    await connectDB();
+    
+    // Test Redis connection
+    const redisHealthy = await cache.ping();
+    if (redisHealthy) {
+        console.log('✅ Redis connected and healthy');
+    } else {
+        console.warn('⚠️ Redis connection failed - running without cache');
+    }
+    
     startMessageScheduler();
     console.log("Message scheduler started");
+    
+    // Start maintenance scheduler
+    maintenanceScheduler.start();
+    console.log("Maintenance scheduler started");
 });

@@ -1,22 +1,28 @@
 import User from "../models/user.model.js";
 import Message from "../models/message.model.js";
+import Contact from "../models/contact.model.js";
 import { Readable } from "stream";
 
 import cloudinary from "../lib/cloudinary.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
 import { updateStreak } from "./streak.controller.js";
 
+import User from "../models/user.model.js";
+import Message from "../models/message.model.js";
+import Contact from "../models/contact.model.js";
+import { Readable } from "stream";
+
+import cloudinary from "../lib/cloudinary.js";
+import { getReceiverSocketId, io } from "../lib/socket.js";
+import { updateStreak } from "./streak.controller.js";
+import queryOptimizer from "../lib/queryOptimizer.js";
+import cache from "../lib/cache.js";
+
 export const getUsersForSidebar = async (req, res) => {
   try {
     const loggedInUserId = req.user._id;
-    const currentUser = await User.findById(loggedInUserId);
-    const blockedUsers = currentUser.blockedUsers || [];
-    
-    const filteredUsers = await User.find({ 
-      _id: { $ne: loggedInUserId, $nin: blockedUsers } 
-    }).select("-password");
-
-    res.status(200).json(filteredUsers);
+    const users = await queryOptimizer.getUsersForSidebar(loggedInUserId);
+    res.status(200).json(users);
   } catch (error) {
     console.error("Error in getUsersForSidebar: ", error.message);
     res.status(500).json({ error: "Internal server error" });
@@ -29,30 +35,8 @@ export const getMessages = async (req, res) => {
     const { page = 1, limit = 50 } = req.query;
     const myId = req.user._id;
 
-    const skip = (page - 1) * limit;
-
-    const messages = await Message.find({
-      $or: [
-        { senderId: myId, receiverId: userToChatId },
-        { senderId: userToChatId, receiverId: myId },
-      ],
-    })
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(parseInt(limit));
-
-    const total = await Message.countDocuments({
-      $or: [
-        { senderId: myId, receiverId: userToChatId },
-        { senderId: userToChatId, receiverId: myId },
-      ],
-    });
-
-    res.status(200).json({
-      messages: messages.reverse(),
-      hasMore: skip + messages.length < total,
-      total
-    });
+    const result = await queryOptimizer.getMessages(myId, userToChatId, page, limit);
+    res.status(200).json(result);
   } catch (error) {
     console.log("Error in getMessages controller: ", error.message);
     res.status(500).json({ error: "Internal server error" });
@@ -210,6 +194,12 @@ export const sendMessage = async (req, res) => {
 
     await newMessage.save();
     await newMessage.populate('replyTo');
+
+    // Invalidate message caches
+    const chatId = [senderId, receiverId].sort().join(':');
+    await cache.deletePattern(`messages:${chatId}*`);
+    await cache.invalidateUser(senderId);
+    await cache.invalidateUser(receiverId);
 
     // Only send immediately if not scheduled
     if (!scheduledFor) {

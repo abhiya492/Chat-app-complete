@@ -766,6 +766,35 @@ io.on("connection", (socket) => {
     }
   });
 
+  // Contact Events
+  socket.on("contact:request", ({ to, requestData }) => {
+    const targetSocket = getReceiverSocketId(to);
+    if (targetSocket) {
+      io.to(targetSocket).emit("contact:request", requestData);
+    }
+  });
+
+  socket.on("contact:accepted", ({ to, contactData }) => {
+    const targetSocket = getReceiverSocketId(to);
+    if (targetSocket) {
+      io.to(targetSocket).emit("contact:accepted", contactData);
+    }
+  });
+
+  socket.on("contact:rejected", ({ to, requestId }) => {
+    const targetSocket = getReceiverSocketId(to);
+    if (targetSocket) {
+      io.to(targetSocket).emit("contact:rejected", { requestId });
+    }
+  });
+
+  socket.on("contact:removed", ({ to, contactId }) => {
+    const targetSocket = getReceiverSocketId(to);
+    if (targetSocket) {
+      io.to(targetSocket).emit("contact:removed", { contactId });
+    }
+  });
+
   // Challenge Events
   socket.on("challenge-invite", ({ to, challengeId, challengeName, from }) => {
     const targetSocket = getReceiverSocketId(to);
