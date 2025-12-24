@@ -11,6 +11,9 @@ import Rooms from './pages/Rooms'
 import RoomView from './pages/RoomView'
 import RandomChat from './pages/RandomChat'
 import Challenge from './pages/Challenge'
+import Wellness from './pages/Wellness'
+import CorporateWellness from './pages/CorporateWellness'
+import CommunityChallengePage from './pages/CommunityChallengePage'
 import { useAuthStore } from './store/useAuthStore'
 import { useThemeStore } from './store/useThemeStore'
 import { useEffect, useState } from 'react'
@@ -33,6 +36,22 @@ import EncryptionSetup from './components/EncryptionSetup'
 import ScheduledMessages from './components/ScheduledMessages'
 import ChallengeNotification from './components/ChallengeNotification'
 import ColdStartLoader from './components/ColdStartLoader'
+import MoodTracker from './components/MoodTracker'
+import BreakReminder from './components/BreakReminder'
+import StressIndicator from './components/StressIndicator'
+import MindfulnessModal from './components/MindfulnessModal'
+import HealthBasedWellness from './components/HealthBasedWellness'
+import SleepQualityIndicator from './components/SleepQualityIndicator'
+import CircadianWellnessIndicator from './components/CircadianWellnessIndicator'
+import CircadianThemeAdapter from './components/CircadianThemeAdapter'
+import CircadianNotifications from './components/CircadianNotifications'
+import CircadianBreakReminder from './components/CircadianBreakReminder'
+import MoodMusicSuggestion from './components/MoodMusicSuggestion'
+import MusicMoodAnalyzer from './components/MusicMoodAnalyzer'
+import WellnessWidget from './components/WellnessWidget'
+import AITherapistChat from './components/AITherapistChat'
+import { useWellnessSocket } from './hooks/useWellnessSocket'
+import { useWellnessWidget } from './hooks/useWellnessWidget'
 
 const App = () => {
   const { authUser,checkAuth,isCheckingAuth,onlineUsers,socket } = useAuthStore();
@@ -40,6 +59,12 @@ const App = () => {
   const { setupCallListeners, cleanupCallListeners } = useCallStore();
   const { subscribeToStoryEvents, unsubscribeFromStoryEvents } = useStoryStore();
   const [backendReady, setBackendReady] = useState(false);
+  
+  // Initialize wellness socket listeners
+  useWellnessSocket();
+  
+  // Initialize wellness widget
+  useWellnessWidget();
 
   console.log({ onlineUsers})
 
@@ -112,6 +137,9 @@ const App = () => {
         <Route path="/room/:id" element={authUser ? <RoomView /> : <Navigate to="/login" />} />
         <Route path="/random-chat" element={authUser ? <RandomChat /> : <Navigate to="/login" />} />
         <Route path="/challenge" element={authUser ? <Challenge /> : <Navigate to="/login" />} />
+        <Route path="/wellness" element={authUser ? <Wellness /> : <Navigate to="/login" />} />
+        <Route path="/corporate-wellness" element={authUser ? <CorporateWellness /> : <Navigate to="/login" />} />
+        <Route path="/community-challenges" element={authUser ? <CommunityChallengePage /> : <Navigate to="/login" />} />
         </Routes>
       </PageTransition>
 
@@ -125,6 +153,20 @@ const App = () => {
       {authUser && <ChatbotButton />}
       {authUser && <ScheduledMessages />}
       {authUser && <ChallengeNotification />}
+      {authUser && <MoodTracker />}
+      {authUser && <BreakReminder />}
+      {authUser && <StressIndicator />}
+      {authUser && <MindfulnessModal />}
+      {authUser && <HealthBasedWellness />}
+      {authUser && <SleepQualityIndicator />}
+      {authUser && <CircadianWellnessIndicator />}
+      {authUser && <CircadianThemeAdapter />}
+      {authUser && <CircadianNotifications />}
+      {authUser && <CircadianBreakReminder />}
+      {authUser && <MoodMusicSuggestion />}
+      {authUser && <MusicMoodAnalyzer />}
+      {authUser && <WellnessWidget />}
+      {authUser && <AITherapistChat />}
       <CallModal />
       <IncomingCallModal />
     </div>

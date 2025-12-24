@@ -13,6 +13,10 @@ import roomRoutes from './routes/room.route.js';
 import sharedExperienceRoutes from './routes/sharedExperience.route.js';
 import challengeRoutes from './routes/challenge.route.js';
 import gameProgressRoutes from './routes/gameProgress.route.js';
+import wellnessRoutes from './routes/wellness.routes.js';
+import healthIntegrationRoutes from './routes/healthIntegration.routes.js';
+import corporateWellnessRoutes from './routes/corporateWellness.routes.js';
+import communityChallengeRoutes from './routes/communityChallenge.routes.js';
 import cors from 'cors';
 import passportConfig from './lib/passport.js';
 import { apiLimiter } from './middleware/rateLimiter.middleware.js';
@@ -66,6 +70,10 @@ app.use("/api/rooms",roomRoutes);
 app.use("/api/shared",sharedExperienceRoutes);
 app.use("/api/challenges",challengeRoutes);
 app.use("/api/game-progress",gameProgressRoutes);
+app.use("/api/wellness",wellnessRoutes);
+app.use("/api/health",healthIntegrationRoutes);
+app.use("/api/corporate-wellness",corporateWellnessRoutes);
+app.use("/api/community-challenges",communityChallengeRoutes);
 
 if (process.env.NODE_ENV === "production") {
     const frontendPath = path.join(__dirname, "../frontend/dist");

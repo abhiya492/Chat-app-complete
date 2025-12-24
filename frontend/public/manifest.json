@@ -1,0 +1,80 @@
+{
+  "name": "Chatty - Wellness Chat App",
+  "short_name": "Chatty",
+  "description": "Real-time chat with wellness features and mood tracking",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1f2937",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["social", "health", "lifestyle"],
+  "icons": [
+    {
+      "src": "/avatar.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/avatar.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "widgets": [
+    {
+      "name": "mood-tracker",
+      "short_name": "Mood",
+      "description": "Quick mood tracking widget",
+      "tag": "mood-tracker",
+      "template": "mood-tracker-template",
+      "ms_ac_template": "adaptive-card-mood-tracker.json",
+      "data": "widgets/mood-data.json",
+      "type": "application/json",
+      "screenshots": [
+        {
+          "src": "/widget-screenshot.png",
+          "sizes": "300x200",
+          "label": "Mood tracking widget"
+        }
+      ],
+      "icons": [
+        {
+          "src": "/avatar.png",
+          "sizes": "72x72"
+        }
+      ],
+      "auth": false,
+      "update": 300
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Quick Mood Check",
+      "short_name": "Mood",
+      "description": "Quickly update your mood",
+      "url": "/?action=mood",
+      "icons": [
+        {
+          "src": "/avatar.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Wellness Dashboard",
+      "short_name": "Wellness",
+      "description": "View wellness insights",
+      "url": "/wellness",
+      "icons": [
+        {
+          "src": "/avatar.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+}

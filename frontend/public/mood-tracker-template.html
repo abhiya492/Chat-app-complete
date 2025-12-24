@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      margin: 0;
+      padding: 12px;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 12px;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .emoji { font-size: 24px; }
+    .title { font-weight: 600; font-size: 14px; }
+    .stats { font-size: 12px; opacity: 0.9; }
+    .footer { font-size: 10px; opacity: 0.7; margin-top: 8px; }
+    .mood-buttons {
+      display: flex;
+      gap: 4px;
+      margin-top: 8px;
+    }
+    .mood-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      border-radius: 6px;
+      padding: 4px 6px;
+      font-size: 12px;
+      color: white;
+      cursor: pointer;
+    }
+    .mood-btn.active {
+      background: rgba(255,255,255,0.4);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span class="emoji" id="moodEmoji">😐</span>
+    <span class="title">Mood Tracker</span>
+  </div>
+  
+  <div class="stats" id="moodStats">
+    Mood: 3/5 • Stress: 45%
+  </div>
+  
+  <div class="mood-buttons">
+    <button class="mood-btn" onclick="updateMood(1)">😢</button>
+    <button class="mood-btn" onclick="updateMood(2)">😔</button>
+    <button class="mood-btn active" onclick="updateMood(3)">😐</button>
+    <button class="mood-btn" onclick="updateMood(4)">😊</button>
+    <button class="mood-btn" onclick="updateMood(5)">😄</button>
+  </div>
+  
+  <div class="footer">
+    Tap to open app
+  </div>
+
+  <script>
+    function updateMood(score) {
+      // Update widget data
+      const data = {
+        mood: score,
+        timestamp: Date.now()
+      };
+      
+      // Send to parent app
+      if (window.parent) {
+        window.parent.postMessage({
+          type: 'MOOD_UPDATE',
+          data: data
+        }, '*');
+      }
+      
+      // Update UI
+      const emojis = ['', '😢', '😔', '😐', '😊', '😄'];
+      document.getElementById('moodEmoji').textContent = emojis[score];
+      document.getElementById('moodStats').textContent = `Mood: ${score}/5 • Updated now`;
+      
+      // Update active button
+      document.querySelectorAll('.mood-btn').forEach((btn, index) => {
+        btn.classList.toggle('active', index + 1 === score);
+      });
+    }
+    
+    // Handle widget click to open app
+    document.body.addEventListener('click', (e) => {
+      if (!e.target.classList.contains('mood-btn')) {
+        window.open('/', '_blank');
+      }
+    });
+  </script>
+</body>
+</html>

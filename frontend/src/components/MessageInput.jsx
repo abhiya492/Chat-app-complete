@@ -1,6 +1,8 @@
 import { useRef, useState, useEffect } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
+import { useWellnessStore } from "../store/useWellnessStore";
+import { useCircadianStore } from "../store/useCircadianStore";
 import { Image, Send, X, Paperclip, Mic, Video, Timer, Edit2, Loader2, Clock } from "lucide-react";
 import toast from "react-hot-toast";
 import VoiceRecorder from "./VoiceRecorder";
@@ -24,6 +26,8 @@ const MessageInput = () => {
   const typingTimeoutRef = useRef(null);
   const { sendMessage, replyingTo, setReplyingTo, editingMessage, setEditingMessage, emitTyping, emitStopTyping, messages, isSendingMessage } = useChatStore();
   const { authUser } = useAuthStore();
+  const { analyzeMoodFromText, updateTypingData } = useWellnessStore();
+  const { shouldShowFeature } = useCircadianStore();
   
   const lastReceivedMessage = messages.filter(m => m.senderId !== authUser._id).slice(-1)[0];
 
@@ -158,6 +162,19 @@ const MessageInput = () => {
   const handleTextChange = (e) => {
     setText(e.target.value);
     
+    // Only track typing patterns if circadian wellness allows it
+    if (shouldShowFeature('typing_analysis')) {
+      const now = Date.now();
+      const typingSpeed = e.target.value.length / ((now - (window.lastTypingTime || now)) / 1000) || 0;
+      window.lastTypingTime = now;
+      
+      updateTypingData({
+        speed: typingSpeed,
+        errors: 0,
+        pauses: 0
+      });
+    }
+    
     emitTyping();
     
     if (typingTimeoutRef.current) {
@@ -182,6 +199,22 @@ const MessageInput = () => {
       if (editingMessage) {
         await useChatStore.getState().editMessage(editingMessage._id, text.trim());
       } else {
+        // Analyze mood from message text
+        if (text.trim()) {
+          analyzeMoodFromText(text.trim());
+          
+          // Trigger music suggestion for strong emotional content
+          const emotionalWords = ['love', 'hate', 'amazing', 'terrible', 'excited', 'sad', 'angry', 'happy'];
+          const hasStrongEmotion = emotionalWords.some(word => 
+            text.toLowerCase().includes(word)
+          );
+          
+          if (hasStrongEmotion) {
+            // Music suggestion will be triggered by MusicMoodAnalyzer
+            console.log('Strong emotion detected in message');
+          }
+        }
+        
         await sendMessage({
           text: text.trim(),
           image: imagePreview,

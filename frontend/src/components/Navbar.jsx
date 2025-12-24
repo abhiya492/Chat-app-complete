@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
-import { LogOut, MessageSquare, Settings, User, Radio, Shuffle, Menu, X, Loader2, Clock, Swords } from "lucide-react";
+import { LogOut, MessageSquare, Settings, User, Radio, Shuffle, Menu, X, Loader2, Clock, Swords, Heart, Building2, Globe } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import LanguageSelector from "./LanguageSelector";
+import ExpandableMenu from "./ExpandableMenu";
 import { useState } from "react";
 import ScheduledMessages from "./ScheduledMessages";
 
@@ -28,52 +29,41 @@ const Navbar = () => {
             </Link>
           </div>
 
-          <div className="hidden md:flex items-center gap-2 lg:gap-3">
-            <ThemeToggle />
-            <LanguageSelector />
-            
-            {authUser && (
-              <>
-                <button onClick={() => setShowScheduled(true)} className="btn btn-sm gap-2 btn-ghost hover:bg-primary/10 hover:text-primary transition-all hover:scale-105 hover:shadow-md">
-                  <Clock className="w-4 h-4" />
-                  <span className="hidden lg:inline font-medium text-sm">Scheduled</span>
-                </button>
-                <Link to="/rooms" className="btn btn-sm gap-2 btn-ghost hover:bg-primary/10 hover:text-primary transition-all hover:scale-105 hover:shadow-md">
-                  <Radio className="w-4 h-4" />
-                  <span className="hidden lg:inline font-medium text-sm">Rooms</span>
-                </Link>
-                <Link to="/random-chat" className="btn btn-sm gap-2 btn-primary hover:scale-105 hover:shadow-md transition-all">
-                  <Shuffle className="w-4 h-4" />
-                  <span className="hidden lg:inline font-medium text-sm">Random</span>
-                </Link>
-                <Link to="/challenge" className="btn btn-sm gap-2 btn-success hover:scale-105 hover:shadow-md transition-all">
-                  <Swords className="w-4 h-4" />
-                  <span className="hidden lg:inline font-medium text-sm">Challenge</span>
-                </Link>
-              </>
-            )}
+          <div className="hidden md:flex items-center gap-2 lg:gap-3 absolute left-1/2 transform -translate-x-1/2 group">
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-2 lg:gap-3">
+              {authUser && (
+                <>
+                  <Link to="/random-chat" className="btn btn-sm gap-2 btn-primary hover:scale-105 hover:shadow-md transition-all">
+                    <Shuffle className="w-4 h-4" />
+                    <span className="hidden lg:inline font-medium text-sm">Random</span>
+                  </Link>
+                  <Link to="/challenge" className="btn btn-sm gap-2 btn-success hover:scale-105 hover:shadow-md transition-all">
+                    <Swords className="w-4 h-4" />
+                    <span className="hidden lg:inline font-medium text-sm">Challenge</span>
+                  </Link>
+                  <Link to="/wellness" className="btn btn-sm gap-2 btn-accent hover:scale-105 hover:shadow-md transition-all">
+                    <Heart className="w-4 h-4" />
+                    <span className="hidden lg:inline font-medium text-sm">Wellness</span>
+                  </Link>
+                  <Link to="/corporate-wellness" className="btn btn-sm gap-2 btn-info hover:scale-105 hover:shadow-md transition-all">
+                    <Building2 className="w-4 h-4" />
+                    <span className="hidden lg:inline font-medium text-sm">Corporate</span>
+                  </Link>
+                  <Link to="/community-challenges" className="btn btn-sm gap-2 btn-secondary hover:scale-105 hover:shadow-md transition-all">
+                    <Globe className="w-4 h-4" />
+                    <span className="hidden lg:inline font-medium text-sm">Community</span>
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
 
-            <Link to="/settings" className="btn btn-sm gap-2 btn-ghost hover:bg-primary/10 hover:text-primary transition-all hover:scale-105 hover:shadow-md">
-              <Settings className="w-4 h-4 hover:rotate-90 transition-transform duration-300" />
-              <span className="hidden lg:inline font-medium text-sm">Settings</span>
-            </Link>
-
-            {authUser && (
-              <>
-                <Link to="/profile" className="btn btn-sm gap-2 btn-ghost hover:bg-primary/10 hover:text-primary transition-all hover:scale-105 hover:shadow-md">
-                  <User className="w-4 h-4" />
-                  <span className="hidden lg:inline font-medium text-sm">Profile</span>
-                </Link>
-                <button className="btn btn-sm gap-2 btn-ghost hover:bg-error/10 hover:text-error transition-all hover:scale-105 hover:shadow-md" onClick={logout} disabled={isLoggingOut}>
-                  {isLoggingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4 hover:-rotate-12 transition-transform" />}
-                  <span className="hidden lg:inline font-medium text-sm">{isLoggingOut ? "Logging out..." : "Logout"}</span>
-                </button>
-              </>
-            )}
+          <div className="hidden md:flex items-center">
+            <ExpandableMenu />
           </div>
 
           <div className="flex md:hidden items-center gap-2">
-            <ThemeToggle />
+            <ExpandableMenu />
             <button className="btn btn-ghost btn-sm btn-circle" onClick={() => setShowMobileMenu(!showMobileMenu)}>
               {showMobileMenu ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -97,6 +87,15 @@ const Navbar = () => {
                   </Link>
                   <Link to="/challenge" className="btn btn-sm gap-2 btn-ghost justify-start" onClick={() => setShowMobileMenu(false)}>
                     <Swords className="w-4 h-4" /><span>Challenge</span>
+                  </Link>
+                  <Link to="/wellness" className="btn btn-sm gap-2 btn-ghost justify-start" onClick={() => setShowMobileMenu(false)}>
+                    <Heart className="w-4 h-4" /><span>Wellness</span>
+                  </Link>
+                  <Link to="/corporate-wellness" className="btn btn-sm gap-2 btn-ghost justify-start" onClick={() => setShowMobileMenu(false)}>
+                    <Building2 className="w-4 h-4" /><span>Corporate Wellness</span>
+                  </Link>
+                  <Link to="/community-challenges" className="btn btn-sm gap-2 btn-ghost justify-start" onClick={() => setShowMobileMenu(false)}>
+                    <Globe className="w-4 h-4" /><span>Community Challenges</span>
                   </Link>
                 </>
               )}

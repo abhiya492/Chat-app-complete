@@ -859,6 +859,17 @@ io.on("connection", (socket) => {
     }
   });
 
+  // Wellness Events
+  socket.on("wellness:mood-update", ({ mood }) => {
+    // Broadcast mood to friends for wellness challenges
+    socket.broadcast.emit("wellness:friend-mood", { userId, mood });
+  });
+
+  socket.on("wellness:break-taken", () => {
+    // Notify friends about break for encouragement
+    socket.broadcast.emit("wellness:friend-break", { userId });
+  });
+
   socket.on("disconnect", () => {
     console.log("A user disconnected", socket.id);
     delete userSocketMap[userId];
