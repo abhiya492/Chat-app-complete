@@ -2,6 +2,7 @@ import Redis from 'ioredis';
 
 class CacheService {
   constructor() {
+    this.isConnected = false;
     this.redis = new Redis({
       host: process.env.REDIS_HOST || 'localhost',
       port: process.env.REDIS_PORT || 6379,
@@ -13,49 +14,55 @@ class CacheService {
 
     this.redis.on('connect', () => {
       console.log('✅ Redis connected');
+      this.isConnected = true;
     });
 
     this.redis.on('error', (err) => {
-      console.error('❌ Redis error:', err);
+      if (!this.errorLogged) {
+        console.error('❌ Redis error:', err);
+        console.log('⚠️ Redis connection failed - running without cache');
+        this.errorLogged = true;
+      }
+      this.isConnected = false;
     });
   }
 
   // Generic cache methods
   async get(key) {
+    if (!this.isConnected) return null;
     try {
       const value = await this.redis.get(key);
       return value ? JSON.parse(value) : null;
     } catch (error) {
-      console.error('Cache get error:', error);
       return null;
     }
   }
 
   async set(key, value, ttl = 3600) {
+    if (!this.isConnected) return false;
     try {
       await this.redis.setex(key, ttl, JSON.stringify(value));
       return true;
     } catch (error) {
-      console.error('Cache set error:', error);
       return false;
     }
   }
 
   async del(key) {
+    if (!this.isConnected) return false;
     try {
       await this.redis.del(key);
       return true;
     } catch (error) {
-      console.error('Cache delete error:', error);
       return false;
     }
   }
 
   async exists(key) {
+    if (!this.isConnected) return false;
     try {
       return await this.redis.exists(key);
     } catch (error) {
-      console.error('Cache exists error:', error);
       return false;
     }
   }
@@ -132,6 +139,7 @@ class CacheService {
 
   // Rate limiting
   async checkRateLimit(key, limit, window) {
+    if (!this.isConnected) return true;
     try {
       const current = await this.redis.incr(key);
       if (current === 1) {
@@ -139,7 +147,6 @@ class CacheService {
       }
       return current <= limit;
     } catch (error) {
-      console.error('Rate limit check error:', error);
       return true; // Allow on error
     }
   }
@@ -200,11 +207,11 @@ class CacheService {
 
   // Health check
   async ping() {
+    if (!this.isConnected) return false;
     try {
       const result = await this.redis.ping();
       return result === 'PONG';
     } catch (error) {
-      console.error('Redis ping error:', error);
       return false;
     }
   }
