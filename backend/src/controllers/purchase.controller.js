@@ -5,11 +5,15 @@ import User from "../models/user.model.js";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 
-// Initialize Razorpay
-const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
+// Initialize Razorpay only if credentials are provided
+let razorpay = null;
+if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET && 
+    process.env.RAZORPAY_KEY_ID !== 'your_razorpay_key_id') {
+    razorpay = new Razorpay({
+        key_id: process.env.RAZORPAY_KEY_ID,
+        key_secret: process.env.RAZORPAY_KEY_SECRET,
+    });
+}
 
 // Get all products
 export const getProducts = async (req, res) => {
@@ -72,6 +76,13 @@ export const getProduct = async (req, res) => {
 // Create Razorpay order
 export const createOrder = async (req, res) => {
     try {
+        if (!razorpay) {
+            return res.status(503).json({ 
+                success: false, 
+                message: "Payment service not configured" 
+            });
+        }
+
         const { productId, couponCode } = req.body;
         const userId = req.user._id;
 
@@ -338,6 +349,13 @@ export const applyPurchasedItem = async (req, res) => {
 // Add money to wallet
 export const addToWallet = async (req, res) => {
     try {
+        if (!razorpay) {
+            return res.status(503).json({ 
+                success: false, 
+                message: "Payment service not configured" 
+            });
+        }
+
         const { amount } = req.body;
         const userId = req.user._id;
 
