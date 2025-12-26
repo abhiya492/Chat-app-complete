@@ -1,76 +1,64 @@
 import { create } from "zustand";
 import toast from "react-hot-toast";
 import { axiosInstance } from "../lib/axios";
-import { useAuthStore } from "./useAuthStore";
 
 export const useContactStore = create((set, get) => ({
   contacts: [],
   pendingRequests: [],
   sentRequests: [],
-  contactGroups: [],
   searchResults: [],
   isLoading: false,
-  isSearching: false,
 
-  // Get all contacts
-  getContacts: async (group = 'all') => {
+  // Fetch contacts
+  fetchContacts: async (group = null) => {
     set({ isLoading: true });
     try {
-      const res = await axiosInstance.get(`/contacts?group=${group}`);
+      const params = group ? `?group=${group}` : "";
+      const res = await axiosInstance.get(`/contacts${params}`);
       set({ contacts: res.data });
     } catch (error) {
+      console.error("Error fetching contacts:", error);
       toast.error(error.response?.data?.error || "Failed to fetch contacts");
     } finally {
       set({ isLoading: false });
     }
   },
 
-  // Get pending requests
-  getPendingRequests: async () => {
+  // Fetch pending requests
+  fetchPendingRequests: async () => {
     try {
       const res = await axiosInstance.get("/contacts/pending");
       set({ pendingRequests: res.data });
     } catch (error) {
-      toast.error(error.response?.data?.error || "Failed to fetch pending requests");
+      console.error("Error fetching pending requests:", error);
     }
   },
 
-  // Get sent requests
-  getSentRequests: async () => {
+  // Fetch sent requests
+  fetchSentRequests: async () => {
     try {
       const res = await axiosInstance.get("/contacts/sent");
       set({ sentRequests: res.data });
     } catch (error) {
-      toast.error(error.response?.data?.error || "Failed to fetch sent requests");
+      console.error("Error fetching sent requests:", error);
     }
   },
 
-  // Get contact groups
-  getContactGroups: async () => {
-    try {
-      const res = await axiosInstance.get("/contacts/groups");
-      set({ contactGroups: res.data });
-    } catch (error) {
-      console.error("Failed to fetch contact groups:", error);
-    }
-  },
-
-  // Search users
+  // Search users with debouncing
   searchUsers: async (query) => {
-    if (!query || query.trim().length < 2) {
+    if (!query || query.length < 2) {
       set({ searchResults: [] });
       return;
     }
 
-    set({ isSearching: true });
     try {
       const res = await axiosInstance.get(`/contacts/search?query=${encodeURIComponent(query)}`);
       set({ searchResults: res.data });
     } catch (error) {
-      toast.error(error.response?.data?.error || "Failed to search users");
       set({ searchResults: [] });
-    } finally {
-      set({ isSearching: false });
+      if (error.response?.status !== 404) {
+        toast.error("Search failed");
+      }
     }
   },
 
@@ -78,19 +66,14 @@ export const useContactStore = create((set, get) => ({
   sendContactRequest: async (userId) => {
     try {
       const res = await axiosInstance.post(`/contacts/request/${userId}`);
-      
-      // Add to sent requests
-      const { sentRequests } = get();
-      set({ sentRequests: [...sentRequests, res.data] });
-      
-      // Remove from search results
-      const { searchResults } = get();
-      set({ searchResults: searchResults.filter(user => user._id !== userId) });
-      
+      set((state) => ({
+        sentRequests: [...state.sentRequests, res.data],
+        searchResults: state.searchResults.filter(user => user._id !== userId),
+      }));
       toast.success("Contact request sent!");
-      return res.data;
     } catch (error) {
-      toast.error(error.response?.data?.error || "Failed to send contact request");
+      console.error("Error sending contact request:", error);
+      toast.error(error.response?.data?.error || "Failed to send request");
       throw error;
     }
   },
@@ -99,31 +82,22 @@ export const useContactStore = create((set, get) => ({
   acceptContactRequest: async (requestId) => {
     try {
       const res = await axiosInstance.put(`/contacts/accept/${requestId}`);
-      
-      // Remove from pending requests
-      const { pendingRequests, contacts } = get();
-      const updatedPending = pendingRequests.filter(req => req._id !== requestId);
-      
-      // Add to contacts
-      const newContact = {
-        _id: res.data._id,
-        user: res.data.requester,
-        group: res.data.group,
-        isFavorite: res.data.isFavorite,
-        nickname: res.data.nickname,
-        createdAt: res.data.createdAt,
-        updatedAt: res.data.updatedAt,
-      };
-      
-      set({ 
-        pendingRequests: updatedPending,
-        contacts: [...contacts, newContact]
-      });
-      
+      set((state) => ({
+        pendingRequests: state.pendingRequests.filter(req => req._id !== requestId),
+        contacts: [...state.contacts, {
+          _id: res.data._id,
+          user: res.data.requester,
+          group: res.data.group,
+          isFavorite: res.data.isFavorite,
+          nickname: res.data.nickname,
+          createdAt: res.data.createdAt,
+          updatedAt: res.data.updatedAt,
+        }],
+      }));
       toast.success("Contact request accepted!");
-      return res.data;
     } catch (error) {
-      toast.error(error.response?.data?.error || "Failed to accept contact request");
+      console.error("Error accepting contact request:", error);
+      toast.error(error.response?.data?.error || "Failed to accept request");
       throw error;
     }
   },
@@ -132,14 +106,13 @@ export const useContactStore = create((set, get) => ({
   rejectContactRequest: async (requestId) => {
     try {
       await axiosInstance.delete(`/contacts/reject/${requestId}`);
-      
-      // Remove from pending requests
-      const { pendingRequests } = get();
-      set({ pendingRequests: pendingRequests.filter(req => req._id !== requestId) });
-      
+      set((state) => ({
+        pendingRequests: state.pendingRequests.filter(req => req._id !== requestId),
+      }));
       toast.success("Contact request rejected");
     } catch (error) {
-      toast.error(error.response?.data?.error || "Failed to reject contact request");
+      console.error("Error rejecting contact request:", error);
+      toast.error(error.response?.data?.error || "Failed to reject request");
       throw error;
     }
   },
@@ -148,13 +121,12 @@ export const useContactStore = create((set, get) => ({
   removeContact: async (contactId) => {
     try {
       await axiosInstance.delete(`/contacts/${contactId}`);
-      
-      // Remove from contacts
-      const { contacts } = get();
-      set({ contacts: contacts.filter(contact => contact._id !== contactId) });
-      
+      set((state) => ({
+        contacts: state.contacts.filter(contact => contact._id !== contactId),
+      }));
       toast.success("Contact removed");
     } catch (error) {
+      console.error("Error removing contact:", error);
       toast.error(error.response?.data?.error || "Failed to remove contact");
       throw error;
     }
@@ -164,67 +136,70 @@ export const useContactStore = create((set, get) => ({
   updateContact: async (contactId, updates) => {
     try {
       const res = await axiosInstance.put(`/contacts/${contactId}`, updates);
-      
-      // Update in contacts list
-      const { contacts } = get();
-      const updatedContacts = contacts.map(contact => 
-        contact._id === contactId 
-          ? { ...contact, ...updates }
-          : contact
-      );
-      
-      set({ contacts: updatedContacts });
-      
-      toast.success("Contact updated");
-      return res.data;
+      set((state) => ({
+        contacts: state.contacts.map(contact =>
+          contact._id === contactId ? { ...contact, ...updates } : contact
+        ),
+      }));
+      toast.success("Contact updated!");
     } catch (error) {
+      console.error("Error updating contact:", error);
       toast.error(error.response?.data?.error || "Failed to update contact");
       throw error;
     }
   },
 
-  // Socket event handlers
-  handleContactRequest: (requestData) => {
-    const { pendingRequests } = get();
-    set({ pendingRequests: [...pendingRequests, requestData] });
-    toast.success(`New contact request from ${requestData.requester.fullName}`);
+  // Toggle favorite
+  toggleFavorite: async (contactId, isFavorite) => {
+    const optimisticUpdate = !isFavorite;
+    
+    // Optimistic update
+    set((state) => ({
+      contacts: state.contacts.map(contact =>
+        contact._id === contactId ? { ...contact, isFavorite: optimisticUpdate } : contact
+      ),
+    }));
+    
+    try {
+      await axiosInstance.put(`/contacts/${contactId}`, { isFavorite: optimisticUpdate });
+    } catch (error) {
+      // Revert on error
+      set((state) => ({
+        contacts: state.contacts.map(contact =>
+          contact._id === contactId ? { ...contact, isFavorite } : contact
+        ),
+      }));
+      toast.error("Failed to update favorite");
+    }
   },
 
-  handleContactAccepted: (contactData) => {
-    const { sentRequests, contacts } = get();
-    
-    // Remove from sent requests
-    const updatedSent = sentRequests.filter(req => req._id !== contactData._id);
-    
-    // Add to contacts
-    const newContact = {
-      _id: contactData._id,
-      user: contactData.recipient,
-      group: contactData.group,
-      isFavorite: contactData.isFavorite,
-      nickname: contactData.nickname,
-      createdAt: contactData.createdAt,
-      updatedAt: contactData.updatedAt,
-    };
-    
-    set({ 
-      sentRequests: updatedSent,
-      contacts: [...contacts, newContact]
-    });
-    
-    toast.success(`${contactData.recipient.fullName} accepted your contact request!`);
+  // Update contact group
+  updateContactGroup: async (contactId, group) => {
+    try {
+      await get().updateContact(contactId, { group });
+    } catch (error) {
+      console.error("Error updating contact group:", error);
+    }
   },
 
-  handleContactRejected: (data) => {
-    const { sentRequests } = get();
-    set({ sentRequests: sentRequests.filter(req => req._id !== data.requestId) });
-    toast.error("Contact request was rejected");
+  // Update contact nickname
+  updateContactNickname: async (contactId, nickname) => {
+    try {
+      await get().updateContact(contactId, { nickname });
+    } catch (error) {
+      console.error("Error updating contact nickname:", error);
+    }
   },
 
-  handleContactRemoved: (data) => {
-    const { contacts } = get();
-    set({ contacts: contacts.filter(contact => contact._id !== data.contactId) });
-    toast.error("Contact was removed");
+  // Get contact groups
+  getContactGroups: async () => {
+    try {
+      const res = await axiosInstance.get("/contacts/groups");
+      return res.data;
+    } catch (error) {
+      console.error("Error fetching contact groups:", error);
+      return [];
+    }
   },
 
   // Clear search results
@@ -232,16 +207,40 @@ export const useContactStore = create((set, get) => ({
     set({ searchResults: [] });
   },
 
-  // Reset store
-  reset: () => {
-    set({
-      contacts: [],
-      pendingRequests: [],
-      sentRequests: [],
-      contactGroups: [],
-      searchResults: [],
-      isLoading: false,
-      isSearching: false,
-    });
+  // Socket event handlers
+  handleContactRequest: (request) => {
+    set((state) => ({
+      pendingRequests: [...state.pendingRequests, request],
+    }));
+    toast.success(`${request.requester.fullName} sent you a contact request`);
+  },
+
+  handleContactAccepted: (contact) => {
+    set((state) => ({
+      sentRequests: state.sentRequests.filter(req => req._id !== contact._id),
+      contacts: [...state.contacts, {
+        _id: contact._id,
+        user: contact.recipient,
+        group: contact.group,
+        isFavorite: contact.isFavorite,
+        nickname: contact.nickname,
+        createdAt: contact.createdAt,
+        updatedAt: contact.updatedAt,
+      }],
+    }));
+    toast.success(`${contact.recipient.fullName} accepted your contact request!`);
+  },
+
+  handleContactRejected: (data) => {
+    set((state) => ({
+      sentRequests: state.sentRequests.filter(req => req._id !== data.requestId),
+    }));
+  },
+
+  handleContactRemoved: (data) => {
+    set((state) => ({
+      contacts: state.contacts.filter(contact => contact._id !== data.contactId),
+    }));
+    toast.info("A contact was removed");
   },
 }));

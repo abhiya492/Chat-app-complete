@@ -1,5 +1,8 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import groupRoutes from './routes/group.route.js';
+import upiPaymentRoutes from './routes/upiPayment.route.js';
+import privacyRoutes from './routes/privacy.route.js';
 import optimizationRoutes from './routes/optimization.route.js';
 import authRoutes from './routes/auth.route.js';
 import oauthRoutes from './routes/oauth.route.js';
@@ -19,6 +22,7 @@ import wellnessRoutes from './routes/wellness.routes.js';
 import healthIntegrationRoutes from './routes/healthIntegration.routes.js';
 import corporateWellnessRoutes from './routes/corporateWellness.routes.js';
 import communityChallengeRoutes from './routes/communityChallenge.routes.js';
+import purchaseRoutes from './routes/purchase.routes.js';
 import cors from 'cors';
 import passportConfig from './lib/passport.js';
 import { apiLimiter } from './middleware/rateLimiter.middleware.js';
@@ -31,6 +35,7 @@ import { app,server } from './lib/socket.js';
 import { startMessageScheduler } from './lib/scheduler.js';
 import maintenanceScheduler from './lib/maintenanceScheduler.js';
 import cache from './lib/cache.js';
+import keepAlive from './lib/keepAlive.js';
 
 dotenv.config();
 
@@ -61,6 +66,9 @@ app.get("/health", (req, res) => {
 });
 
 // API routes MUST come before static files
+app.use("/api/groups",groupRoutes);
+app.use("/api/upi",upiPaymentRoutes);
+app.use("/api/privacy",privacyRoutes);
 app.use("/api/optimization",optimizationRoutes);
 app.use("/api/auth",authRoutes);
 app.use("/api/auth",oauthRoutes);
@@ -80,6 +88,7 @@ app.use("/api/wellness",wellnessRoutes);
 app.use("/api/health",healthIntegrationRoutes);
 app.use("/api/corporate-wellness",corporateWellnessRoutes);
 app.use("/api/community-challenges",communityChallengeRoutes);
+app.use("/api/purchases",purchaseRoutes);
 
 if (process.env.NODE_ENV === "production") {
     const frontendPath = path.join(__dirname, "../frontend/dist");
@@ -110,4 +119,7 @@ server.listen(PORT, async () => {
     // Start maintenance scheduler
     maintenanceScheduler.start();
     console.log("Maintenance scheduler started");
+    
+    // Start keep-alive service to prevent cold starts
+    keepAlive();
 });

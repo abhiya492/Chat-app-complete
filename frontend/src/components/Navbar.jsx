@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
-import { LogOut, MessageSquare, Settings, User, Radio, Shuffle, Menu, X, Loader2, Clock, Swords, Heart, Building2, Globe } from "lucide-react";
+import { LogOut, MessageSquare, Settings, User, Radio, Shuffle, Menu, X, Loader2, Clock, Swords, Heart, Building2, Globe, CreditCard, Users, UserPlus } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import LanguageSelector from "./LanguageSelector";
 import ExpandableMenu from "./ExpandableMenu";
@@ -33,6 +33,14 @@ const Navbar = () => {
             <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-2 lg:gap-3">
               {authUser && (
                 <>
+                  <Link to="/groups" className="btn btn-sm gap-2 btn-primary hover:scale-105 hover:shadow-md transition-all">
+                    <Users className="w-4 h-4" />
+                    <span className="hidden lg:inline font-medium text-sm">Groups</span>
+                  </Link>
+                  <Link to="/contacts" className="btn btn-sm gap-2 btn-primary hover:scale-105 hover:shadow-md transition-all">
+                    <UserPlus className="w-4 h-4" />
+                    <span className="hidden lg:inline font-medium text-sm">Contacts</span>
+                  </Link>
                   <Link to="/random-chat" className="btn btn-sm gap-2 btn-primary hover:scale-105 hover:shadow-md transition-all">
                     <Shuffle className="w-4 h-4" />
                     <span className="hidden lg:inline font-medium text-sm">Random</span>
@@ -52,6 +60,10 @@ const Navbar = () => {
                   <Link to="/community-challenges" className="btn btn-sm gap-2 btn-secondary hover:scale-105 hover:shadow-md transition-all">
                     <Globe className="w-4 h-4" />
                     <span className="hidden lg:inline font-medium text-sm">Community</span>
+                  </Link>
+                  <Link to="/upi-payment" className="btn btn-sm gap-2 btn-warning hover:scale-105 hover:shadow-md transition-all">
+                    <CreditCard className="w-4 h-4" />
+                    <span className="hidden lg:inline font-medium text-sm">Upgrade</span>
                   </Link>
                 </>
               )}
@@ -79,6 +91,12 @@ const Navbar = () => {
                   <button onClick={() => { setShowScheduled(true); setShowMobileMenu(false); }} className="btn btn-sm gap-2 btn-ghost justify-start">
                     <Clock className="w-4 h-4" /><span>Scheduled Messages</span>
                   </button>
+                  <Link to="/groups" className="btn btn-sm gap-2 btn-ghost justify-start" onClick={() => setShowMobileMenu(false)}>
+                    <Users className="w-4 h-4" /><span>Groups</span>
+                  </Link>
+                  <Link to="/contacts" className="btn btn-sm gap-2 btn-ghost justify-start" onClick={() => setShowMobileMenu(false)}>
+                    <UserPlus className="w-4 h-4" /><span>Contacts</span>
+                  </Link>
                   <Link to="/rooms" className="btn btn-sm gap-2 btn-ghost justify-start" onClick={() => setShowMobileMenu(false)}>
                     <Radio className="w-4 h-4" /><span>Voice Rooms</span>
                   </Link>
@@ -96,6 +114,9 @@ const Navbar = () => {
                   </Link>
                   <Link to="/community-challenges" className="btn btn-sm gap-2 btn-ghost justify-start" onClick={() => setShowMobileMenu(false)}>
                     <Globe className="w-4 h-4" /><span>Community Challenges</span>
+                  </Link>
+                  <Link to="/upi-payment" className="btn btn-sm gap-2 btn-ghost justify-start" onClick={() => setShowMobileMenu(false)}>
+                    <CreditCard className="w-4 h-4" /><span>Upgrade Plan</span>
                   </Link>
                 </>
               )}

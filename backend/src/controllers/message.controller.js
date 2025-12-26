@@ -1,6 +1,7 @@
 import User from "../models/user.model.js";
 import Message from "../models/message.model.js";
 import Contact from "../models/contact.model.js";
+import Group from "../models/group.model.js";
 import { Readable } from "stream";
 
 import cloudinary from "../lib/cloudinary.js";
@@ -38,6 +39,7 @@ export const sendMessage = async (req, res) => {
   try {
     const { text, image, file, replyTo, video, voice, disappearAfter, scheduledFor, isEncrypted } = req.body;
     const { id: receiverId } = req.params;
+    const { groupId } = req.query;
     const senderId = req.user._id;
     
     console.log('📨 Received:', { 
@@ -47,8 +49,34 @@ export const sendMessage = async (req, res) => {
       hasFile: !!file, 
       fileType: typeof file,
       hasVideo: !!video, 
-      hasVoice: !!voice 
+      hasVoice: !!voice,
+      groupId: groupId
     });
+
+    // Validate group membership if sending to group
+    if (groupId) {
+      const group = await Group.findById(groupId);
+      if (!group) {
+        return res.status(404).json({ error: "Group not found" });
+      }
+      
+      const isMember = group.members.some(
+        member => member.user.toString() === senderId.toString()
+      );
+      
+      if (!isMember) {
+        return res.status(403).json({ error: "Not a group member" });
+      }
+      
+      if (!group.settings.allowMemberMessages) {
+        const member = group.members.find(
+          member => member.user.toString() === senderId.toString()
+        );
+        if (member.role === "member") {
+          return res.status(403).json({ error: "Only admins can send messages" });
+        }
+      }
+    }
 
     let imageUrl;
     if (image) {
@@ -161,7 +189,8 @@ export const sendMessage = async (req, res) => {
 
     const messagePayload = {
       senderId,
-      receiverId,
+      receiverId: groupId ? null : receiverId,
+      groupId: groupId || null,
       text,
       isEncrypted: isEncrypted || false,
       image: imageUrl,
@@ -194,14 +223,32 @@ export const sendMessage = async (req, res) => {
 
     // Only send immediately if not scheduled
     if (!scheduledFor) {
-      // Update streak
-      const streak = await updateStreak(senderId, receiverId);
-
-      const receiverSocketId = getReceiverSocketId(receiverId);
-      if (receiverSocketId) {
-        io.to(receiverSocketId).emit("newMessage", newMessage);
-        if (streak) {
-          io.to(receiverSocketId).emit("streakUpdated", streak);
+      if (groupId) {
+        // Send to all group members
+        const group = await Group.findById(groupId).populate('members.user');
+        group.members.forEach(member => {
+          if (member.user._id.toString() !== senderId.toString()) {
+            const memberSocketId = getReceiverSocketId(member.user._id);
+            if (memberSocketId) {
+              io.to(memberSocketId).emit("newMessage", newMessage);
+            }
+          }
+        });
+        
+        // Update group's last activity
+        group.lastMessage = newMessage._id;
+        group.lastActivity = new Date();
+        await group.save();
+      } else {
+        // Send to individual user
+        const streak = await updateStreak(senderId, receiverId);
+        
+        const receiverSocketId = getReceiverSocketId(receiverId);
+        if (receiverSocketId) {
+          io.to(receiverSocketId).emit("newMessage", newMessage);
+          if (streak) {
+            io.to(receiverSocketId).emit("streakUpdated", streak);
+          }
         }
       }
     }
@@ -512,6 +559,40 @@ export const getPinnedMessages = async (req, res) => {
     res.status(200).json(messages);
   } catch (error) {
     console.log("Error in getPinnedMessages controller: ", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const getGroupMessages = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const { page = 1, limit = 50 } = req.query;
+    const userId = req.user._id;
+
+    // Check if user is a group member
+    const group = await Group.findById(groupId);
+    if (!group) {
+      return res.status(404).json({ error: "Group not found" });
+    }
+
+    const isMember = group.members.some(
+      member => member.user.toString() === userId.toString()
+    );
+
+    if (!isMember) {
+      return res.status(403).json({ error: "Not a group member" });
+    }
+
+    const messages = await Message.find({ groupId })
+      .populate('senderId', 'fullName profilePic')
+      .populate('replyTo')
+      .sort({ createdAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+
+    res.status(200).json(messages.reverse());
+  } catch (error) {
+    console.log("Error in getGroupMessages controller: ", error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };

@@ -5,6 +5,7 @@ import {
   getMessages, 
   getUsersForSidebar, 
   sendMessage,
+  getGroupMessages,
   addReaction,
   removeReaction,
   editMessage,
@@ -25,6 +26,7 @@ router.get("/users", protectRoute, getUsersForSidebar);
 router.get("/search", protectRoute, searchMessages);
 router.get("/scheduled", protectRoute, getScheduledMessages);
 router.get("/pinned/:id", protectRoute, getPinnedMessages);
+router.get("/group/:groupId", protectRoute, getGroupMessages);
 router.get("/:id", protectRoute, getMessages);
 router.post("/send/:id", protectRoute, messageLimiter, sendMessage);
 router.post("/react/:messageId", protectRoute, addReaction);

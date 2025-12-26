@@ -15,44 +15,37 @@ const Contacts = () => {
     contacts,
     pendingRequests,
     sentRequests,
-    contactGroups,
     isLoading,
-    getContacts,
-    getPendingRequests,
-    getSentRequests,
+    fetchContacts,
+    fetchPendingRequests,
+    fetchSentRequests,
     getContactGroups,
   } = useContactStore();
 
   useEffect(() => {
-    getContacts(selectedGroup);
-    getPendingRequests();
-    getSentRequests();
-    getContactGroups();
-  }, [selectedGroup]);
+    fetchContacts();
+    fetchPendingRequests();
+    fetchSentRequests();
+  }, [fetchContacts, fetchPendingRequests, fetchSentRequests]);
 
   const tabs = [
     {
       id: "contacts",
       label: "Contacts",
       icon: Users,
-      count: contacts.length,
+      count: (contacts || []).length,
     },
     {
       id: "requests",
       label: "Requests",
       icon: UserPlus,
-      count: pendingRequests.length,
+      count: (pendingRequests || []).length,
     },
   ];
 
   const groups = [
-    { id: "all", label: "All Contacts", count: contacts.length },
-    { id: "favorites", label: "Favorites", count: contacts.filter(c => c.isFavorite).length },
-    ...contactGroups.map(group => ({
-      id: group._id,
-      label: group._id.charAt(0).toUpperCase() + group._id.slice(1),
-      count: group.count,
-    })),
+    { id: "all", label: "All Contacts", count: (contacts || []).length },
+    { id: "favorites", label: "Favorites", count: (contacts || []).filter(c => c.isFavorite).length },
   ];
 
   if (isLoading) {
@@ -134,10 +127,8 @@ const Contacts = () => {
         {activeTab === "contacts" && (
           <ContactList
             contacts={selectedGroup === "favorites" 
-              ? contacts.filter(c => c.isFavorite)
-              : selectedGroup === "all"
-              ? contacts
-              : contacts.filter(c => c.group === selectedGroup)
+              ? (contacts || []).filter(c => c.isFavorite)
+              : (contacts || [])
             }
             selectedGroup={selectedGroup}
           />

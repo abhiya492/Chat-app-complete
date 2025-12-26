@@ -1,6 +1,8 @@
 //import React from 'react'
 import Navbar from './components/Navbar'
 import { Routes, Route, Navigate } from 'react-router-dom'
+import Groups from './pages/Groups'
+import ContactsPage from './pages/ContactsPage'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Settings from './pages/Setting'
@@ -14,6 +16,9 @@ import Challenge from './pages/Challenge'
 import Wellness from './pages/Wellness'
 import CorporateWellness from './pages/CorporateWellness'
 import CommunityChallengePage from './pages/CommunityChallengePage'
+import Store from './components/Store'
+import UPIPayment from './components/UPIPayment'
+import PrivacyTest from './components/PrivacyTest'
 import { useAuthStore } from './store/useAuthStore'
 import { useThemeStore } from './store/useThemeStore'
 import { useEffect, useState } from 'react'
@@ -133,6 +138,8 @@ const App = () => {
       <PageTransition>
         <Routes>
         <Route path="/" element={authUser ? <Home /> : <Navigate to="/login" />} />
+        <Route path="/groups" element={authUser ? <Groups /> : <Navigate to="/login" />} />
+        <Route path="/contacts" element={authUser ? <ContactsPage /> : <Navigate to="/login" />} />
         <Route path="/signup" element={!authUser ? <SignUp /> : <Navigate to="/" />} />
         <Route path="/login" element={!authUser ? <Login /> : <Navigate to="/" />} />
         <Route path="/forgot-password" element={!authUser ? <ForgotPassword /> : <Navigate to="/" />} />
@@ -143,6 +150,9 @@ const App = () => {
         <Route path="/random-chat" element={authUser ? <RandomChat /> : <Navigate to="/login" />} />
         <Route path="/challenge" element={authUser ? <Challenge /> : <Navigate to="/login" />} />
         <Route path="/wellness" element={authUser ? <Wellness /> : <Navigate to="/login" />} />
+        <Route path="/store" element={<Store />} />
+        <Route path="/upi-payment" element={authUser ? <UPIPayment /> : <Navigate to="/login" />} />
+        <Route path="/privacy-test" element={authUser ? <PrivacyTest /> : <Navigate to="/login" />} />
         <Route path="/corporate-wellness" element={authUser ? <CorporateWellness /> : <Navigate to="/login" />} />
         <Route path="/community-challenges" element={authUser ? <CommunityChallengePage /> : <Navigate to="/login" />} />
         </Routes>
