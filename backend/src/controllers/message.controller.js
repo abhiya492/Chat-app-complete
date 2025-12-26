@@ -2,6 +2,7 @@ import User from "../models/user.model.js";
 import Message from "../models/message.model.js";
 import Contact from "../models/contact.model.js";
 import Group from "../models/group.model.js";
+import { sendNotification } from "./notification.controller.js";
 import { Readable } from "stream";
 
 import cloudinary from "../lib/cloudinary.js";
@@ -250,6 +251,16 @@ export const sendMessage = async (req, res) => {
             io.to(receiverSocketId).emit("streakUpdated", streak);
           }
         }
+        
+        // Send push notification
+        const sender = await User.findById(senderId).select('fullName');
+        await sendNotification(
+          receiverId,
+          `New message from ${sender.fullName}`,
+          text || 'Sent a file',
+          'messages',
+          { messageId: newMessage._id.toString(), senderId: senderId.toString() }
+        );
       }
     }
 

@@ -3,6 +3,7 @@ import { useThemeStore } from "../store/useThemeStore";
 import { Send, Shield, Key, Bell } from "lucide-react";
 import { hasKeys, getStoredKeys } from "../lib/encryption";
 import { useState, useEffect } from "react";
+import NotificationSettings from "../components/NotificationSettings";
 
 const PREVIEW_MESSAGES = [
   { id: 1, content: "Hey! How's it going?", isSent: false },
@@ -13,6 +14,7 @@ const Setting = () => {
   const { theme, setTheme } = useThemeStore();
   const [encryptionEnabled] = useState(hasKeys());
   const keys = getStoredKeys();
+  const [showNotificationSettings, setShowNotificationSettings] = useState(false);
   
   const [notificationPrefs, setNotificationPrefs] = useState(() => {
     const saved = localStorage.getItem('notificationPrefs');
@@ -77,33 +79,30 @@ const Setting = () => {
         </div>
 
         <div className="glass-effect rounded-2xl sm:rounded-3xl p-3 sm:p-6 shadow-2xl animate-slide-up">
-          <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4 flex items-center gap-2">
-            <div className="w-1 h-4 sm:h-5 bg-gradient-to-b from-primary to-secondary rounded-full"></div>
-            Smart Notifications
-          </h3>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between p-3 bg-base-200/50 rounded-lg">
-              <div className="flex items-center gap-2">
-                <Bell className="size-4" />
-                <span className="text-sm">Notify for all messages</span>
-              </div>
-              <input type="checkbox" className="toggle toggle-sm" checked={notificationPrefs.notifyAll} onChange={() => togglePref('notifyAll')} />
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h3 className="text-base sm:text-lg font-bold flex items-center gap-2">
+              <div className="w-1 h-4 sm:h-5 bg-gradient-to-b from-primary to-secondary rounded-full"></div>
+              Push Notifications
+            </h3>
+            <button
+              onClick={() => setShowNotificationSettings(true)}
+              className="btn btn-primary btn-sm"
+            >
+              <Bell className="w-4 h-4" />
+              Settings
+            </button>
+          </div>
+          <p className="text-sm text-base-content/60 mb-4">
+            Configure when and how you receive notifications
+          </p>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="stat bg-base-200/50 rounded-lg">
+              <div className="stat-title text-xs">Status</div>
+              <div className="stat-value text-sm text-success">Enabled</div>
             </div>
-            <div className="flex items-center justify-between p-3 bg-base-200/50 rounded-lg">
-              <span className="text-sm">Notify for @mentions</span>
-              <input type="checkbox" className="toggle toggle-sm" checked={notificationPrefs.notifyMentions} onChange={() => togglePref('notifyMentions')} disabled={notificationPrefs.notifyAll} />
-            </div>
-            <div className="flex items-center justify-between p-3 bg-base-200/50 rounded-lg">
-              <span className="text-sm">Notify for questions</span>
-              <input type="checkbox" className="toggle toggle-sm" checked={notificationPrefs.notifyQuestions} onChange={() => togglePref('notifyQuestions')} disabled={notificationPrefs.notifyAll} />
-            </div>
-            <div className="flex items-center justify-between p-3 bg-base-200/50 rounded-lg">
-              <span className="text-sm">Notify for important keywords</span>
-              <input type="checkbox" className="toggle toggle-sm" checked={notificationPrefs.notifyKeywords} onChange={() => togglePref('notifyKeywords')} disabled={notificationPrefs.notifyAll} />
-            </div>
-            <div className="flex items-center justify-between p-3 bg-base-200/50 rounded-lg">
-              <span className="text-sm">Notify for media messages</span>
-              <input type="checkbox" className="toggle toggle-sm" checked={notificationPrefs.notifyMedia} onChange={() => togglePref('notifyMedia')} disabled={notificationPrefs.notifyAll} />
+            <div className="stat bg-base-200/50 rounded-lg">
+              <div className="stat-title text-xs">Types</div>
+              <div className="stat-value text-sm">5 Active</div>
             </div>
           </div>
         </div>
@@ -211,6 +210,11 @@ const Setting = () => {
         </div>
         </div>
       </div>
+      
+      {/* Notification Settings Modal */}
+      {showNotificationSettings && (
+        <NotificationSettings onClose={() => setShowNotificationSettings(false)} />
+      )}
     </div>
   );
 };

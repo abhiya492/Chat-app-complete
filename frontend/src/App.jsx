@@ -1,4 +1,9 @@
 //import React from 'react'
+import E2EEncryptionSetup from './components/E2EEncryptionSetup'
+import OfflineSupport from './components/OfflineSupport'
+import PWAInstall from './components/PWAInstall'
+import MobileNav from './components/MobileNav'
+import NotificationSetup from './components/NotificationSetup'
 import Navbar from './components/Navbar'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Groups from './pages/Groups'
@@ -162,6 +167,8 @@ const App = () => {
       <ConnectionStatus />
       <OfflineQueue />
       <OfflineBanner />
+      {authUser && <NotificationSetup />}
+      {authUser && <E2EEncryptionSetup />}
       {authUser && <EncryptionSetup />}
       {authUser && <OnboardingTour />}
       {authUser && <NotificationPrompt />}
@@ -183,6 +190,9 @@ const App = () => {
       {authUser && <MusicMoodAnalyzer />}
       {authUser && <WellnessWidget />}
       {authUser && <AITherapistChat />}
+      <OfflineSupport />
+      {authUser && <PWAInstall />}
+      {authUser && <MobileNav />}
       <CallModal />
       <IncomingCallModal />
     </div>

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
-import { LogOut, MessageSquare, Settings, User, Radio, Shuffle, Menu, X, Loader2, Clock, Swords, Heart, Building2, Globe, CreditCard, Users, UserPlus } from "lucide-react";
+import { LogOut, MessageSquare, Settings, User, Radio, Shuffle, Menu, X, Loader2, Clock, Swords, Heart, Building2, Globe, CreditCard, Users, UserPlus, Bell } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import LanguageSelector from "./LanguageSelector";
 import ExpandableMenu from "./ExpandableMenu";

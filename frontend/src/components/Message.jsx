@@ -1,7 +1,8 @@
-import { memo, useState } from 'react';
+import { memo, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 import { useAccessibilityStore } from '../store/useAccessibilityStore';
+import { decryptMessage, isEncryptionEnabled } from '../lib/e2eEncryption';
 import { Smile, Reply, Edit2, Trash2, Download, Pin, Forward, Check, CheckCheck, Play, Pause, Shield, Volume2, VolumeX } from 'lucide-react';
 import { formatMessageTime } from '../lib/utils';
 import LazyImage from './LazyImage';
@@ -28,15 +29,26 @@ const Message = memo(({
   const prefersReducedMotion = useReducedMotion();
   const { textToSpeech } = useAccessibilityStore();
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [decryptedText, setDecryptedText] = useState(message.text);
+
+  // Decrypt message if encrypted
+  useEffect(() => {
+    if (message.isEncrypted && message.text && !isOwnMessage && selectedUser?.publicKey) {
+      const result = decryptMessage(message.text, selectedUser.publicKey);
+      setDecryptedText(result.message);
+    } else {
+      setDecryptedText(message.text);
+    }
+  }, [message.text, message.isEncrypted, isOwnMessage, selectedUser?.publicKey]);
 
   const speakMessage = () => {
-    if (!textToSpeech.enabled || !message.text) return;
+    if (!textToSpeech.enabled || !decryptedText) return;
     
     if (isSpeaking) {
       speechSynthesis.cancel();
       setIsSpeaking(false);
     } else {
-      const utterance = new SpeechSynthesisUtterance(message.text);
+      const utterance = new SpeechSynthesisUtterance(decryptedText);
       utterance.rate = textToSpeech.rate;
       utterance.volume = textToSpeech.volume;
       utterance.onend = () => setIsSpeaking(false);
@@ -72,7 +84,7 @@ const Message = memo(({
         <time className="text-xs opacity-50 ml-1">
           {formatMessageTime(message.createdAt)}
           {message.isEdited && <span className="ml-1 text-xs opacity-50">(edited)</span>}
-          {message.isEncrypted && <Shield size={10} className="inline ml-1 text-green-500" title="Encrypted" />}
+          {message.isEncrypted && <Shield size={10} className="inline ml-1 text-green-500" title="End-to-end encrypted" />}
         </time>
       </div>
       <div className="relative">
@@ -113,7 +125,7 @@ const Message = memo(({
               <span className="text-sm truncate max-w-[150px]">{message.file.name}</span>
             </a>
           )}
-          {message.text && <p className={message.isDeleted ? "italic opacity-50" : ""}>{message.text}</p>}
+          {message.text && <p className={message.isDeleted ? "italic opacity-50" : ""}>{decryptedText}</p>}
           {isOwnMessage && (
             <div className="flex justify-end mt-1" title={
               message.readBy && message.readBy.length > 0 ? "Read" :

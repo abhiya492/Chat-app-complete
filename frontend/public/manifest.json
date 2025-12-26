@@ -1,7 +1,7 @@
 {
-  "name": "Chatty - Wellness Chat App",
+  "name": "Chatty - Real-Time Chat App",
   "short_name": "Chatty",
-  "description": "Real-time chat with wellness features and mood tracking",
+  "description": "Feature-rich real-time chat with AI, games, groups, and wellness features",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1f2937",
@@ -9,8 +9,14 @@
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "en",
-  "categories": ["social", "health", "lifestyle"],
+  "categories": ["social", "communication", "productivity"],
   "icons": [
+    {
+      "src": "/chatty-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
     {
       "src": "/avatar.png",
       "sizes": "192x192",
@@ -24,57 +30,27 @@
       "purpose": "any maskable"
     }
   ],
-  "widgets": [
-    {
-      "name": "mood-tracker",
-      "short_name": "Mood",
-      "description": "Quick mood tracking widget",
-      "tag": "mood-tracker",
-      "template": "mood-tracker-template",
-      "ms_ac_template": "adaptive-card-mood-tracker.json",
-      "data": "widgets/mood-data.json",
-      "type": "application/json",
-      "screenshots": [
-        {
-          "src": "/widget-screenshot.png",
-          "sizes": "300x200",
-          "label": "Mood tracking widget"
-        }
-      ],
-      "icons": [
-        {
-          "src": "/avatar.png",
-          "sizes": "72x72"
-        }
-      ],
-      "auth": false,
-      "update": 300
-    }
-  ],
   "shortcuts": [
     {
-      "name": "Quick Mood Check",
-      "short_name": "Mood",
-      "description": "Quickly update your mood",
-      "url": "/?action=mood",
-      "icons": [
-        {
-          "src": "/avatar.png",
-          "sizes": "96x96"
-        }
-      ]
+      "name": "New Chat",
+      "short_name": "Chat",
+      "description": "Start a new conversation",
+      "url": "/?action=new-chat",
+      "icons": [{ "src": "/avatar.png", "sizes": "96x96" }]
     },
     {
-      "name": "Wellness Dashboard",
-      "short_name": "Wellness",
-      "description": "View wellness insights",
-      "url": "/wellness",
-      "icons": [
-        {
-          "src": "/avatar.png",
-          "sizes": "96x96"
-        }
-      ]
+      "name": "Groups",
+      "short_name": "Groups",
+      "description": "View your groups",
+      "url": "/groups",
+      "icons": [{ "src": "/avatar.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Contacts",
+      "short_name": "Contacts",
+      "description": "Manage your contacts",
+      "url": "/contacts",
+      "icons": [{ "src": "/avatar.png", "sizes": "96x96" }]
     }
   ]
 }

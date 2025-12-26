@@ -1,5 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import notificationRoutes from './routes/notification.route.js';
 import groupRoutes from './routes/group.route.js';
 import upiPaymentRoutes from './routes/upiPayment.route.js';
 import privacyRoutes from './routes/privacy.route.js';
@@ -66,6 +67,7 @@ app.get("/health", (req, res) => {
 });
 
 // API routes MUST come before static files
+app.use("/api/notifications",notificationRoutes);
 app.use("/api/groups",groupRoutes);
 app.use("/api/upi",upiPaymentRoutes);
 app.use("/api/privacy",privacyRoutes);

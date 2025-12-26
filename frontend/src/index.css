@@ -2,6 +2,56 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  /* Prevent zoom on input focus */
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+  
+  /* Safe area for notched devices */
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-area-bottom {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 60px);
+  }
+  
+  /* Touch-friendly buttons */
+  .btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Smooth scrolling */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* PWA display mode */
+@media (display-mode: standalone) {
+  .pwa-only {
+    display: block;
+  }
+  
+  .browser-only {
+    display: none;
+  }
+}
+
+/* Keyboard adjustments */
+.keyboard-open {
+  height: 100vh;
+  height: 100dvh;
+}
+
+/* Prevent pull-to-refresh */
+body {
+  overscroll-behavior-y: contain;
+}
+
 /* Dyslexia-friendly font */
 @import url('https://fonts.googleapis.com/css2?family=OpenDyslexic:wght@400;700&display=swap');
 

@@ -1,6 +1,7 @@
 
 
 import { useChatStore } from "../store/useChatStore";
+import { useMobileOptimizations } from "../hooks/useMobileOptimizations";
 import Sidebar from "../components/Sidebar";
 import NoChatSelected from "../components/NoChatSelected";
 import ChatContainer from "../components/ChatContainer";
@@ -9,11 +10,12 @@ import SkipToContent from "../components/SkipToContent";
 
 const Home = () => {
   const { selectedUser } = useChatStore();
+  const { isMobile, isKeyboardOpen } = useMobileOptimizations();
 
   return (
     <>
       <SkipToContent />
-      <div className="h-screen bg-gradient-to-br from-base-200 via-base-100 to-base-200 relative overflow-hidden">
+      <div className={`h-screen bg-gradient-to-br from-base-200 via-base-100 to-base-200 relative overflow-hidden ${isKeyboardOpen ? 'keyboard-open' : ''} ${isMobile ? 'safe-area-bottom' : ''}`}>
       {/* Animated background orbs */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl float"></div>

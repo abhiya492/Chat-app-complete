@@ -15,6 +15,8 @@
     "@react-three/postprocessing": "^2.16.3",
     "@react-three/rapier": "^1.4.0",
     "axios": "^1.7.9",
+    "crypto-js": "^4.2.0",
+    "firebase": "^12.7.0",
     "framer-motion": "^12.23.24",
     "i18next": "^25.6.2",
     "lottie-react": "^2.4.1",

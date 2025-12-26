@@ -1,6 +1,7 @@
 import Contact from "../models/contact.model.js";
 import User from "../models/user.model.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
+import { sendNotification } from "./notification.controller.js";
 import queryOptimizer from "../lib/queryOptimizer.js";
 import cache from "../lib/cache.js";
 
@@ -44,6 +45,14 @@ export const sendContactRequest = async (req, res) => {
     if (recipientSocketId) {
       io.to(recipientSocketId).emit("contactRequest", contactRequest);
     }
+    
+    // Send push notification
+    await sendNotification(
+      userId,
+      "New Contact Request",
+      `${contactRequest.requester.fullName} wants to connect with you`,
+      'contactRequests'
+    );
 
     res.status(201).json(contactRequest);
   } catch (error) {

@@ -4,7 +4,8 @@ import { useAuthStore } from "../store/useAuthStore";
 import { useWellnessStore } from "../store/useWellnessStore";
 import { useCircadianStore } from "../store/useCircadianStore";
 import { useAccessibilityStore } from "../store/useAccessibilityStore";
-import { Image, Send, X, Paperclip, Mic, Video, Timer, Edit2, Loader2, Clock, MicOff } from "lucide-react";
+import { encryptMessage, isEncryptionEnabled } from "../lib/e2eEncryption";
+import { Image, Send, X, Paperclip, Mic, Video, Timer, Edit2, Loader2, Clock, MicOff, Shield } from "lucide-react";
 import toast from "react-hot-toast";
 import VoiceRecorder from "./VoiceRecorder";
 import SmartReplies from "./SmartReplies";
@@ -22,12 +23,13 @@ const MessageInput = () => {
   const [scheduledFor, setScheduledFor] = useState("");
   const [showSchedule, setShowSchedule] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [isEncrypted, setIsEncrypted] = useState(false);
   const fileInputRef = useRef(null);
   const videoInputRef = useRef(null);
   const docInputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const recognitionRef = useRef(null);
-  const { sendMessage, replyingTo, setReplyingTo, editingMessage, setEditingMessage, emitTyping, emitStopTyping, messages, isSendingMessage } = useChatStore();
+  const { sendMessage, replyingTo, setReplyingTo, editingMessage, setEditingMessage, emitTyping, emitStopTyping, messages, isSendingMessage, selectedUser } = useChatStore();
   const { authUser } = useAuthStore();
   const { analyzeMoodFromText, updateTypingData } = useWellnessStore();
   const { shouldShowFeature } = useCircadianStore();
@@ -247,7 +249,7 @@ const MessageInput = () => {
 
     try {
       if (editingMessage) {
-        await useChatStore.getState().editMessage(editingMessage._id, text.trim());
+        await useChatStore.getState().editMessage(editingMessage._id, text.trim(), isEncrypted);
       } else {
         // Analyze mood from message text
         if (text.trim()) {
@@ -260,12 +262,12 @@ const MessageInput = () => {
           );
           
           if (hasStrongEmotion) {
-            // Music suggestion will be triggered by MusicMoodAnalyzer
             console.log('Strong emotion detected in message');
           }
         }
         
-        await sendMessage({
+        // Prepare message data
+        let messageData = {
           text: text.trim(),
           image: imagePreview,
           file: filePreview,
@@ -273,7 +275,21 @@ const MessageInput = () => {
           voice: voiceData,
           disappearAfter,
           scheduledFor: scheduledFor || null,
-        });
+          isEncrypted: false
+        };
+        
+        // Encrypt message if encryption is enabled and recipient has public key
+        if (isEncrypted && isEncryptionEnabled() && selectedUser?.publicKey && text.trim()) {
+          const encryptionResult = encryptMessage(text.trim(), selectedUser.publicKey);
+          if (encryptionResult.success) {
+            messageData.text = encryptionResult.encrypted;
+            messageData.isEncrypted = true;
+          } else {
+            toast.error('Encryption failed, sending unencrypted');
+          }
+        }
+        
+        await sendMessage(messageData);
         if (scheduledFor) {
           toast.success(`Message scheduled for ${new Date(scheduledFor).toLocaleString()}`);
         }
@@ -428,6 +444,17 @@ const MessageInput = () => {
           <Clock size={14} className="sm:w-4 sm:h-4" />
           {scheduledFor ? 'Scheduled' : 'Schedule'}
         </button>
+        {isEncryptionEnabled() && selectedUser?.publicKey && (
+          <button
+            type="button"
+            onClick={() => setIsEncrypted(!isEncrypted)}
+            className={`btn btn-xs sm:btn-sm gap-1 ${isEncrypted ? 'btn-success' : 'btn-ghost'}`}
+            title={isEncrypted ? 'Encryption enabled' : 'Click to encrypt message'}
+          >
+            <Shield size={14} className="sm:w-4 sm:h-4" />
+            {isEncrypted ? 'Encrypted' : 'Encrypt'}
+          </button>
+        )}
       </div>
 
       {showSchedule && (

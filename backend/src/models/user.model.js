@@ -68,6 +68,10 @@ const userSchema = new mongoose.Schema(
         type: String,
         default: null,
     },
+    encryptionEnabled: {
+        type: Boolean,
+        default: false,
+    },
     subscription: {
         plan: { type: String, enum: ['free', 'pro', 'enterprise'], default: 'free' },
         status: { type: String, enum: ['active', 'expired', 'cancelled'], default: 'active' },
@@ -101,6 +105,24 @@ const userSchema = new mongoose.Schema(
         totalItems: { type: Number, default: 0 },
         lastPurchase: Date,
         favoriteCategory: String,
+    },
+    fcmToken: {
+        type: String,
+        default: null,
+    },
+    notificationSettings: {
+        enabled: { type: Boolean, default: true },
+        messages: { type: Boolean, default: true },
+        groupMessages: { type: Boolean, default: true },
+        contactRequests: { type: Boolean, default: true },
+        calls: { type: Boolean, default: true },
+        soundEnabled: { type: Boolean, default: true },
+        vibrationEnabled: { type: Boolean, default: true },
+        quietHours: {
+            enabled: { type: Boolean, default: false },
+            startTime: { type: String, default: "22:00" },
+            endTime: { type: String, default: "08:00" }
+        }
     },
 },
     { timestamps: true }
